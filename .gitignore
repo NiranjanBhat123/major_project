@@ -1,0 +1,32 @@
+# Ignore virtual environment
+venv/
+
+# Ignore Python cache files
+__pycache__/
+*.py[cod]
+*.sqlite3
+
+# Ignore Django secret key file, if any
+.env
+
+# Ignore IDE and editor settings (optional)
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled files
+*.pyc
+*.pyo
+
+
+
+static/
+media/
+
+
+node_modules/
