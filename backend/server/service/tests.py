@@ -12,7 +12,7 @@ import io
 import uuid
 import random
 import string
-from .factories import UserFactory, ServiceFactory
+from .factory import UserFactory, ServiceFactory
 from .models import Service
 
 # Custom matchers
