@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Service
-from server.serializers import CommonResponseSerializer
+from sub_service.models import SubService
+
 
 class ServiceSerializer(serializers.ModelSerializer):
     sub_services_count = serializers.SerializerMethodField()
@@ -9,8 +10,8 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Service
-        fields = ['id', 'name', 'image', 'image_url', 'sub_services_count', 
-                 'providers_count', 'created_at', 'updated_at']
+        fields = ['id', 'name', 'image', 'image_url', 'sub_services_count',
+                  'providers_count', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def get_sub_services_count(self, obj):
@@ -38,3 +39,31 @@ class ServiceSerializer(serializers.ModelSerializer):
             'message': 'Service data retrieved successfully',
             'data': data
         }
+
+
+class SubServiceSerializer(serializers.ModelSerializer):
+    main_service_name = serializers.CharField(source='main_service.name', read_only=True)
+    providers_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = SubService
+        fields = ['id', 'name', 'main_service', 'main_service_name', 'providers_count']
+        read_only_fields = ['id', 'main_service_name', 'providers_count']
+
+    def to_representation(self, instance):
+        # Return direct data without wrapping in status/message
+        return super().to_representation(instance)
+
+    def get_providers_count(self, obj):
+        return obj.providers.count()
+
+    def validate_name(self, value):
+        main_service = self.context.get('main_service')
+        if main_service and SubService.objects.filter(
+            name__iexact=value,
+            main_service=main_service
+        ).exists():
+            raise serializers.ValidationError(
+                "A sub-service with this name already exists under this service"
+            )
+        return value

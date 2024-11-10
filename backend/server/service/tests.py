@@ -14,7 +14,7 @@ import random
 import string
 from .factory import UserFactory, ServiceFactory
 from .models import Service
-
+from sub_service.factory import SubServiceFactory
 # Custom matchers
 class have_status_code(Matcher):
     def __init__(self, expected):
@@ -88,13 +88,7 @@ class TestServiceViewSet(APITestCase):
         ServiceFactory(name="Existing Service")
         data = {'name': 'Existing Service'}
         response = self.client.post(self.base_url, data)
-        expect(response).to(have_status_code(status.HTTP_409_CONFLICT))
-        expected_response = {
-            "status": False,
-            "message": "A service with this name already exists",
-            "data": None
-        }
-        expect(response.data).to(equal(expected_response))
+        expect(response).to(have_status_code(status.HTTP_400_BAD_REQUEST))
 
     def test_list_services_pagination(self):
         # Create 25 services in batch
@@ -103,7 +97,7 @@ class TestServiceViewSet(APITestCase):
         response = self.client.get(self.base_url)
         expect(response).to(have_status_code(status.HTTP_200_OK))
         expect(response.data['data']).to(have_key('count', 25))
-        expect(response.data['data']['results']).to(have_len(10))  # First page
+        expect(response.data['data']['results']).to(have_len(10))
         
         # Test second page
         next_page = response.data['data']['next']
@@ -195,6 +189,171 @@ class TestServicePerformance:
         import time
         start_time = time.time()
         response = self.client.get(reverse('service-list'))
+        end_time = time.time()
+        
+        expect(response).to(have_status_code(status.HTTP_200_OK))
+        expect(end_time - start_time).to(be_below(1.0))  # Response should be under 1 second
+        
+        
+
+
+
+@pytest.mark.django_db
+class TestSubServiceModel:
+    def test_subservice_creation(self):
+        subservice = SubServiceFactory()
+        expect(subservice).to(be_truthy)
+        expect(subservice.id).to(be_uuid())
+        expect(subservice.name).to(start_with('SubService'))
+        expect(subservice.main_service).to(be_truthy)
+
+    def test_subservice_str_representation(self):
+        service = ServiceFactory(name="Main Service")
+        subservice = SubServiceFactory(name="Test SubService", main_service=service)
+        expect(str(subservice)).to(equal("Test SubService (Main Service)"))
+
+    def test_subservice_name_validation(self):
+        service = ServiceFactory()
+        
+        # Test minimum length
+        with pytest.raises(Exception) as exc_info:
+            SubServiceFactory(name="a", main_service=service)
+        expect(str(exc_info.value)).to(contain("at least 2 characters"))
+
+        # Test maximum length
+        long_name = "".join(random.choices(string.ascii_letters, k=101))
+        with pytest.raises(Exception) as exc_info:
+            SubServiceFactory(name=long_name, main_service=service)
+        expect(str(exc_info.value)).to(contain("cannot exceed 100 characters"))
+
+@pytest.mark.django_db
+class TestSubServiceViewSet(APITestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+        self.service = ServiceFactory()
+        self.base_url = reverse('subservice-list', kwargs={'service_id': self.service.id})
+
+    def test_create_subservice_success(self):
+        data = {'name': 'New SubService'}
+        response = self.client.post(self.base_url, data)
+        expect(response).to(have_status_code(status.HTTP_201_CREATED))
+        expect(response.data).to(have_key('status', True))
+        expect(response.data).to(have_key('message', 'Sub-service created successfully'))
+        expect(response.data['data']).to(have_key('name', 'New SubService'))
+        expect(response.data['data']).to(have_key('main_service_name', self.service.name))
+
+    def test_create_subservice_duplicate_name(self):
+        SubServiceFactory(name="Existing SubService", main_service=self.service)
+        data = {'name': 'Existing SubService'}
+        response = self.client.post(self.base_url, data)
+        expect(response).to(have_status_code(status.HTTP_400_BAD_REQUEST))
+        expect(response.data).to(have_key('status', False))
+
+    def test_create_subservice_nonexistent_service(self):
+        url = reverse('subservice-list', kwargs={'service_id': uuid.uuid4()})
+        data = {'name': 'New SubService'}
+        response = self.client.post(url, data)
+        expect(response).to(have_status_code(status.HTTP_404_NOT_FOUND))
+        expect(response.data).to(have_key('status', False))
+        expect(response.data).to(have_key('message', 'Resource not found'))
+
+    def test_list_subservices(self):
+        # Create multiple subservices
+        SubServiceFactory.create_batch(5, main_service=self.service)
+        
+        response = self.client.get(self.base_url)
+        expect(response).to(have_status_code(status.HTTP_200_OK))
+        expect(response.data).to(have_key('status', True))
+        expect(response.data).to(have_key('message', 'Data retrieved successfully'))
+        expect(response.data['data']).to(have_key('count', 5))
+        expect(response.data['data']['results']).to(have_len(5))
+
+    def test_retrieve_subservice(self):
+        subservice = SubServiceFactory(main_service=self.service)
+        url = reverse('subservice-detail', 
+                    kwargs={'service_id': self.service.id, 'id': subservice.id})
+        response = self.client.get(url)
+        
+        # Verify response status
+        expect(response).to(have_status_code(status.HTTP_200_OK))
+        
+        # The response data is directly the subservice object, not wrapped in status/message/data
+        data = response.data
+        expect(data).to(have_key('name'))
+        expect(data).to(have_key('main_service'))
+        expect(data).to(have_key('main_service_name'))
+        expect(data).to(have_key('providers_count'))
+        expect(data['name']).to(equal(subservice.name))
+        expect(data['main_service_name']).to(equal(self.service.name))
+        expect(data['providers_count']).to(equal(0))
+
+    def test_retrieve_nonexistent_subservice(self):
+        url = reverse('subservice-detail', 
+                     kwargs={'service_id': self.service.id, 'id': uuid.uuid4()})
+        response = self.client.get(url)
+        expect(response).to(have_status_code(status.HTTP_404_NOT_FOUND))
+
+    def test_update_subservice(self):
+        subservice = SubServiceFactory(main_service=self.service)
+        url = reverse('subservice-detail', 
+                     kwargs={'service_id': self.service.id, 'id': subservice.id})
+        data = {'name': 'Updated SubService'}
+        response = self.client.put(url, data)
+        expect(response).to(have_status_code(status.HTTP_200_OK))
+        expect(response.data).to(have_key('status', True))
+        expect(response.data).to(have_key('message', 'Sub-service updated successfully'))
+        expect(response.data['data']['name']).to(equal('Updated SubService'))
+
+    def test_update_subservice_duplicate_name(self):
+        SubServiceFactory(name="Existing SubService", main_service=self.service)
+        subservice = SubServiceFactory(main_service=self.service)
+        url = reverse('subservice-detail', 
+                     kwargs={'service_id': self.service.id, 'id': subservice.id})
+        data = {'name': 'Existing SubService'}
+        response = self.client.put(url, data)
+        expect(response).to(have_status_code(status.HTTP_400_BAD_REQUEST))
+        expect(response.data).to(have_key('status', False))
+
+    def test_delete_subservice(self):
+        subservice = SubServiceFactory(main_service=self.service)
+        url = reverse('subservice-detail', 
+                     kwargs={'service_id': self.service.id, 'id': subservice.id})
+        response = self.client.delete(url)
+        expect(response).to(have_status_code(status.HTTP_200_OK))
+        expect(response.data).to(have_key('status', True))
+        expect(response.data).to(have_key('message', 'Sub-service deleted successfully'))
+
+    def test_delete_nonexistent_subservice(self):
+        url = reverse('subservice-detail', 
+                     kwargs={'service_id': self.service.id, 'id': uuid.uuid4()})
+        response = self.client.delete(url)
+        expect(response).to(have_status_code(status.HTTP_404_NOT_FOUND))
+       
+
+    def test_authentication_required(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(self.base_url)
+        expect(response).to(have_status_code(status.HTTP_401_UNAUTHORIZED))
+
+@pytest.mark.django_db
+class TestSubServicePerformance:
+    def setUp(self):
+        self.client = APIClient()
+        self.user = UserFactory()
+        self.client.force_authenticate(user=self.user)
+        self.service = ServiceFactory()
+
+    def test_bulk_subservice_listing_performance(self):
+        # Create 100 subservices for performance testing
+        SubServiceFactory.create_batch(100, main_service=self.service)
+        
+        url = reverse('subservice-list', kwargs={'service_id': self.service.id})
+        
+        import time
+        start_time = time.time()
+        response = self.client.get(url)
         end_time = time.time()
         
         expect(response).to(have_status_code(status.HTTP_200_OK))

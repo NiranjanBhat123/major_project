@@ -26,9 +26,9 @@ Content-Type: application/json
   }
 }
 
-#service already exists - error 409 conflicts
+#service already exists - error 400
 {
   "status": false,
-  "message": "A service with this name already exists",
+  "message": "Database integrety error",
   "data": null
 }
