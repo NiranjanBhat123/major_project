@@ -1,0 +1,28 @@
+### get-service-detail.http
+GET http://127.0.0.1:8000/services/{uuid}/
+Content-Type: application/json
+Authorization: Bearer your-auth-token-here
+
+### Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "status": true,
+  "message": "Service retrieved successfully",
+  "data": {
+    "id": "5ae11ebb-b347-4010-81ba-9b7e5ef799be",
+    "name": "Plumbing",
+    "image": "http://127.0.0.1:8000/media/services/TA9Q9bV3Z81nZRooviZz51Y4bpnXIdBt1623180634.jpg",
+    "image_url": "http://127.0.0.1:8000/media/services/TA9Q9bV3Z81nZRooviZz51Y4bpnXIdBt1623180634.jpg",
+    "sub_services_count": 0,
+    "providers_count": 0,
+    "created_at": "2024-11-09T11:31:22.479914Z",
+    "updated_at": "2024-11-09T11:31:22.479934Z"
+  }
+}
+
+#Non existing ID - 404 not found 
+
+{
+  "detail": "No Service matches the given query."
+}
