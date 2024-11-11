@@ -1,0 +1,35 @@
+POST http://127.0.0.1:8000/service_providers/{uuid}/remove-services/
+
+
+REQUEST 
+
+{
+    "service_ids": [ "32"]
+}
+
+HTTP 200 success 
+{
+  "status": true,
+  "message": "1 services removed successfully",
+  "errors": null,
+  "data": {
+    "deleted_count": 1,
+    "service_ids": [
+      "32"
+    ]
+  }
+}
+
+400 bad request 
+{
+  "status": false,
+  "message": "No services were deleted",
+  "errors": [
+    {
+      "service_id": "32",
+      "error": "Service not found"
+    }
+  ],
+  "data": null
+}
+
