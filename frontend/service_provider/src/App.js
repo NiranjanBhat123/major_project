@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import WelcomeViewContextProvider from "./Contexts/WelcomeViewContextProvider";
+import { Box } from "@mui/material";
+import Welcome from "./Components/Welcome";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+    <>
+      <WelcomeViewContextProvider>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexDirection: "column",
+            width: "100%",
+            height: "100vh",
+            p: "8px",
+            bgcolor: "background.paper",
+            boxSizing: "border-box"
+          }}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
+          <Welcome/>
+        </Box>
+      </WelcomeViewContextProvider>
+    </>
   );
 }
 
