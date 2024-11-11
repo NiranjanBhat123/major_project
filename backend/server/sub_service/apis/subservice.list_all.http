@@ -1,0 +1,43 @@
+### Get all subservices for a service
+GET http://127.0.0.1:8000/services/{uuid}/subservices/
+Authorization: Bearer your-auth-token-here
+
+### Response - Success
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": true,
+  "message": "Data retrieved successfully",
+  "data": {
+    "count": 6,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": "30a2ac7b-72b2-4e9f-a572-48be5f918bb0",
+        "name": "Bridal and Special Event Packages:",
+        "main_service": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+        "main_service_name": "Salon",
+        "providers_count": 2
+      },
+      {
+        "id": "50ec64b0-9db1-4014-8024-014681848358",
+        "name": "Eyebrow and Eyelash Services",
+        "main_service": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+        "main_service_name": "Salon",
+        "providers_count": 1
+      }
+    ]
+  }
+}
+
+### Response - Service Not Found
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "status": false,
+  "message": "Resource not found",
+  "data": null
+}
