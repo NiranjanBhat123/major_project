@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
 from django.http import Http404
@@ -14,6 +15,63 @@ from .serializers import (
     ProviderServiceCreateSerializer
 )
 from server.pagination import CustomPagination
+from .validate_service_provider import FaceMatcher
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+import cv2
+import numpy as np
+from deepface import DeepFace
+from .validate_service_provider import FaceMatcher
+import os
+from rest_framework.decorators import api_view, parser_classes, permission_classes
+from rest_framework.parsers import MultiPartParser, FormParser
+from PIL import Image
+from django.conf import settings
+from rest_framework.permissions import AllowAny
+
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
+@permission_classes([AllowAny])
+def verify_faces(request):
+    image1 = request.FILES.get('image1')
+    image2 = request.FILES.get('image2')
+
+    if not image1 or not image2:
+        return Response({"success": False, "error": "Both images are required."}, status=400)
+
+    matcher = FaceMatcher()
+
+    try:
+        # Save the uploaded images to the 'images' folder in the project directory
+        images_dir = os.path.join(settings.BASE_DIR, 'images')
+        os.makedirs(images_dir, exist_ok=True)
+
+        img1_path = os.path.join('images', image1.name)
+        img2_path = os.path.join('images', image2.name)
+
+        with open(os.path.join(images_dir, image1.name), 'wb+') as destination:
+            for chunk in image1.chunks():
+                destination.write(chunk)
+
+        with open(os.path.join(images_dir, image2.name), 'wb+') as destination:
+            for chunk in image2.chunks():
+                destination.write(chunk)
+                
+        result = matcher.verify_faces(img1_path, img2_path)
+        os.remove(os.path.join(images_dir, image1.name))
+        os.remove(os.path.join(images_dir, image2.name))
+
+
+
+
+    except Exception as e:
+        return Response({"success": False, "error": str(e)}, status=400)
+
+    return Response(result)
+
+
+
 
 class ServiceProviderViewSet(viewsets.ModelViewSet):
     queryset = ServiceProvider.objects.all()

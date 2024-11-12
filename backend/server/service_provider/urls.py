@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ServiceProviderViewSet
+from .views import ServiceProviderViewSet,verify_faces
 
 urlpatterns = [
     path('', 
@@ -43,4 +43,5 @@ urlpatterns = [
         }), 
         name='provider-remove-services'
     ),
+    path('verify/', verify_faces, name='verify-faces'),
 ]
