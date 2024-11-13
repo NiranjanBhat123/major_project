@@ -1,0 +1,124 @@
+### list-services.http
+GET http://127.0.0.1:8000/services/
+Content-Type: application/json
+Authorization: Bearer your-auth-token-here
+
+### Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": true,
+  "message": "Services retrieved successfully",
+  "data": {
+    "count": 9,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": "3a862eb3-d9fb-4ce9-81b7-fa82d1a6db15",
+        "name": "Applaince repair",
+        "image": "http://127.0.0.1:8000/media/services/ac-repair-amc-services-godrej-500x500.jpg.webp",
+        "image_url": "http://127.0.0.1:8000/media/services/ac-repair-amc-services-godrej-500x500.jpg.webp",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:54:47.299604Z",
+        "updated_at": "2024-11-09T11:54:47.299645Z"
+      },
+      {
+        "id": "ecc9b20a-edae-4a13-a7a4-d2e632ba0722",
+        "name": "Carpenter",
+        "image": "http://127.0.0.1:8000/media/services/717111670587385.jpg",
+        "image_url": "http://127.0.0.1:8000/media/services/717111670587385.jpg",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:49:15.146436Z",
+        "updated_at": "2024-11-09T11:49:15.146458Z"
+      },
+      {
+        "id": "d61082cc-b0d8-440c-a68c-9ec7e508e02e",
+        "name": "Cleaning",
+        "image": "http://127.0.0.1:8000/media/services/bathroom-cleaning-service.jpeg",
+        "image_url": "http://127.0.0.1:8000/media/services/bathroom-cleaning-service.jpeg",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:51:13.085218Z",
+        "updated_at": "2024-11-09T11:51:47.608523Z"
+      },
+      {
+        "id": "85d13de0-5726-4154-8ff9-f163fd04e6aa",
+        "name": "Electrician",
+        "image": "http://127.0.0.1:8000/media/services/Why-hire-a-professional-electrician_-scaled.jpeg",
+        "image_url": "http://127.0.0.1:8000/media/services/Why-hire-a-professional-electrician_-scaled.jpeg",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:47:05.250417Z",
+        "updated_at": "2024-11-09T11:47:05.250438Z"
+      },
+      {
+        "id": "4c6dc358-4990-45bb-979e-1109d4561389",
+        "name": "Painting",
+        "image": "http://127.0.0.1:8000/media/services/residential-painting-service.jpg",
+        "image_url": "http://127.0.0.1:8000/media/services/residential-painting-service.jpg",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:53:06.820461Z",
+        "updated_at": "2024-11-09T11:53:06.820516Z"
+      },
+      {
+        "id": "c978b825-01ae-47ce-a942-2baf0fb857c0",
+        "name": "Pet care",
+        "image": null,
+        "image_url": null,
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-10T03:20:35.894080Z",
+        "updated_at": "2024-11-10T03:20:35.894136Z"
+      },
+      {
+        "id": "5ae11ebb-b347-4010-81ba-9b7e5ef799be",
+        "name": "Plumbing",
+        "image": "http://127.0.0.1:8000/media/services/TA9Q9bV3Z81nZRooviZz51Y4bpnXIdBt1623180634.jpg",
+        "image_url": "http://127.0.0.1:8000/media/services/TA9Q9bV3Z81nZRooviZz51Y4bpnXIdBt1623180634.jpg",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T11:31:22.479914Z",
+        "updated_at": "2024-11-09T11:31:22.479934Z"
+      },
+      {
+        "id": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+        "name": "Salon",
+        "image": "http://127.0.0.1:8000/media/services/salon.jpg.webp_PXMhm8f.jpeg",
+        "image_url": "http://127.0.0.1:8000/media/services/salon.jpg.webp_PXMhm8f.jpeg",
+        "sub_services_count": 6,
+        "providers_count": 2,
+        "created_at": "2024-11-09T09:27:52.491415Z",
+        "updated_at": "2024-11-09T11:09:12.175641Z"
+      },
+      {
+        "id": "2175b2d1-2eec-4b82-bd19-1d30b828715f",
+        "name": "Vehicle wash",
+        "image": "http://127.0.0.1:8000/media/services/shutterstock-752921533-car-washing-services-2-cm5j6.jpg.webp",
+        "image_url": "http://127.0.0.1:8000/media/services/shutterstock-752921533-car-washing-services-2-cm5j6.jpg.webp",
+        "sub_services_count": 0,
+        "providers_count": 0,
+        "created_at": "2024-11-09T12:04:03.074102Z",
+        "updated_at": "2024-11-09T12:10:14.680588Z"
+      }
+    ]
+  }
+}
+
+
+
+
+#unauthorized - status code 401
+{
+  "status": false,
+  "message": "Authentication failed",
+  "errors": "{'detail': ErrorDetail(string='Given token not valid for any token type', code='token_not_valid'), 
+  'code': ErrorDetail(string='token_not_valid', code='token_not_valid'),
+   'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 
+   'token_type': ErrorDetail(string='access', code='token_not_valid'), 
+   'message': ErrorDetail(string='Token is invalid or expired', code='token_not_valid')}]}"
+}

@@ -1,0 +1,259 @@
+### List all service providers
+GET http://localhost:8000/api/providers/
+Accept: application/json
+
+{
+  "status": true,
+  "message": "Data retrieved successfully",
+  "data": {
+    "count": 8,
+    "next": null,
+    "previous": null,
+    "results": [
+      {
+        "id": "fef2dbc3-96e6-4086-9419-963ba71d4095",
+        "first_name": "Anil",
+        "last_name": "Desai",
+        "full_name": "Anil Desai",
+        "gender": "M",
+        "mobile_number": "9678901234",
+        "city": "Noida",
+        "state": "Uttar Pradesh",
+        "main_service": {
+          "id": "5ae11ebb-b347-4010-81ba-9b7e5ef799be",
+          "name": "Plumbing"
+        },
+        "sub_services": [
+          {
+            "id": "0f65d09c-84cd-4abe-ba52-e9e10e22b31c",
+            "name": "Drain Cleaning and Unclogging"
+          },
+          {
+            "id": "496b02e1-c3d5-448f-841b-b7229c623e06",
+            "name": "Leak Detection and Repair"
+          },
+          {
+            "id": "e3b0b3ed-aa4d-4856-8297-b08d8c8b412c",
+            "name": "Sewer Line Repair and Replacement"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "40f39afc-eb4e-42d6-8202-e02c8ffe225b",
+        "first_name": "Aravind",
+        "last_name": "Kumar",
+        "full_name": "Aravind Kumar",
+        "gender": "M",
+        "mobile_number": "9234567890",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "main_service": {
+          "id": "3a862eb3-d9fb-4ce9-81b7-fa82d1a6db15",
+          "name": "Applaince repair"
+        },
+        "sub_services": [
+          {
+            "id": "e6550d73-ee15-4787-ae40-f46ca7cd2b0b",
+            "name": "Television / Home Theater Repair"
+          },
+          {
+            "id": "a0c2b85a-ebb0-4372-8747-13d16ea78b46",
+            "name": "Washing Machine Repair"
+          },
+          {
+            "id": "370c531b-0158-4b36-8f09-b7267639a048",
+            "name": "Water Heater Repair"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "9a09df11-fa6d-4265-acfa-cc13261e5a35",
+        "first_name": "Priya",
+        "last_name": "Iyer",
+        "full_name": "Priya Iyer",
+        "gender": "F",
+        "mobile_number": "9123456789",
+        "city": "Chennai",
+        "state": "Tamil Nadu",
+        "main_service": {
+          "id": "4c6dc358-4990-45bb-979e-1109d4561389",
+          "name": "Painting"
+        },
+        "sub_services": [
+          {
+            "id": "15e0ea76-eab5-446c-ac01-bddcd111f17f",
+            "name": "Interior Wall Painting"
+          },
+          {
+            "id": "379bc78f-0107-4b67-981d-a04ce91dd451",
+            "name": "Texture and Decorative Painting"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "cf076d98-9478-4285-b901-8b133854823c",
+        "first_name": "Rajesh",
+        "last_name": "Verma",
+        "full_name": "Rajesh Verma",
+        "gender": "M",
+        "mobile_number": "9876543210",
+        "city": "Dwarka",
+        "state": "Uttar Pradesh",
+        "main_service": {
+          "id": "2175b2d1-2eec-4b82-bd19-1d30b828715f",
+          "name": "Vehicle wash"
+        },
+        "sub_services": [
+          {
+            "id": "6ba22b48-8bf0-42ca-83fe-eb1fe9e82144",
+            "name": "2-Wheeler Full Wash"
+          },
+          {
+            "id": "faca021c-198b-4ba2-936a-558573bbd922",
+            "name": "4-Wheeler Body + Interior Cleaning"
+          },
+          {
+            "id": "86f09f75-a92c-4e97-ba1f-434a5e08c048",
+            "name": "Truck/Bus wash"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "fdf374ae-4e2e-482f-bdaf-49af86902f9b",
+        "first_name": "Ramesh",
+        "last_name": "Gopalan",
+        "full_name": "Ramesh Gopalan",
+        "gender": "M",
+        "mobile_number": "9980711961",
+        "city": "Mysuru",
+        "state": "Karnataka",
+        "main_service": {
+          "id": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+          "name": "Salon"
+        },
+        "sub_services": [
+          {
+            "id": "272fb124-d001-4211-b6ce-0d4b84b845fe",
+            "name": "Hair Coloring"
+          },
+          {
+            "id": "9c32e968-9b64-44c9-b89a-585aa23772c6",
+            "name": "Hair dressing"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "8f2f186b-a98e-4581-9df8-f02f03e960ee",
+        "first_name": "Rehmanulla",
+        "last_name": "Khan",
+        "full_name": "Rehmanulla Khan",
+        "gender": "M",
+        "mobile_number": "9449293949",
+        "city": "Lucknow",
+        "state": "Uttar Pradesh",
+        "main_service": {
+          "id": "ecc9b20a-edae-4a13-a7a4-d2e632ba0722",
+          "name": "Carpenter"
+        },
+        "sub_services": [
+          {
+            "id": "83a165db-6da0-43e1-ad83-842c810d90ad",
+            "name": "Cabinet Installation and Repair"
+          },
+          {
+            "id": "3504fd23-0385-4003-ac55-c1646d0c6da2",
+            "name": "Furniture Repair"
+          },
+          {
+            "id": "bd0c1d93-65ba-44a7-bafc-f1982d1c7fea",
+            "name": "Shelving and Storage Solutions"
+          },
+          {
+            "id": "369ec1ab-b3ae-4fe6-a2f5-4d1b5c30e19a",
+            "name": "Window Frame Repair and Installation"
+          },
+          {
+            "id": "ff01e977-9f4e-42f6-ba65-7666bb156ad2",
+            "name": "Wooden Door Installation and Repair"
+          },
+          {
+            "id": "f4388a7e-1ba6-42e3-872c-afe31d469e38",
+            "name": "Wooden Flooring Installation and Repair"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "48a04b1b-6948-4f97-9e9e-1803756209ba",
+        "first_name": "Shreya",
+        "last_name": "patil",
+        "full_name": "Shreya patil",
+        "gender": "F",
+        "mobile_number": "7022893411",
+        "city": "Bhopal",
+        "state": "Madhya Pradesh",
+        "main_service": {
+          "id": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+          "name": "Salon"
+        },
+        "sub_services": [
+          {
+            "id": "30a2ac7b-72b2-4e9f-a572-48be5f918bb0",
+            "name": "Bridal and Special Event Packages:"
+          },
+          {
+            "id": "50ec64b0-9db1-4014-8024-014681848358",
+            "name": "Eyebrow and Eyelash Services"
+          },
+          {
+            "id": "272fb124-d001-4211-b6ce-0d4b84b845fe",
+            "name": "Hair Coloring"
+          },
+          {
+            "id": "9c32e968-9b64-44c9-b89a-585aa23772c6",
+            "name": "Hair dressing"
+          },
+          {
+            "id": "4d9136a0-d185-41d4-98ca-6e83611904df",
+            "name": "Waxing"
+          }
+        ],
+        "is_active": true
+      },
+      {
+        "id": "9c77a74e-b437-432b-bd40-81977c1144dd",
+        "first_name": "Vikram",
+        "last_name": "Singh",
+        "full_name": "Vikram Singh",
+        "gender": "M",
+        "mobile_number": "9456789012",
+        "city": "Jaipur",
+        "state": "Rajasthan",
+        "main_service": {
+          "id": "d61082cc-b0d8-440c-a68c-9ec7e508e02e",
+          "name": "Cleaning"
+        },
+        "sub_services": [
+          {
+            "id": "043a15fd-1817-48bc-91be-9fb52ec608e4",
+            "name": "Bathroom Cleaning"
+          },
+          {
+            "id": "da9f31c8-f7e9-4bbe-b34e-7362d3c17696",
+            "name": "Floor Polishing and Cleaning"
+          },
+          {
+            "id": "ac7b72f0-fc61-447c-893a-4961537c6c4d",
+            "name": "Kitchen Cleaning"
+          }
+        ],
+        "is_active": true
+      }
+    ]
+  }
+}

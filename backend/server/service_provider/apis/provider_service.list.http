@@ -1,0 +1,34 @@
+
+http://127.0.0.1:8000/service_providers/{uuid}/services/
+
+
+{
+  "status": true,
+  "message": "Provider services retrieved successfully",
+  "data": [
+    {
+      "id": 30,
+      "sub_service": {
+        "id": "0f65d09c-84cd-4abe-ba52-e9e10e22b31c",
+        "name": "Drain Cleaning and Unclogging"
+      },
+      "price": "700.00"
+    },
+    {
+      "id": 31,
+      "sub_service": {
+        "id": "496b02e1-c3d5-448f-841b-b7229c623e06",
+        "name": "Leak Detection and Repair"
+      },
+      "price": "300.00"
+    },
+    {
+      "id": 32,
+      "sub_service": {
+        "id": "e3b0b3ed-aa4d-4856-8297-b08d8c8b412c",
+        "name": "Sewer Line Repair and Replacement"
+      },
+      "price": "1000.00"
+    }
+  ]
+}

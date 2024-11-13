@@ -1,0 +1,36 @@
+http://127.0.0.1:8000/service_providers/{uuid}/
+
+{
+  "city":"Greater Noida"
+}
+
+{
+  "main_service": "5ae11ebb-b347-4010-81ba-9b7e5ef799be",
+  "first_name": "Anil",
+  "last_name": "Desai",
+  "aadhaar": "789012345678",
+  "gender": "M",
+  "mobile_number": "9678901234",
+  "photo": "http://127.0.0.1:8000/media/providers/360_F_446748818_QZ45jBJVaAYkdmslY7RLCpppEQbMX3kY.jpg",
+  "street_address": "Sector 44",
+  "city": "Greater Noida",
+  "state": "Uttar Pradesh",
+  "postal_code": "411004",
+  "latitude": "18.520400",
+  "longitude": "73.856700",
+  "provider_services": [
+    {
+      "sub_service": "0f65d09c-84cd-4abe-ba52-e9e10e22b31c",
+      "price": "700.00"
+    },
+    {
+      "sub_service": "496b02e1-c3d5-448f-841b-b7229c623e06",
+      "price": "300.00"
+    },
+    {
+      "sub_service": "e3b0b3ed-aa4d-4856-8297-b08d8c8b412c",
+      "price": "1000.00"
+    }
+  ],
+  "is_active": true
+}

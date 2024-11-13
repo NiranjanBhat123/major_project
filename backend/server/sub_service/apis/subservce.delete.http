@@ -1,0 +1,23 @@
+### Delete subservice
+DELETE http://127.0.0.1:8000/services/{uuid}/subservices/{uuid}/
+Authorization: Bearer your-auth-token-here
+
+### Response - Success
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+  "status": true,
+  "message": "Sub-service deleted successfully",
+  "data": null
+}
+
+### Response - Not Found
+HTTP/1.1 404 Not Found
+Content-Type: application/json
+
+{
+  "status": false,
+  "message": "Resource not found",
+  "data": null
+}

@@ -1,0 +1,21 @@
+### delete-service.http
+DELETE http://127.0.0.1:8000/services/{uuid}/
+Authorization: Bearer your-auth-token-here
+
+### Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{
+    "status": true,
+    "message": "Service deleted successfully",
+    "data": null
+}
+
+
+
+#No service exists
+
+{
+  "detail": "No Service matches the given query."
+}
