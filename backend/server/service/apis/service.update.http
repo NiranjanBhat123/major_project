@@ -1,0 +1,36 @@
+### update-service.http
+PATCH http://127.0.0.1:8000/services/{uuid}/
+Content-Type: application/json
+Authorization: Bearer your-auth-token-here
+
+{
+    "name": "Updated Pet Care Service"
+}
+
+
+### Response:
+HTTP/1.1 200 OK
+Content-Type: application/json
+{
+  "status": true,
+  "message": "Service updated successfully",
+  "data": {
+    "status": true,
+    "message": "Service data retrieved successfully",
+    "data": {
+      "id": "a2b2151c-dec7-4b8d-bab4-560d1d399cbc",
+      "name": "pet care",
+      "image": null,
+      "image_url": null,
+      "sub_services_count": 0,
+      "providers_count": 0,
+      "created_at": "2024-11-10T03:27:51.607454Z",
+      "updated_at": "2024-11-10T03:31:48.394999Z"
+    }
+  }
+}
+
+#service does not exist
+{
+  "detail": "No Service matches the given query."
+}

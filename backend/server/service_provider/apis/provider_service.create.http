@@ -1,0 +1,11 @@
+POST http://127.0.0.1:8000/service_providers/{uuid}/add-services/
+
+{
+  "services": [
+        {
+"sub_service": "fda13d78-2ca7-4b3b-b5e9-2009567a35a1",
+"price": "100.00"
+        }
+    ]
+  
+}

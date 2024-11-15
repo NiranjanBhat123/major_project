@@ -1,0 +1,36 @@
+### Create new subservice
+POST http://127.0.0.1:8000/services/{uuid}/subservices/
+Content-Type: application/json
+Authorization: Bearer your-auth-token-here
+
+{
+  "name": "nail polish2"
+}
+
+### Response - Success
+HTTP/1.1 201 Created
+Content-Type: application/json
+
+{
+  "status": true,
+  "message": "Sub-service created successfully",
+  "data": {
+    "id": "8bb19428-a3ef-45a9-a3b7-b6f9d35c2e98",
+    "name": "nail polish2",
+    "main_service": "7ec4adff-0338-48d1-b963-17d26ac6a4c0",
+    "main_service_name": "Salon"
+  }
+}
+
+#subservice already exists - error 400
+{
+  "status": false,
+  "message": "Database integrety error",
+  "data": null
+}
+
+{
+  "status": false,
+  "message": "Resource not found",
+  "data": null
+}
