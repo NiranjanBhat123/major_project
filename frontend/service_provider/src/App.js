@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
 import Welcome from "./Components/Welcome";
 import Registration from "./Components/Registration";
+import { Typography } from "@mui/material";
 
 const App = () => {
   return (
@@ -24,6 +25,16 @@ const App = () => {
         <Routes>
           <Route path="/" element={ <Welcome /> }/>
           <Route path="/registration" element={ <Registration /> }/>
+          <Route path="/main" element= { 
+            <>
+              <Typography variant="title">
+                FixNGo
+              </Typography> 
+              <Typography variant="h1">
+                Service Provider Dashboard
+              </Typography> 
+            </>
+          } />
         </Routes>
       </Box>
     </WelcomeViewContextProvider>

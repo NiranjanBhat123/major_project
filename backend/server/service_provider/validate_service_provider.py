@@ -1,78 +1,62 @@
 import cv2
-import numpy as np
 from deepface import DeepFace
-import os
-from PIL import Image
-import base64
-import io
 
 class FaceMatcher:
-    def __init__(self):
-        # Initialize face detector
+    def __init__(self, threshold_multiplier=1.0):
         self.face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        self.threshold_multiplier = threshold_multiplier
+        self.model_name = 'ArcFace'
 
     def detect_face(self, image_path):
-        """
-        Detect if there is a face in the image and return True/False
-        """
         try:
             image = cv2.imread(image_path)
+            if image is None:
+                return False, "Image not found."
+            
+            height, width = image.shape[:2]
+            min_face_size = min(height, width) // 8
+            
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            faces = self.face_cascade.detectMultiScale(gray, 1.1, 4)
-            return len(faces) > 0
+            faces = self.face_cascade.detectMultiScale(
+                gray, scaleFactor=1.1, minNeighbors=5, minSize=(min_face_size, min_face_size)
+            )
+            
+            if len(faces) == 1:
+                return True, None
+            elif len(faces) == 0:
+                return False, "No face detected."
+            else:
+                return False, "Multiple faces detected."
         except Exception as e:
-            print(f"Error in face detection: {str(e)}")
-            return False
+            return False, f"Error in face detection: {str(e)}"
 
     def verify_faces(self, image1_path, image2_path):
-        """
-        Verify if two face images match
-        Returns: dict containing match result and confidence score
-        """
         try:
-            # First check if both images contain faces
-            if not self.detect_face(image1_path):
-                return {"success": False, "error": "No face detected in first image"}
+            face1_valid, error1 = self.detect_face(image1_path)
+            face2_valid, error2 = self.detect_face(image2_path)
 
-            if not self.detect_face(image2_path):
-                return {"success": False, "error": "No face detected in second image"}
+            if not face1_valid:
+                return {"success": False, "error": f"First image issue: {error1}"}
+            if not face2_valid:
+                return {"success": False, "error": f"Second image issue: {error2}"}
 
-            # Verify faces using DeepFace
             result = DeepFace.verify(
                 img1_path=image1_path,
                 img2_path=image2_path,
-                model_name='VGG-Face',
-                enforce_detection=True,
-                detector_backend='opencv'
+                model_name=self.model_name,
+                enforce_detection=False
             )
+
+            adjusted_threshold = result['threshold'] * self.threshold_multiplier
+            is_verified = result['distance'] < adjusted_threshold
 
             return {
                 "success": True,
-                "matched": result['verified'],
-                "distance": float(result['distance']),
-                "threshold": float(result['threshold']),
-                "model": "VGG-Face"
+                "matched": is_verified,
+                "distance": result['distance'],
+                "threshold": adjusted_threshold,
+                "message": "Faces matched successfully" if is_verified else "Faces did not match."
             }
 
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-    def base64_to_image(self, base64_string, save_path):
-        """
-        Convert base64 string to image and save it
-        """
-        try:
-            # Remove header if present
-            if 'data:image' in base64_string:
-                base64_string = base64_string.split(',')[1]
-
-            image_data = base64.b64decode(base64_string)
-            image = Image.open(io.BytesIO(image_data))
-            image.save(save_path)
-            return True
-        except Exception as e:
-            print(f"Error converting base64 to image: {str(e)}")
-            return False
+            return {"success": False, "error": str(e)}
