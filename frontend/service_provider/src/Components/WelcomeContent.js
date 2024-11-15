@@ -28,8 +28,11 @@ const WelcomeContent = () => {
       }}
     >
       <Typography
-        variant="h1"
-        sx={{ color: 'background.paper', mb: 2 }}
+        variant="title"
+        sx={{
+          color: 'background.paper',
+          mb: 2,
+        }}
       >
         FixNGo
       </Typography>
@@ -38,6 +41,16 @@ const WelcomeContent = () => {
         sx={{ color: 'background.paper', mb: 4 }}
       >
         A Platform for On-Demand Local Home Services
+      </Typography>
+      <Typography
+        variant="h5"
+        sx={{
+          position: 'absolute',
+          bottom: '2rem',
+          color: 'background.paper',
+        }}
+      >
+        Service Providers
       </Typography>
       <Button variant="outlined" onClick={showSignUp}>
         Join Us

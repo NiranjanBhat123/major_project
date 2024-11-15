@@ -44,7 +44,13 @@ const Theme = createTheme({
   },
 
   typography: {
-    fontFamily: '"Poppins", sans-serif',
+    fontFamily: '"Poppins", "sans-serif"',
+    title: {
+      fontWeight: 500,
+      fontSize: '4rem',
+      textAlign: 'center',
+      fontFamily: '"Moul", "sans-serif"',
+    },
     h1: {
       fontWeight: 700,
       fontSize: '3rem',
@@ -112,31 +118,30 @@ const Theme = createTheme({
       },
       styleOverrides: {
         root: ({ theme }) => ({
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: theme.palette.text.secondary,
-            },
-            '&:hover fieldset': {
-              borderColor: theme.palette.text.primary
-            },
-            '&.Mui-focused fieldset': {
-              borderColor: theme.palette.secondary.main
-            }
+          '& .MuiOutlinedInput-notchedOutline': {
+            borderRadius: 10,
+            borderColor: 'rgba(0, 0, 0, 0.1)',
+          },
+          '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: 'rgba(0, 0, 0, 0.2)',
+          },
+          '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: theme.palette.secondary.main,
           },
           '& .MuiFormLabel-root': {
             color: theme.palette.text.muted,
             '&.Mui-focused': {
-              color: theme.palette.secondary.main
-            }
+              color: theme.palette.secondary.main,
+            },
           },
           '& .Mui-error': {
             '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.error.main
+              borderColor: theme.palette.error.main,
             },
             '&.MuiFormLabel-root': {
-              color: theme.palette.error.main
-            }
-          }
+              color: theme.palette.error.main,
+            },
+          },
         })
       }
     },

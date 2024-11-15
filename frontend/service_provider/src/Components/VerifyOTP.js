@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useNavigate } from 'react-router-dom';
 import emailjs from 'emailjs-com';
 import { Typography, Button, Box, TextField, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -7,6 +8,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const VerifyOTP = () => {
   const { setEmpty, showSignUp, signUpEmail, updateSignUpEmail } = useWelcomeViewContext();
+  const navigate = useNavigate();
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [generatedOTP, setGeneratedOTP] = useState('');
   const [timer, setTimer] = useState(30);
@@ -118,9 +120,12 @@ const VerifyOTP = () => {
       updateSignUpEmail("");
       setAlert({
         show: true,
-        message: 'OTP verified successfully!',
+        message: 'OTP verified successfully! Redirecting to registration...',
         type: 'success'
       });
+      setTimeout(() => {
+        navigate("/registration");
+      }, 4000);
     }
     else {
       setAlert({
