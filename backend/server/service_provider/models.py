@@ -11,6 +11,7 @@ from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from sub_service.models import SubService
 from service.models import Service
+from django.contrib.auth.hashers import make_password
 
 def validate_image_size(value):
     """Validate that the image size is less than 2MB."""
@@ -76,6 +77,18 @@ class ServiceProvider(models.Model):
         on_delete=models.PROTECT,
         related_name='providers',
         help_text=_("Main service category this provider belongs to")
+    )
+    email = models.EmailField(
+        unique=True,
+        null=True,  # Allow null for backward compatibility
+        blank=True,
+        help_text=_("Email address for authentication")
+    )
+    password = models.CharField(
+        max_length=128,
+        null=True,  # Allow null for backward compatibility
+        blank=True,
+        help_text=_("Hashed password for authentication")
     )
     first_name = models.CharField(
         max_length=50,
@@ -184,6 +197,17 @@ class ServiceProvider(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
+    
+    def save(self, *args, **kwargs):
+            # Hash password if it's being set for the first time or changed
+        if self.password and (
+            not self.pk or 
+            self._state.adding or 
+            self.password != ServiceProvider.objects.get(pk=self.pk).password
+        ):
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+
 
     def clean(self):
         """Ensure provider can only select sub-services from their main service"""
