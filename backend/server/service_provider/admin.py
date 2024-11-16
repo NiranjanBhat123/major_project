@@ -21,16 +21,22 @@ class ProviderServiceInline(admin.TabularInline):
 @admin.register(ServiceProvider)
 class ServiceProviderAdmin(admin.ModelAdmin):
     list_display = (
-        'photo_preview', 'full_name', 'main_service', 'mobile_number', 
-        'city', 'state', 'is_active'
+        'photo_preview', 'full_name', 'email', 'main_service', 
+        'mobile_number', 'city', 'state', 'is_active'
     )
     list_display_links = ('photo_preview', 'full_name')
-    search_fields = ('first_name', 'last_name', 'mobile_number', 'aadhaar')
+    search_fields = (
+        'first_name', 'last_name', 'email', 
+        'mobile_number', 'aadhaar'
+    )
     list_filter = ('main_service', 'city', 'state', 'gender', 'is_active', 'created_at')
     inlines = [ProviderServiceInline]
     readonly_fields = ('id', 'photo_preview_large', 'created_at', 'updated_at')
 
     fieldsets = (
+        (_('Authentication'), {
+            'fields': ('email', 'password')
+        }),
         (_('Service Information'), {
             'fields': ('main_service', 'is_active')
         }),
@@ -54,6 +60,18 @@ class ServiceProviderAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    # Rest of the methods remain the same
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        if obj:  # If editing existing object
+            # Remove password field from fieldsets when editing
+            auth_fields = fieldsets[0][1]['fields']
+            if 'password' in auth_fields:
+                fieldsets[0][1]['fields'] = tuple(
+                    f for f in auth_fields if f != 'password'
+                )
+        return fieldsets
 
     def get_queryset(self, request):
         return super().get_queryset(request)
@@ -101,7 +119,7 @@ class ServiceProviderAdmin(admin.ModelAdmin):
 
 @admin.register(ProviderService)
 class ProviderServiceAdmin(admin.ModelAdmin):
-    list_display = ('id','provider', 'sub_service', 'price', 'created_at')
+    list_display = ('id', 'provider', 'sub_service', 'price', 'created_at')
     list_filter = ('created_at', 'provider__main_service')
     search_fields = ('provider__first_name', 'provider__last_name', 'sub_service__name')
     autocomplete_fields = ['provider', 'sub_service']

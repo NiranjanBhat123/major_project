@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import ServiceProviderViewSet,verify_faces
+from .views import ServiceProviderViewSet,verify_faces,LoginView,SignupView
 
 urlpatterns = [
     path('', 
@@ -44,4 +44,6 @@ urlpatterns = [
         name='provider-remove-services'
     ),
     path('verify/', verify_faces, name='verify-faces'),
+    path('login/', LoginView.as_view(), name='provider-login'),
+    path('signup/', SignupView.as_view(), name='provider-signup'),
 ]

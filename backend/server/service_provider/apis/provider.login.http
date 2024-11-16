@@ -1,0 +1,19 @@
+POST http://127.0.0.1:8000/service_providers/login/
+
+{
+ "email": "ramesh@gmail.com",
+ "password":"Ramesh123#"
+}
+
+
+{
+  "status": true,
+  "message": "Login successful",
+  "data": {
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxNzU0MjE3LCJpYXQiOjE3MzE3NDM0MTcsImp0aSI6IjJmOWE4NzE1NTA1ZDRkZTFhMjUyNWJiZGQ3ZDFjMWVmIiwidXNlcl9pZCI6IjI5ZWJkNjllLTg2YTEtNDQxYi05YzIxLTg2OGFlOGQ2NjkyYyJ9.dGSoaxBHQiTxts9DSX0nqU4XN4XsHiyNW7VJbFAeSaY",
+    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMjM0ODIxNywiaWF0IjoxNzMxNzQzNDE3LCJqdGkiOiJjMTRkMTdjZDRkMGI0Mjc2OTZmOGIwNjMyYzdmZTE4YiIsInVzZXJfaWQiOiIyOWViZDY5ZS04NmExLTQ0MWItOWMyMS04NjhhZThkNjY5MmMifQ.b3jtTgwnSqtAwo5jIMkKczwcfkbB--2y-lLVyQekfzs",
+    "provider_id": "29ebd69e-86a1-441b-9c21-868ae8d6692c",
+    "email": "ramesh@gmail.com",
+    "name": "ramesh Gopal"
+  }
+}
