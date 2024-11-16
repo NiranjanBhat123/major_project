@@ -5,7 +5,7 @@ import {
 import RegistrationForm from "./RegistrationForm";
 import PhotoMatching from "./PhotoMatching";
 
-const Registration = () => {
+const RegistrationPage = () => {
   const [currentStep, setCurrentStep] = useState('1');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -193,4 +193,4 @@ const Registration = () => {
   );
 };
 
-export default Registration;
+export default RegistrationPage;

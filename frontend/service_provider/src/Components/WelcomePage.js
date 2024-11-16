@@ -6,7 +6,7 @@ import Login from "./Login";
 import VerifyOTP from "./VerifyOTP";
 import { Box } from '@mui/material';
 
-const Welcome = () => {
+const WelcomePage = () => {
   const { view } = useWelcomeViewContext();
 
   return (
@@ -29,4 +29,4 @@ const Welcome = () => {
   );
 }
 
-export default Welcome;
+export default WelcomePage;
