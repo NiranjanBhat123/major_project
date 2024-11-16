@@ -6,13 +6,15 @@ from django.conf import settings
 from service.models import Service
 from client.models import Client
 from service_provider.models import ServiceProvider
+from service_provider.models import ProviderService
 
 class OrderStatus(models.TextChoices):
     PENDING = 'pending', _('Pending')
     ACCEPTED = 'accepted', _('Accepted')
-    IN_PROGRESS = 'in_progress', _('In Progress')
     COMPLETED = 'completed', _('Completed')
     CANCELLED = 'cancelled', _('Cancelled')
+    REJECTED = 'rejected', _('Rejected')
+
 
 class Orders(models.Model):
     id = models.UUIDField(
@@ -21,6 +23,7 @@ class Orders(models.Model):
         editable=False,
         help_text=_("Unique identifier for the order")
     )
+
     user = models.ForeignKey(
         Client,
         on_delete=models.PROTECT,
@@ -72,6 +75,9 @@ class Orders(models.Model):
     def __str__(self):
         return f"Order {self.id} by {self.user} - {self.service.name}"
 
+
+
+
 class OrderItems(models.Model):
     id = models.UUIDField(
         primary_key=True,
@@ -85,20 +91,17 @@ class OrderItems(models.Model):
         related_name='items',
         help_text=_("Order this item belongs to")
     )
-    subservice = models.ForeignKey(
-        'sub_service.SubService',
-        on_delete=models.PROTECT,
-        related_name='order_items',
-        help_text=_("Subservice associated with this order item")
+
+    provider_service = models.ForeignKey(
+        ProviderService,
+        on_delete=models.CASCADE,
+        help_text=_("Sub service ordered by the client")
     )
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        help_text=_("Price of the individual subservice item")
-    )
+    
 
     def __str__(self):
-        return f"OrderItem {self.id} for {self.order} - {self.subservice.name}"
+        return f"OrderItem {self.id} for {self.order} - {self.provider_service.sub_service.name}"
+    
 
 class OrderStatusHistory(models.Model):
     id = models.UUIDField(

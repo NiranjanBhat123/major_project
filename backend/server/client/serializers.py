@@ -55,6 +55,7 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
+        print("Received data:", data)
 
         # Check if a client with the provided email exists
         try:

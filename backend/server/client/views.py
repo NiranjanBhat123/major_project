@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import ClientSerializer, LoginSerializer
 from .models import Client
+from django.views.decorators.csrf import csrf_exempt
 
 
 class SignupView(APIView):
@@ -24,7 +25,9 @@ class LoginView(APIView):
     """
     View for user login. Handles generating a token for the user.
     """
+    @csrf_exempt
     def post(self, request):
+        print(request.data)
         serializer = LoginSerializer(data=request.data)
         
         # Validate the data with the serializer

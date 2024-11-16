@@ -32,3 +32,4 @@ class Migration(migrations.Migration):
             field=models.CharField(help_text="Client's postal code", max_length=6, validators=[django.core.validators.RegexValidator(message='Postal code must be exactly 6 digits', regex='^\\d{6}$')]),
         ),
     ]
+    

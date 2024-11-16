@@ -109,6 +109,8 @@ const Navbar = () => {
                   <MenuItem>Settings</MenuItem>
                   <MenuItem 
                   onClick={() => {
+                    localStorage.removeItem('accessToken');
+                    localStorage.removeItem('refreshToken');
                     handleLogout();
                     }}
                   >Logout</MenuItem>
