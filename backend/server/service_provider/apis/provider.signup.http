@@ -1,0 +1,37 @@
+POST http://127.0.0.1:8000/service_providers/signup/
+
+
+{
+  "email": "venkatesh@example.com",
+  "password": "Venkatest123#",
+  "confirm_password": "Venkatesh123#",
+  "main_service": "3a862eb3-d9fb-4ce9-81b7-fa82d1a6db15",
+  "first_name": "John",
+  "last_name": "Doe",
+  "aadhaar": "123456789012",
+  "gender": "M",
+  "mobile_number": "9876543210",
+  "street_address": "123 Main Street",
+  "city": "Mumbai",
+  "state": "Maharashtra",
+  "postal_code": "400001",
+  "latitude": 19.075983,
+  "longitude": 72.877655,
+  "is_active": true
+} #include a "photo" field
+
+
+RESPONSE
+
+
+{
+    "status": true,
+    "message": "Service provider registered successfully",
+    "data": {
+        "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxNzU0OTk2LCJpYXQiOjE3MzE3NDQxOTYsImp0aSI6IjU2MjRjY2ZjODIwYjQwNzI4MjU0MmMzNGIyMzU0Y2ZmIiwidXNlcl9pZCI6IjE3ZTAzZWFhLTc5MzUtNDUwNS1iMmI0LWFlMTQzMzNhMzRkMSJ9.P6OcmDUGsy4X4K1RTXzfwpqwv2RJ32aDkO_dF8_lhZ0",
+        "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTczMjM0ODk5NiwiaWF0IjoxNzMxNzQ0MTk2LCJqdGkiOiIwMjJiODNlMDhlZTQ0ZWQ3ODI5OTM2NDc3YjI1ZGVkMyIsInVzZXJfaWQiOiIxN2UwM2VhYS03OTM1LTQ1MDUtYjJiNC1hZTE0MzMzYTM0ZDEifQ.RhfeXUj-wQlRoe7aYdl6Y7bd2b8EsOKn_AnLG2MohX4",
+        "provider_id": "17e03eaa-7935-4505-b2b4-ae14333a34d1",
+        "email": "venkatesh@gmail.com",
+        "name": "Venkatesh Iyer"
+    }
+}

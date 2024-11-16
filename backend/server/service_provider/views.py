@@ -1,33 +1,49 @@
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import get_object_or_404
+# Django imports
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.http import Http404
-from django.db import transaction
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+
+# Third-party imports
+import os
+import cv2
+import numpy as np
+from PIL import Image
+from deepface import DeepFace
+
+# DRF imports
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view, parser_classes, permission_classes
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
+
+# Models
 from .models import ServiceProvider, ProviderService, SubService
+
+# Serializers
 from .serializers import (
     ServiceProviderListSerializer,
     ServiceProviderDetailSerializer,
     ServiceProviderCreateUpdateSerializer,
     ProviderServiceSerializer,
-    ProviderServiceCreateSerializer
+    ProviderServiceCreateSerializer,
+    LoginSerializer
 )
+
+# Pagination
 from server.pagination import CustomPagination
+
+# Utilities
 from .validate_service_provider import FaceMatcher
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-import cv2
-import numpy as np
-from deepface import DeepFace
-from .validate_service_provider import FaceMatcher
-import os
-from rest_framework.decorators import api_view, parser_classes, permission_classes
-from rest_framework.parsers import MultiPartParser, FormParser
-from PIL import Image
-from django.conf import settings
-from rest_framework.permissions import AllowAny
+
+# Database
+from django.db import transaction
+
+
 
 
 @api_view(['POST'])
@@ -59,6 +75,7 @@ def verify_faces(request):
                 destination.write(chunk)
                 
         result = matcher.verify_faces(img1_path, img2_path)
+        print(result)
         os.remove(os.path.join(images_dir, image1.name))
         os.remove(os.path.join(images_dir, image2.name))
 
@@ -245,3 +262,63 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
                 'message': str(e),
                 'data': None
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            
+class SignupView(APIView):
+    """View for service provider signup."""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = ServiceProviderCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            provider = serializer.save()
+            
+            # Generate tokens
+            refresh = RefreshToken.for_user(provider)
+            
+            return Response({
+                'status': True,
+                'message': 'Service provider registered successfully',
+                'data': {
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                    'provider_id': str(provider.id),
+                    'email': provider.email,
+                    'name': provider.full_name
+                }
+            }, status=status.HTTP_201_CREATED)
+            
+        return Response({
+            'status': False,
+            'message': 'Registration failed',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    """View for service provider login."""
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            provider = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(provider)
+            
+            return Response({
+                'status': True,
+                'message': 'Login successful',
+                'data': {
+                    'access_token': str(refresh.access_token),
+                    'refresh_token': str(refresh),
+                    'provider_id': str(provider.id),
+                    'email': provider.email,
+                    'name': provider.full_name
+                }
+            }, status=status.HTTP_200_OK)
+            
+        return Response({
+            'status': False,
+            'message': 'Login failed',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
