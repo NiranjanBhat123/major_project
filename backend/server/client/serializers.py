@@ -1,23 +1,21 @@
 from rest_framework import serializers
 from .models import Client
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate
-from django.contrib.auth.hashers import check_password
 
 
 class ClientSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=5)  # Updated min_length to 5
+    password = serializers.CharField(write_only=True, min_length=5)
 
     class Meta:
         model = Client
         fields = [
             'id', 'name', 'email', 'password', 'mobile_number', 'street_address',
-            'city', 'state', 'postal_code', 'latitude', 'longitude'
+            'city', 'state', 'postal_code'
         ]
+        read_only_fields = ['id']  # Make id read-only
     
     def create(self, validated_data):
-        # Hash the password before saving the user
         validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
 
@@ -42,12 +40,6 @@ class ClientSerializer(serializers.ModelSerializer):
         return value
 
 
-
-
-
-
-
-
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
@@ -56,16 +48,17 @@ class LoginSerializer(serializers.Serializer):
         email = data.get('email')
         password = data.get('password')
 
-        # Check if a client with the provided email exists
         try:
             client = Client.objects.get(email=email)
         except Client.DoesNotExist:
-            raise serializers.ValidationError("A user with this email does not exist.")
+            raise serializers.ValidationError({
+                "email": ["A user with this email does not exist."]
+            })
 
-        # Manually check the hashed password
         if not check_password(password, client.password):
-            raise serializers.ValidationError("Incorrect password.")
+            raise serializers.ValidationError({
+                "password": ["Incorrect password."]
+            })
 
-        # Add the authenticated client to the validated data
         data['user'] = client
         return data
