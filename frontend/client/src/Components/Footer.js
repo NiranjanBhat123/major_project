@@ -2,8 +2,7 @@ import React from 'react';
 import { Box, Container, Grid, Typography, Link } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { FaApple, FaGooglePlay } from 'react-icons/fa';
-// Correct image import
-import Logo from '../images/logo.jpeg';
+import HandymanIcon from '@mui/icons-material/Handyman';
 
 const StyledFooter = styled('footer')(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -32,10 +31,23 @@ const FooterHeading = styled(Typography)(({ theme }) => ({
   },
 }));
 
-const LogoImage = styled('img')({
-  height: '40px',
-  marginBottom: '16px',
-});
+const LogoText = styled(Typography)(({ theme }) => ({
+  fontFamily: 'Righteous, cursive',
+  fontSize: '2rem',
+  fontWeight: 'bold',
+  background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  marginBottom: '24px',
+  '& .icon': {
+    color: theme.palette.primary.main,
+    fontSize: '1.8rem',
+    transform: 'rotate(-15deg)',
+  },
+}));
 
 const FooterLink = styled(Link)(({ theme }) => ({
   color: theme.palette.text.muted,
@@ -101,16 +113,6 @@ const FooterBottom = styled(Box)(({ theme }) => ({
   },
 }));
 
-const BrandText = styled(Typography)(({ theme }) => ({
-  fontFamily: '"Poppins", sans-serif',
-  fontWeight: 700,
-  fontSize: '28px',
-  background: `linear-gradient(90deg, ${theme.palette.secondary.main} 0%, ${theme.palette.secondary.dark} 100%)`,
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  marginBottom: '24px',
-}));
-
 const StyledList = styled('ul')({
   listStyle: 'none',
   padding: 0,
@@ -123,7 +125,10 @@ const Footer = () => {
       <Container maxWidth="lg">
         <Grid container spacing={4}>
           <Grid item xs={12} md={3}>
-            <LogoImage src={Logo} style={{height:"10rem",width:"10rem"}} alt="FixNGo Logo" />
+            <LogoText variant="h1">
+              <HandymanIcon className="icon" />
+              FixNGo
+            </LogoText>
             <Typography 
               variant="body2" 
               sx={{ 
