@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, Typography, Grid } from '@mui/material';
 import { styled } from '@mui/system';
 
@@ -11,8 +12,8 @@ const ServiceContainer = styled(Box)(({ theme }) => ({
 }));
 
 const ServiceCircle = styled(Box)(({ theme }) => ({
-  width: '200px', // Circle size
-  height: '200px', // Circle size
+  width: '200px',
+  height: '200px',
   backgroundColor: '#f0f4f8',
   borderRadius: '50%',
   display: 'flex',
@@ -27,24 +28,31 @@ const ServiceCircle = styled(Box)(({ theme }) => ({
 }));
 
 const ServiceImage = styled('img')({
-  width: '60%', // Image size relative to circle
+  width: '60%',
   height: '60%',
   objectFit: 'contain',
 });
 
+// Updated services array with unique IDs
 const services = [
-    { name: 'Plumbing', image: 'https://media.istockphoto.com/id/1273820684/vector/plumbing-installation-rgb-color-icon.jpg?s=612x612&w=0&k=20&c=5iiyfZnB_mPGqsyPpkJpXe4Wlkm768QreV43Wjh5FqE=' },
-    { name: 'Electrical', image: 'https://img.freepik.com/free-vector/hand-drawn-electrician-cartoon-illustration_52683-152426.jpg' },
-    { name: 'House Cleaning', image: 'https://media.istockphoto.com/id/876741676/vector/cleaning-equipment-cleaning-service-concept-poster-template-for-house-cleaning-services-with.jpg?s=612x612&w=0&k=20&c=F01MJBwfV2PO371-EuBLUFkCxwnPlMZgrNV4-1jErYU=' },
-  { name: 'Carpentry', image: 'https://via.placeholder.com/100' },
-  { name: 'Painting', image: 'https://via.placeholder.com/100' },
-  { name: 'Appliance Repair', image: 'https://via.placeholder.com/100' },
-  { name: 'Landscaping', image: 'https://via.placeholder.com/100' },
-  { name: 'HVAC Services', image: 'https://via.placeholder.com/100' },
-  { name: 'Roof Repair', image: 'https://via.placeholder.com/100' },
+  { id: 'plumbing', name: 'Plumbing', image: 'https://media.istockphoto.com/id/1273820684/vector/plumbing-installation-rgb-color-icon.jpg?s=612x612&w=0&k=20&c=5iiyfZnB_mPGqsyPpkJpXe4Wlkm768QreV43Wjh5FqE=' },
+  { id: 'electrical', name: 'Electrical', image: 'https://img.freepik.com/free-vector/hand-drawn-electrician-cartoon-illustration_52683-152426.jpg' },
+  { id: 'cleaning', name: 'House Cleaning', image: 'https://media.istockphoto.com/id/876741676/vector/cleaning-equipment-cleaning-service-concept-poster-template-for-house-cleaning-services-with.jpg?s=612x612&w=0&k=20&c=F01MJBwfV2PO371-EuBLUFkCxwnPlMZgrNV4-1jErYU=' },
+  { id: 'carpentry', name: 'Carpentry', image: 'https://via.placeholder.com/100' },
+  { id: 'painting', name: 'Painting', image: 'https://via.placeholder.com/100' },
+  { id: 'appliance', name: 'Appliance Repair', image: 'https://via.placeholder.com/100' },
+  { id: 'landscaping', name: 'Landscaping', image: 'https://via.placeholder.com/100' },
+  { id: 'hvac', name: 'HVAC Services', image: 'https://via.placeholder.com/100' },
+  { id: 'roof', name: 'Roof Repair', image: 'https://via.placeholder.com/100' },
 ];
 
 const ServicesSection = () => {
+  const navigate = useNavigate();
+
+  const handleServiceClick = (serviceId) => {
+    navigate(`/service/${serviceId}`);
+  };
+
   return (
     <Box sx={{ py: 6, backgroundColor: '#ffffff' }}>
       <Typography
@@ -55,9 +63,9 @@ const ServicesSection = () => {
         Order Your Services
       </Typography>
       <Grid container spacing={4} justifyContent="center">
-        {services.map((service, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
-            <ServiceContainer>
+        {services.map((service) => (
+          <Grid item xs={12} sm={6} md={4} key={service.id}>
+            <ServiceContainer onClick={() => handleServiceClick(service.id)}>
               <ServiceCircle>
                 <ServiceImage src={service.image} alt={service.name} />
               </ServiceCircle>

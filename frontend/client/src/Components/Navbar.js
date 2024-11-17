@@ -1,30 +1,35 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   AppBar, 
   Toolbar, 
   Button, 
   IconButton, 
   Box, 
-  TextField,
   Avatar,
   Menu,
   MenuItem,
   Tooltip,
   Fade,
   Chip,
-  Typography
+  Typography,
+  Autocomplete
 } from '@mui/material';
+
 import { styled, alpha } from '@mui/material/styles';
+import ClearIcon from '@mui/icons-material/Clear';
+import CircularProgress from '@mui/material/CircularProgress';
 import SearchIcon from '@mui/icons-material/Search';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonIcon from '@mui/icons-material/Person';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import ReceiptIcon from '@mui/icons-material/Receipt';
-import HandymanIcon from '@mui/icons-material/Handyman'; // Added repair icon
+import HandymanIcon from '@mui/icons-material/Handyman';
 import AuthModal from './AuthModal';
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
-// Remove Logo import since we're not using it
+
+
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
   backgroundColor: theme.palette.common.white,
@@ -61,7 +66,25 @@ const LogoText = styled(Typography)(({ theme }) => ({
   },
 }));
 
-const SearchTextField = styled(TextField)(({ theme }) => ({
+const LocationChip = styled(Chip)(({ theme }) => ({
+  backgroundColor: alpha(theme.palette.grey[100], 0.8),
+  '&:hover': {
+    backgroundColor: alpha(theme.palette.grey[200], 0.8),
+  },
+  height: '40px',
+  padding: '0 8px',
+  '& .MuiChip-icon': {
+    color: theme.palette.grey[600],
+  },
+  '& .MuiChip-label': {
+    color: theme.palette.grey[700],
+    fontWeight: 500,
+  },
+}));
+// Existing styled components remain the same...
+// (StyledAppBar, LogoContainer, LogoText, LocationChip definitions remain unchanged)
+
+const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
     backgroundColor: alpha(theme.palette.grey[100], 0.8),
     borderRadius: '8px',
@@ -81,23 +104,24 @@ const SearchTextField = styled(TextField)(({ theme }) => ({
       },
     },
   },
+  '& .MuiAutocomplete-endAdornment': {
+    right: '8px',
+    top: 'calc(50% - 14px)',
+  },
+  '& .MuiAutocomplete-clearIndicator': {
+    color: theme.palette.grey[500],
+    '&:hover': {
+      color: theme.palette.grey[700],
+    },
+  },
 }));
 
-const LocationChip = styled(Chip)(({ theme }) => ({
-  backgroundColor: alpha(theme.palette.grey[100], 0.8),
-  '&:hover': {
-    backgroundColor: alpha(theme.palette.grey[200], 0.8),
-  },
-  height: '40px',
-  padding: '0 8px',
-  '& .MuiChip-icon': {
-    color: theme.palette.grey[600],
-  },
-  '& .MuiChip-label': {
-    color: theme.palette.grey[700],
-    fontWeight: 500,
-  },
+const SearchLoadingIndicator = styled(CircularProgress)(({ theme }) => ({
+  color: theme.palette.grey[500],
+  size: 20,
 }));
+
+
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -105,82 +129,284 @@ const Navbar = () => {
   const [location, setLocation] = useState(null);
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
   const [userName, setUserName] = useState('');
+  const [subServices, setSubServices] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchValue, setSearchValue] = useState(null);
+  const [inputValue, setInputValue] = useState('');
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [filteredServices, setFilteredServices] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.pageYOffset > 0);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  // Load user data and location
-  useEffect(() => {
-    const storedUserName = localStorage.getItem('userName');
-    if (storedUserName) {
-      setUserName(storedUserName);
-    }
-
-    const userLocation = localStorage.getItem('userLocation');
-    if (userLocation) {
-      try {
-        const parsedLocation = JSON.parse(userLocation);
-        setLocation(parsedLocation);
-      } catch (error) {
-        console.error('Error parsing location:', error);
+  // Fetch subservices from the backend
+  const fetchSubServices = async (searchTerm = '') => {
+    try {
+      setIsSearching(true);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const response = await fetch('http://127.0.0.1:8000/sub_services/listAll/');
+      const data = await response.json();
+      
+      if (data.status && data.data.results) {
+        if (searchTerm) {
+          const filtered = data.data.results.filter(service => 
+            service.name.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          setFilteredServices(filtered);
+        } else {
+          setFilteredServices([]);
+        }
       }
+    } catch (error) {
+      console.error('Error fetching subservices:', error);
+      setFilteredServices([]);
+    } finally {
+      setIsSearching(false);
     }
+  };
+
+  // Debounced search handler
+  const handleSearchInput = (event, newInputValue) => {
+    setInputValue(newInputValue);
+    
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+  
+    // Set new timeout for search
+    const newTimeout = setTimeout(() => {
+      fetchSubServices(newInputValue);
+    }, 300); // 300ms delay
+  
+    setSearchTimeout(newTimeout);
+  };
+
+  useEffect(() => {
+    fetchSubServices();
   }, []);
+
+  // Existing useEffects remain the same...
+
+  useEffect(() => {
+        const handleScroll = () => {
+          setIsScrolled(window.pageYOffset > 0);
+        };
+    
+        window.addEventListener('scroll', handleScroll);
+        return () => {
+          window.removeEventListener('scroll', handleScroll);
+        };
+      }, []);
+    
+      // Load user data and location
+      useEffect(() => {
+        const storedUserName = localStorage.getItem('userName');
+        if (storedUserName) {
+          setUserName(storedUserName);
+        }
+    
+        const userLocation = localStorage.getItem('userLocation');
+        if (userLocation) {
+          try {
+            const parsedLocation = JSON.parse(userLocation);
+            setLocation(parsedLocation);
+          } catch (error) {
+            console.error('Error parsing location:', error);
+          }
+        }
+      }, []);
+
+
+  // (scroll handler, user data loading, etc.)
 
   const formatAddress = (address) => {
-    if (!address) return '';
-    const parts = address.split(',');
-    return parts.slice(0, 2).join(',');
+        if (!address) return '';
+        const parts = address.split(',');
+        return parts.slice(0, 2).join(',');
+      };
+    
+      const { 
+        isAuthModalOpen, 
+        handleCloseAuthModal, 
+        handleOpenAuthModal, 
+        isLoggedIn,
+        handleLogout,
+      } = useWelcomeViewContext();
+    
+      const handleProfileClick = (event) => {
+        setAnchorEl(event.currentTarget);
+      };
+    
+      const handleMenuClose = () => {
+        setAnchorEl(null);
+      };
+    
+      const handleLocationClick = (event) => {
+        setLocationAnchorEl(event.currentTarget);
+      };
+    
+      const handleLocationMenuClose = () => {
+        setLocationAnchorEl(null);
+      };
+
+  const handleSearchChange = (event, newValue) => {
+    setSearchValue(newValue);
+    // You can handle the selected service here
+    if (newValue) {
+      console.log('Selected service:', newValue);
+      navigate(`/service/${newValue.main_service}`);
+      // Add your logic for handling the selected service
+    }
   };
 
-  const { 
-    isAuthModalOpen, 
-    handleCloseAuthModal, 
-    handleOpenAuthModal, 
-    isLoggedIn,
-    handleLogout,
-  } = useWelcomeViewContext();
-
-  const handleProfileClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLocationClick = (event) => {
-    setLocationAnchorEl(event.currentTarget);
-  };
-
-  const handleLocationMenuClose = () => {
-    setLocationAnchorEl(null);
-  };
+  // Replace the SearchTextField in the Toolbar with this new Autocomplete
+  const searchComponent = (
+    <StyledAutocomplete
+      value={searchValue}
+      onChange={handleSearchChange}
+      inputValue={inputValue}
+      onInputChange={handleSearchInput}
+      options={filteredServices}
+      getOptionLabel={(option) => option.name || ''}
+      loading={isSearching}
+      loadingText="Searching..."
+      noOptionsText="No services found"
+      ListboxProps={{
+        sx: {
+          maxHeight: '400px', // Adjust maximum height of the dropdown
+          '& .MuiAutocomplete-listbox': {
+            padding: 0,
+          }
+        }
+      }}
+      renderInput={(params) => (
+        <Box ref={params.InputProps.ref} sx={{ display: 'flex', alignItems: 'center' }}>
+          <SearchIcon sx={{ color: 'grey.500', ml: 2, position: 'absolute', zIndex: 1 }} />
+          <Box 
+            component="input"
+            {...params.inputProps}
+            sx={{
+              width: '100%',
+              height: '40px',
+              pl: 5,
+              pr: 2,
+              border: 'none',
+              outline: 'none',
+              borderRadius: '8px',
+              backgroundColor: 'transparent',
+              fontSize: '0.875rem',
+              '&::placeholder': {
+                color: 'grey.500',
+              },
+            }}
+            placeholder="Search for services..."
+          />
+          {isSearching ? (
+            <SearchLoadingIndicator size={20} sx={{ mr: 2, position: 'absolute', right: 8 }} />
+          ) : inputValue ? (
+            <IconButton
+              size="small"
+              onClick={() => {
+                setInputValue('');
+                setFilteredServices([]);
+              }}
+              sx={{ 
+                mr: 1,
+                p: 0.5,
+                '&:hover': {
+                  backgroundColor: alpha('#000', 0.04),
+                }
+              }}
+            >
+              <ClearIcon sx={{ fontSize: 18, color: 'grey.500' }} />
+            </IconButton>
+          ) : null}
+        </Box>
+      )}
+      renderOption={(props, option) => (
+        <MenuItem 
+          {...props}
+          sx={{
+            py: 1.5,
+            px: 2,
+            minHeight: 'auto',
+            width: '100%',
+            whiteSpace: 'normal', // Allow text to wrap
+            '&:hover': {
+              backgroundColor: alpha('#000', 0.04),
+            }
+          }}
+        >
+          <Box sx={{ 
+            width: '100%',
+            minWidth: 0, // Enables text truncation
+          }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                fontWeight: 500,
+                wordWrap: 'break-word', // Enable word wrapping
+                overflowWrap: 'break-word',
+              }}
+            >
+              {option.name}
+            </Typography>
+            {option.description && (
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: 'grey.600',
+                  display: 'block',
+                  mt: 0.5,
+                  wordWrap: 'break-word', // Enable word wrapping
+                  overflowWrap: 'break-word',
+                }}
+              >
+                {option.description}
+              </Typography>
+            )}
+          </Box>
+        </MenuItem>
+      )}
+      PaperProps={{
+        sx: {
+          mt: 1,
+          borderRadius: '8px',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+          width: '600px', // Set a fixed width for the dropdown
+          maxWidth: '80vw', // Prevent overflow on smaller screens
+          '& .MuiAutocomplete-listbox': {
+            padding: 0,
+            maxHeight: '400px',
+            width: '100%',
+          }
+        }
+      }}
+      PopperProps={{
+        placement: 'bottom-start',
+        sx: {
+          width: '600px !important', // Force popper to be wider
+          maxWidth: '80vw !important',
+        }
+      }}
+    />
+);
 
   return (
     <>
-      <StyledAppBar 
-        position="sticky" 
-        isscrolled={isScrolled.toString()}
-        elevation={0}
-      >
+      <StyledAppBar position="sticky" isscrolled={isScrolled.toString()} elevation={0}>
         <Toolbar sx={{ py: 1.5, gap: 2 }}>
-        <LogoContainer>
+          {/* Logo section remains the same */}
+          <LogoContainer>
             <LogoText variant="h1">
               <HandymanIcon className="icon" />
               FixNGo
             </LogoText>
           </LogoContainer>
 
-
+          {/* Location chip remains the same */}
           {location && (
             <Tooltip title="Click to view full address" arrow placement="bottom">
               <LocationChip
@@ -192,18 +418,14 @@ const Navbar = () => {
             </Tooltip>
           )}
 
+          {/* Replace the existing search field with the new searchComponent */}
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-            <SearchTextField
-              size="small"
-              placeholder="Search for services..."
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: 'grey.500', mr: 1 }} />,
-              }}
-            />
+            {searchComponent}
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {isLoggedIn ? (
+          {/* Rest of the Navbar remains the same */}
+           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+             {isLoggedIn ? (
               <>
                 <IconButton color="primary" sx={{ backgroundColor: alpha('#000', 0.04) }}>
                   <ShoppingCartIcon />
@@ -274,6 +496,7 @@ const Navbar = () => {
         </Toolbar>
       </StyledAppBar>
 
+      {/* Existing menus and modals remain the same */}
       <Menu
         anchorEl={locationAnchorEl}
         open={Boolean(locationAnchorEl)}
