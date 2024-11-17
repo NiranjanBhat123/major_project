@@ -9,18 +9,23 @@ import {
   TextField,
   Avatar,
   Menu,
-  MenuItem
+  MenuItem,
+  Tooltip,
+  Fade,
+  Chip
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonIcon from '@mui/icons-material/Person';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AuthModal from './AuthModal';
-
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [location, setLocation] = useState(null);
+  const [locationAnchorEl, setLocationAnchorEl] = useState(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,6 +37,26 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
+  // Load and format location data
+  useEffect(() => {
+    const userLocation = localStorage.getItem('userLocation');
+    if (userLocation) {
+      try {
+        const parsedLocation = JSON.parse(userLocation);
+        setLocation(parsedLocation);
+      } catch (error) {
+        console.error('Error parsing location:', error);
+      }
+    }
+  }, []);
+
+  const formatAddress = (address) => {
+    if (!address) return '';
+    const parts = address.split(',');
+    // Return first 2 parts of the address for compact display
+    return parts.slice(0, 2).join(',');
+  };
 
   const { 
     isAuthModalOpen, 
@@ -49,14 +74,74 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
+  const handleLocationClick = (event) => {
+    setLocationAnchorEl(event.currentTarget);
+  };
+
+  const handleLocationMenuClose = () => {
+    setLocationAnchorEl(null);
+  };
+
   return (
     <>
       <AppBar position={isScrolled ? 'fixed' : 'static'} color="primary" elevation={isScrolled ? 4 : 0}>
         <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          <Typography variant="h6" sx={{ flexGrow: 0 }}>
             FixNGo
           </Typography>
-          <Box display="flex" alignItems="center">
+
+          {isLoggedIn && location && (
+            <Box sx={{ flexGrow: 0, ml: 3, display: 'flex', alignItems: 'center' }}>
+              <Tooltip 
+                title="Click to view full address"
+                arrow
+                placement="bottom"
+              >
+                <Chip
+                  icon={<LocationOnIcon />}
+                  label={formatAddress(location.address)}
+                  onClick={handleLocationClick}
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    color: 'white',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    },
+                    maxWidth: '250px',
+                  }}
+                />
+              </Tooltip>
+              <Menu
+                anchorEl={locationAnchorEl}
+                open={Boolean(locationAnchorEl)}
+                onClose={handleLocationMenuClose}
+                TransitionComponent={Fade}
+                PaperProps={{
+                  elevation: 3,
+                  sx: {
+                    maxWidth: '400px',
+                    padding: '16px',
+                  },
+                }}
+              >
+                <Box sx={{ p: 1 }}>
+                  <Typography variant="subtitle2" color="primary" gutterBottom>
+                    Current Location
+                  </Typography>
+                  <Typography variant="body2">
+                    {location?.address}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                    Last updated: {new Date(location?.timestamp).toLocaleString()}
+                  </Typography>
+                </Box>
+              </Menu>
+            </Box>
+          )}
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          <Box display="flex" alignItems="center" gap={2}>
             <TextField
               variant="outlined"
               size="small"
@@ -71,7 +156,6 @@ const Navbar = () => {
               sx={{
                 backgroundColor: (theme) => theme.palette.background.default,
                 borderRadius: 1,
-                marginRight: 2,
               }}
             />
             {isLoggedIn ? (
@@ -107,13 +191,7 @@ const Navbar = () => {
                   <MenuItem>Profile</MenuItem>
                   <MenuItem>My Orders</MenuItem>
                   <MenuItem>Settings</MenuItem>
-                  <MenuItem 
-                  onClick={() => {
-                    localStorage.removeItem('accessToken');
-                    localStorage.removeItem('refreshToken');
-                    handleLogout();
-                    }}
-                  >Logout</MenuItem>
+                  <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 </Menu>
               </>
             ) : (

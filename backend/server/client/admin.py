@@ -1,41 +1,29 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
-from django.utils.html import format_html
-from django.contrib.admin import SimpleListFilter
 from .models import Client
-
-class StateFilter(SimpleListFilter):
-    title = _('State')
-    parameter_name = 'state'
-
-    def lookups(self, request, model_admin):
-        states = Client.objects.values_list('state', flat=True).distinct().order_by('state')
-        return [(state, state) for state in states]
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(state=self.value())
-        return queryset
+from django.contrib.auth.hashers import make_password
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-    list_display = [
-        'id',
+    list_display = (
         'name',
         'email',
         'mobile_number',
-        'location_display',
-        'address_display',
-        'created_at'
-    ]
-    
-    list_filter = [
-        StateFilter,
         'city',
-        'created_at'
-    ]
+        'state',
+        'postal_code',
+        'created_at',
+        'updated_at'
+    )
     
-    search_fields = [
+    list_filter = (
+        'city',
+        'state',
+        'created_at',
+        'updated_at'
+    )
+    
+    search_fields = (
         'name',
         'email',
         'mobile_number',
@@ -43,93 +31,66 @@ class ClientAdmin(admin.ModelAdmin):
         'city',
         'state',
         'postal_code'
-    ]
+    )
     
-    readonly_fields = [
+    readonly_fields = (
         'id',
         'created_at',
         'updated_at',
-        'map_preview'
-    ]
+    )
     
     fieldsets = (
-        (_('Basic Information'), {
-            'fields': (
-                'id',
-                'name',
-                'email',
-                ('password', 'mobile_number')
-            )
+        (_('Personal Information'), {
+            'fields': ('id', 'name', 'email', 'mobile_number')
         }),
         (_('Address Information'), {
             'fields': (
                 'street_address',
-                ('city', 'state'),
+                'city',
+                'state',
                 'postal_code',
-                ('latitude', 'longitude'),
-                'map_preview'
+                'latitude',
+                'longitude'
             )
         }),
-        (_('System Information'), {
-            'fields': (
-                'created_at',
-                'updated_at'
-            ),
+        (_('Security'), {
+            'fields': ('password',),
+        }),
+        (_('Timestamps'), {
+            'fields': ('created_at', 'updated_at'),
             'classes': ('collapse',)
         })
     )
     
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        if obj:  # If editing existing object
-            form.base_fields['password'].required = False
-        return form
-    
-    def location_display(self, obj):
-        return format_html(
-            '<span title="Lat: {}, Long: {}">📍 View Location</span>',
-            obj.latitude,
-            obj.longitude
-        )
-    location_display.short_description = _('Location')
-    
-    def address_display(self, obj):
-        return format_html(
-            '<div style="max-width: 300px; white-space: normal;">{}</div>',
-            obj.get_full_address()
-        )
-    address_display.short_description = _('Address')
-    
-    def map_preview(self, obj):
-        if obj and obj.latitude and obj.longitude:
-            return format_html(
-                '''
-                <div style="margin-top: 10px;">
-                    <a href="https://www.openstreetmap.org/?mlat={}&mlon={}&zoom=15" 
-                       target="_blank" 
-                       class="button" 
-                       style="padding: 5px 10px; background-color: #447e9b; color: white; 
-                              text-decoration: none; border-radius: 4px;">
-                        🗺️ View on Map
-                    </a>
-                </div>
-                ''',
-                obj.latitude,
-                obj.longitude
-            )
-        return _("Location coordinates not set")
-    map_preview.short_description = _('Map Preview')
+    ordering = ('-created_at',)
+    list_per_page = 25
+    date_hierarchy = 'created_at'
 
     def save_model(self, request, obj, form, change):
-        """Only hash password if it's been changed"""
-        if form.cleaned_data.get('password') == '':
-            # If password field is empty in admin form, use existing password
-            if obj.pk:
-                orig_obj = Client.objects.get(pk=obj.pk)
-                obj.password = orig_obj.password
+        """
+        Override save_model to handle password hashing when saving from admin
+        """
+        if 'password' in form.changed_data:  # Only hash if password has changed
+            obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
-        
-    class Media:
-        css = {
-            'all': ('admin/css/custom.css',)
-        }
+
+    def get_readonly_fields(self, request, obj=None):
+        """
+        Make certain fields readonly only when editing existing objects
+        """
+        if obj:  # editing an existing object
+            return self.readonly_fields + ('password',)
+        return self.readonly_fields
+    
+    def get_fieldsets(self, request, obj=None):
+        """
+        Customize fieldsets based on whether adding or editing
+        """
+        fieldsets = super().get_fieldsets(request, obj)
+        if not obj:  # Adding new client
+            # Remove 'id' from personal information fieldset for new clients
+            personal_info = list(fieldsets[0][1]['fields'])
+            if 'id' in personal_info:
+                personal_info.remove('id')
+            fieldsets[0][1]['fields'] = tuple(personal_info)
+        return fieldsets
