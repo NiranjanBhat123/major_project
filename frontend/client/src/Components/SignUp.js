@@ -106,7 +106,7 @@ const SignUp = () => {
       if (formData.mobile_number.length !== 10) {
         validationErrors.mobile_number = 'Please enter a valid 10-digit mobile number';
       }
-      if(formData.postal_code.length !=6 ){
+      if(formData.postal_code.length !==6 ){
         validationErrors.postal_code = 'Please enter a valid 6-digit postal code';
       }
       
