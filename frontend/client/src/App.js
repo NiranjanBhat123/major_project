@@ -1,15 +1,18 @@
-// src/App.js
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import WelcomeViewContextProvider from "./Contexts/WelcomeViewContextProvider";
 import HomePage from "./Components/HomePage";
 
 
 const App = () => (
-  <div>
+  <BrowserRouter>
     <WelcomeViewContextProvider>
-    <HomePage/>
+          <Routes>
+            
+            <Route path="/" element={<HomePage />} />
+          </Routes>
     </WelcomeViewContextProvider>
-  </div>
+  </BrowserRouter>
 );
 
 export default App;
