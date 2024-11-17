@@ -123,17 +123,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # settings.py
 
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'server.pagination.CustomPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-    'EXCEPTION_HANDLER': 'server.exceptions.custom_exception_handler'
+    )
 }
+
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=180),

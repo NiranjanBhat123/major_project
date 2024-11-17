@@ -1,18 +1,18 @@
-// src/App.js
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import WelcomeViewContextProvider from "./Contexts/WelcomeViewContextProvider";
-import Navbar from './Components/Navbar';
-import HomePageBody from './Components/HomePageBody';
-import FooterComponent from './Components/Footer';
+import HomePage from "./Components/HomePage";
+
 
 const App = () => (
-  <div>
+  <BrowserRouter>
     <WelcomeViewContextProvider>
-    <Navbar />
-    <HomePageBody />
-    <FooterComponent />
+          <Routes>
+            
+            <Route path="/" element={<HomePage />} />
+          </Routes>
     </WelcomeViewContextProvider>
-  </div>
+  </BrowserRouter>
 );
 
 export default App;
