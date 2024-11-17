@@ -6,8 +6,8 @@ from .models import Orders, OrderItems, OrderStatusHistory
 class OrderItemsInline(admin.TabularInline):
     model = OrderItems
     extra = 1
-    readonly_fields = ['id']
-    raw_id_fields = ['provider_service']
+    readonly_fields = ('id',)
+    raw_id_fields = ('provider_service',)
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "provider_service" and request.resolver_match.kwargs.get('object_id'):
@@ -18,7 +18,7 @@ class OrderItemsInline(admin.TabularInline):
 class OrderStatusHistoryInline(admin.TabularInline):
     model = OrderStatusHistory
     extra = 0
-    readonly_fields = ['id', 'changed_on']
+    readonly_fields = ('id', 'changed_on')
     can_delete = False
     
     def has_add_permission(self, request, obj=None):
@@ -26,7 +26,7 @@ class OrderStatusHistoryInline(admin.TabularInline):
 
 @admin.register(Orders)
 class OrdersAdmin(admin.ModelAdmin):
-    list_display = [
+    list_display = (
         'id', 
         'user', 
         'provider', 
@@ -35,23 +35,23 @@ class OrdersAdmin(admin.ModelAdmin):
         'status', 
         'total_price',
         'rating_display'
-    ]
-    list_filter = [
+    )
+    list_filter = (
         'status', 
         'service', 
         'scheduled_on',
         'provider__main_service',
         ('rating', admin.EmptyFieldListFilter),
-    ]
-    search_fields = [
+    )
+    search_fields = (
         'id', 
         'user__name', 
         'provider__first_name', 
         'provider__last_name',
         'service__name'
-    ]
-    readonly_fields = ['id', 'ordered_on']
-    raw_id_fields = ['user', 'provider', 'service']
+    )
+    readonly_fields = ('id', 'ordered_on')
+    raw_id_fields = ('user', 'provider', 'service')
     inlines = [OrderItemsInline, OrderStatusHistoryInline]
     fieldsets = (
         (_('Basic Information'), {
@@ -105,17 +105,17 @@ class OrdersAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItems)
 class OrderItemsAdmin(admin.ModelAdmin):
-    list_display = ['id', 'order', 'get_provider_service']
-    list_filter = ['order__status', 'provider_service__sub_service__main_service']
-    search_fields = [
+    list_display = ('id', 'order', 'get_provider_service')
+    list_filter = ('order__status', 'provider_service__sub_service__main_service')
+    search_fields = (
         'id', 
         'order__id', 
         'provider_service__sub_service__name',
         'provider_service__provider__first_name',
         'provider_service__provider__last_name'
-    ]
-    readonly_fields = ['id']
-    raw_id_fields = ['order', 'provider_service']
+    )
+    readonly_fields = ('id',)
+    raw_id_fields = ('order', 'provider_service')
 
     def get_provider_service(self, obj):
         return f"{obj.provider_service.sub_service.name} by {obj.provider_service.provider.full_name}"
@@ -134,11 +134,11 @@ class OrderItemsAdmin(admin.ModelAdmin):
 
 @admin.register(OrderStatusHistory)
 class OrderStatusHistoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'order', 'status', 'changed_on']
-    list_filter = ['status', 'changed_on']
-    search_fields = ['order__id']
-    readonly_fields = ['id', 'changed_on']
-    raw_id_fields = ['order']
+    list_display = ('id', 'order', 'status', 'changed_on')
+    list_filter = ('status', 'changed_on')
+    search_fields = ('order__id',)
+    readonly_fields = ('id', 'changed_on')
+    raw_id_fields = ('order',)
     
     def has_add_permission(self, request):
         return False

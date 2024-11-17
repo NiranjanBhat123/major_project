@@ -28,6 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('client/', include('client.urls')), 
     path('services/', include('service.urls')),
+    path('orders/',include('orders.urls')),
     path('service_providers/',include('service_provider.urls')),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
