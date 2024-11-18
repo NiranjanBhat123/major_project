@@ -1,16 +1,34 @@
-import React, { useState } from 'react';
-import { Box, Typography, Menu, MenuItem } from "@mui/material";
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Menu, MenuItem, Avatar, Tooltip, IconButton, Divider, ListItemIcon } from "@mui/material";
+import { AccountCircle, EventNote, Logout } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const MainPage = () => {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [userName, setUserName] = useState('');
+  const open = Boolean(anchorEl);
 
-  const handleProfileClick = (event) => {
+  useEffect(() => {
+    const name = localStorage.getItem('providerName');
+    if(name) setUserName(name);
+  }, []);
+
+  const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleMenuClose = () => {
+  const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('providerId');
+    localStorage.removeItem('providerName');
+    localStorage.removeItem('providerEmail');
+    navigate('/');
   };
 
   return (
@@ -62,55 +80,92 @@ const MainPage = () => {
             <Box sx={{
               display: 'flex',
               alignItems: 'center',
-              justify: 'space-between',
-              gap: '4px',
-              boxSizing: 'border-box',
+              gap: 1,
             }}>
               <Typography
-                variant="body1"
                 sx={{
                   color: 'text.muted',
                   fontSize: '1.2rem',
                 }}
               >
-                Hi, Srinidhi V
+                Hi, {userName}
               </Typography>
-              <AccountCircleIcon
-                onClick={handleProfileClick}
-                sx={{
-                  fontSize: 30,
-                  color: 'text.muted',
-                  mb: 0.25,
-                  cursor: 'pointer',
-                  // '&:hover': {
-                  //   transform: 'scale(1.1)',
-                  // },
-                }}
-              />
-
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                onClick={handleMenuClose}
-                PaperProps={{
-                  elevation: 0,
-                  sx: {
-                    overflow: 'visible',
-                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-                    mt: 1.5,
-                  },
-                }}
-                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-              >
-                <MenuItem>Profile</MenuItem>
-                <MenuItem>Orders</MenuItem>
-                <MenuItem>Logout</MenuItem>
-              </Menu>
+              <Tooltip title="Account settings">
+                <IconButton
+                  onClick={handleClick}
+                  size="small"
+                  aria-controls={open ? 'account-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={open ? 'true' : undefined}
+                >
+                  <Avatar 
+                    sx={{ 
+                      width: 32, 
+                      height: 32,
+                      bgcolor: 'secondary.main',
+                      color: 'background.paper',
+                    }}
+                  >
+                    {userName.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+              </Tooltip>
             </Box>
           </Box>
         </Box>
+
+        <Menu
+          anchorEl={anchorEl}
+          id="account-menu"
+          open={open}
+          onClose={handleClose}
+          onClick={handleClose}
+          slotProps={{
+            paper: {
+              elevation: 0,
+              sx: {
+                overflow: 'visible',
+                filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                mt: 1.5,
+                bgcolor: 'background.paper',
+                '&::before': {
+                  content: '""',
+                  display: 'block',
+                  position: 'absolute',
+                  top: 0,
+                  right: 14,
+                  width: 10,
+                  height: 10,
+                  bgcolor: 'background.paper',
+                  transform: 'translateY(-50%) rotate(45deg)',
+                  zIndex: 0,
+                },
+              },
+            },
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        >
+          <MenuItem>
+            <ListItemIcon>
+              <AccountCircle fontSize="small" sx={{ color: 'text.muted' }} />
+            </ListItemIcon>
+            Profile
+          </MenuItem>
+          <MenuItem>
+            <ListItemIcon>
+              <EventNote fontSize="small" sx={{ color: 'text.muted' }} />
+            </ListItemIcon>
+            Orders
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={handleLogout}>
+            <ListItemIcon>
+              <Logout fontSize="small" sx={{ color: 'text.muted' }} />
+            </ListItemIcon>
+            Logout
+          </MenuItem>
+        </Menu>
       </Box>
     </>
   );

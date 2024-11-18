@@ -43,9 +43,6 @@ from .validate_service_provider import FaceMatcher
 # Database
 from django.db import transaction
 
-
-
-
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
 @permission_classes([AllowAny])
@@ -75,12 +72,8 @@ def verify_faces(request):
                 destination.write(chunk)
                 
         result = matcher.verify_faces(img1_path, img2_path)
-        print(result)
         os.remove(os.path.join(images_dir, image1.name))
         os.remove(os.path.join(images_dir, image2.name))
-
-
-
 
     except Exception as e:
         return Response({"success": False, "error": str(e)}, status=400)
@@ -269,6 +262,7 @@ class SignupView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        # print(request.data)
         serializer = ServiceProviderCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             provider = serializer.save()

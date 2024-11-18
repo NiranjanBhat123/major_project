@@ -1,24 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, Button, CircularProgress, Typography, Alert } from '@mui/material';
-import { Camera, Cameraswitch } from '@mui/icons-material';
+import React, {useState, useRef, useEffect} from 'react';
+import {Box, Button, CircularProgress, Typography, Alert} from '@mui/material';
+import {Camera, Cameraswitch} from '@mui/icons-material';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import axios from 'axios';
 
-const PhotoMatching = ({ formData, setCurrentStep }) => {
+const PhotoMatching = (
+  {formData, setCurrentStep, handleFinalSubmit, isSubmitting, error, setError}
+) => {
   const [cameraStream, setCameraStream] = useState(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [capturedPhoto, setCapturedPhoto] = useState(null);
   const [verificationResult, setVerificationResult] = useState(null);
-  const navigate = useNavigate();
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   useEffect(() => {
     return () => {
-      // Cleanup: stop camera stream when component unmounts
-      if (cameraStream) {
+      if(cameraStream) {
         cameraStream.getTracks().forEach(track => track.stop());
       }
     };
@@ -27,7 +26,7 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
   const startCamera = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'user' }
+        video: {facingMode: 'user'}
       });
       videoRef.current.srcObject = stream;
       setCameraStream(stream);
@@ -55,7 +54,7 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
     setCapturedPhoto(photoData);
 
     // Stop the camera stream
-    if (cameraStream) {
+    if(cameraStream) {
       cameraStream.getTracks().forEach(track => track.stop());
       setCameraStream(null);
     }
@@ -76,22 +75,20 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
     while (n--) {
       u8arr[n] = bstr.charCodeAt(n);
     }
-    return new Blob([u8arr], { type: mime });
+    return new Blob([u8arr], {type: mime});
   };
 
   const handleVerify = async () => {
     setIsVerifying(true);
-    
+
     try {
-      // Create form data
       const formDataToSend = new FormData();
-      
+
       // Convert captured photo data URL to blob and append
       const capturedPhotoBlob = dataURLtoBlob(capturedPhoto);
       formDataToSend.append('image1', formData.photo);
       formDataToSend.append('image2', capturedPhotoBlob);
 
-      // Make API call using axios
       const response = await axios.post(
         'http://127.0.0.1:8000/service_providers/verify/',
         formDataToSend,
@@ -101,16 +98,16 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
           }
         }
       );
-      
+
       setVerificationResult(response.data);
-    } 
+    }
     catch(error) {
       console.error('Verification error:', error);
       setVerificationResult({
         success: false,
         error: 'Failed to verify photos. Please try again.'
       });
-    } 
+    }
     finally {
       setIsVerifying(false);
     }
@@ -118,7 +115,6 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
 
   const getAlertContent = () => {
     if(!verificationResult) return null;
-    
     if(!verificationResult.success) {
       return {
         severity: 'error',
@@ -127,7 +123,7 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
     }
 
     return {
-      severity: verificationResult.matched? 'success': 'error',
+      severity: verificationResult.matched ? 'success' : 'error',
       message: verificationResult.matched ? 'Photos matched!' : 'Photos did not match.'
     };
   };
@@ -137,25 +133,25 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
       return {
         onClick: startCamera,
         children: 'Allow Camera Access',
-        startIcon: <Camera />
+        startIcon: <Camera/>
       };
     }
     if(cameraStream && !capturedPhoto) {
       return {
         onClick: capturePhoto,
         children: 'Capture Photo',
-        startIcon: <Camera />
+        startIcon: <Camera/>
       };
     }
     return {
       onClick: retakePhoto,
       children: 'Retake Photo',
-      startIcon: <Cameraswitch />
+      startIcon: <Cameraswitch/>
     };
   };
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{width: '100%'}}>
       <Typography
         variant="h5"
         sx={{
@@ -202,7 +198,7 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
           borderColor: 'divider',
           borderRadius: 1,
           overflow: 'hidden',
-          aspectRatio: capturedPhoto? '4/3': '16/9',
+          aspectRatio: capturedPhoto ? '4/3' : '16/9',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -240,8 +236,8 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
 
       {/* Verification Alert */}
       {verificationResult && (
-        <Box sx={{ mb: 3 }}>
-          <Alert 
+        <Box sx={{mb: 3}}>
+          <Alert
             severity={getAlertContent().severity}
             onClose={() => setVerificationResult(null)}
           >
@@ -250,7 +246,7 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
         </Box>
       )}
 
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <canvas ref={canvasRef} style={{display: 'none'}}/>
 
       <Box sx={{
         display: 'flex',
@@ -271,20 +267,34 @@ const PhotoMatching = ({ formData, setCurrentStep }) => {
         <Button
           variant="contained"
           color="success"
-          onClick={verificationResult?.matched? (() => navigate("/main")): handleVerify}
-          disabled={!capturedPhoto || isVerifying}
-          sx={{ minWidth: 120 }}
+          onClick={verificationResult?.matched ? handleFinalSubmit : handleVerify}
+          disabled={!capturedPhoto || isVerifying || isSubmitting}
+          sx={{minWidth: 120}}
         >
           {isVerifying ? (
             <>
-              <CircularProgress size={24} color="inherit" />
-              <Typography ml={1}>Verifying</Typography>
+              <CircularProgress size={24} color="inherit"/>
+              <Typography ml={1}>verifying...</Typography>
+            </>
+          ) : isSubmitting ? (
+            <>
+              <CircularProgress size={24} color="inherit"/>
+              <Typography ml={1}>registering...</Typography>
             </>
           ) : (
-            verificationResult?.matched? 'Next': 'Verify'
+            verificationResult?.matched ? 'Register' : 'Verify'
           )}
         </Button>
       </Box>
+      {error && (
+        <Alert
+          severity="error"
+          sx={{mt: 2}}
+          onClose={() => setError(null)}
+        >
+          {error}
+        </Alert>
+      )}
     </Box>
   );
 };

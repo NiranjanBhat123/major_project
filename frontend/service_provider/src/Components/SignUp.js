@@ -6,7 +6,6 @@ import CloseIcon from '@mui/icons-material/Close';
 const SignUp = () => {
   const { setEmpty, showOTP, showLogin, signUpEmail, updateSignUpEmail } = useWelcomeViewContext();
   const [emailError, setEmailError] = useState('');
-  const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
 
   const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
 
@@ -20,20 +19,6 @@ const SignUp = () => {
     const newEmail = event.target.value;
     setEmailError(validateEmail(newEmail));
     updateSignUpEmail(newEmail);
-  };
-
-  const handleSendOTP = () => {
-    const error = validateEmail(signUpEmail);
-    if(error) {
-      setEmailError(error);
-      setAlert({
-        show: true,
-        message: error,
-        type: 'error'
-      });
-      return;
-    }
-    showOTP();
   };
 
   return (
@@ -79,16 +64,6 @@ const SignUp = () => {
         Sign Up
       </Typography>
 
-      {alert.show && (
-        <Alert
-          severity={alert.type}
-          sx={{ mb: 1, width: '100%', maxWidth: '400px' }}
-          onClose={() => setAlert({ ...alert, show: false })}
-        >
-          {alert.message}
-        </Alert>
-      )}
-
       <Box sx={{ width: '100%', maxWidth: '400px' }}>
         <TextField
           label="Email Address"
@@ -102,7 +77,7 @@ const SignUp = () => {
         <Button
           fullWidth
           variant="contained"
-          onClick={handleSendOTP}
+          onClick={() => showOTP()}
           disabled={!!emailError || !signUpEmail}
           sx={{
             mb: 3,

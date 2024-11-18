@@ -2,6 +2,7 @@ import React from "react";
 import WelcomeViewContextProvider from "./Contexts/WelcomeViewContextProvider";
 import { Routes, Route } from "react-router-dom";
 import { Box } from "@mui/material";
+import ProtectedRoute from './Components/ProtectedRoute';
 import WelcomePage from "./Components/WelcomePage";
 import RegistrationPage from "./Components/RegistrationPage";
 import MainPage from "./Components/MainPage";
@@ -25,7 +26,11 @@ const App = () => {
         <Routes>
           <Route path="/" element={ <WelcomePage /> }/>
           <Route path="/registration" element={ <RegistrationPage /> }/>
-          <Route path="/main" element= { <MainPage /> } />
+          <Route path="/main" element= { 
+            <ProtectedRoute>
+              <MainPage /> 
+            </ProtectedRoute>
+          } />
         </Routes>
       </Box>
     </WelcomeViewContextProvider>
