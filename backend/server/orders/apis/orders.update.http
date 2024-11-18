@@ -1,0 +1,4 @@
+PATCH /api/orders/<order_uuid>/update_status/
+{
+    "status": "completed"
+}

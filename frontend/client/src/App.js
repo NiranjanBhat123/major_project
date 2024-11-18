@@ -1,18 +1,18 @@
-// src/App.js
 import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import WelcomeViewContextProvider from "./Contexts/WelcomeViewContextProvider";
-import Navbar from './Components/Navbar';
-import HomePageBody from './Components/HomePageBody';
-import FooterComponent from './Components/Footer';
+import HomePage from "./Components/HomePage";
+import ServiceDetail from './pages/ServiceDetail.js';
 
 const App = () => (
-  <div>
+  <BrowserRouter>
     <WelcomeViewContextProvider>
-    <Navbar />
-    <HomePageBody />
-    <FooterComponent />
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/service/:serviceId" element={<ServiceDetail />} />
+          </Routes>
     </WelcomeViewContextProvider>
-  </div>
+  </BrowserRouter>
 );
 
 export default App;

@@ -4,10 +4,20 @@ import emailjs from 'emailjs-com';
 import { Typography, Button, Box, TextField, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { requestAndStoreLocation } from '../utils/locationhandler.js';
+
 
 const VerifyOTP = () => {
-  const { setEmpty, showSignUp, signUpEmail, updateSignUpEmail } = useWelcomeViewContext();
-  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
+  const { 
+    setEmpty, 
+    showSignUp, 
+    signUpEmail,
+    signUpData,
+    updateSignUpEmail,
+    handleLogin,
+    handleCloseAuthModal 
+  } = useWelcomeViewContext();
+    const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [generatedOTP, setGeneratedOTP] = useState('');
   const [timer, setTimer] = useState(30);
   const [isResendDisabled, setIsResendDisabled] = useState(true);
@@ -111,18 +121,77 @@ const VerifyOTP = () => {
     setOtpValues(['', '', '', '', '', '']);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const enteredOTP = otpValues.join('');
 
     if(enteredOTP === generatedOTP) {
-      updateSignUpEmail("");
-      setAlert({
-        show: true,
-        message: 'OTP verified successfully!',
-        type: 'success'
-      });
-    }
-    else {
+      try {
+        // Make the signup API call with the stored signUpData
+        const response = await fetch('http://127.0.0.1:8000/client/signup/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify(signUpData)
+        });
+
+        const data = await response.json();
+        console.log(data);
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Signup failed');
+        }
+
+        // Store tokens and user info
+        if (data.tokens) {
+          localStorage.setItem('accessToken', data.tokens.access_token);
+          localStorage.setItem('refreshToken', data.tokens.refresh_token);
+        }
+        if (data.user) {
+          localStorage.setItem('userId', data.user.id);
+          localStorage.setItem('userEmail', data.user.email);
+          localStorage.setItem('userName', data.user.name);
+          
+          // Add location handling
+          const locationSuccess = await requestAndStoreLocation(
+            () => {
+              handleLogin();
+              handleCloseAuthModal();
+            },
+            (error) => {
+              console.log(error);
+            }
+          );
+          
+          if (!locationSuccess) {
+            return; // Don't proceed until location is provided
+          }
+        }
+
+        setAlert({
+          show: true,
+          message: 'Signup successful!',
+          type: 'success'
+        });
+
+        // Clean up and login
+        setTimeout(() => {
+          updateSignUpEmail("");
+          handleLogin();
+          handleCloseAuthModal();
+        }, 1500); // Give user time to see success message
+
+      } catch (error) {
+        setAlert({
+          show: true,
+          message: error.message || 'Signup failed. Please try again.',
+          type: 'error'
+        });
+        console.error('Signup error:', error);
+      }
+    } else {
       setAlert({
         show: true,
         message: 'Invalid OTP. Please try again.',
@@ -130,6 +199,7 @@ const VerifyOTP = () => {
       });
     }
   };
+
 
   // Handle paste event
   const handlePaste = (e) => {

@@ -12,6 +12,7 @@ admin.site.index_title = "Welcome to FixNGo Admin Portal"
 class ProviderServiceInline(admin.TabularInline):
     model = ProviderService
     extra = 1
+    fields = ['password']
     fields = ('sub_service', 'price')
     readonly_fields = ('created_at',)
 

@@ -1,0 +1,5 @@
+POST /api/orders/<order_uuid>/add_review/
+{
+    "review": "Great service!",
+    "rating": 5
+}

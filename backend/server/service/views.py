@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models import Count
 from server.exceptions import (
     ObjectDoesNotExist,
@@ -12,12 +13,14 @@ from .models import Service
 from sub_service.models import SubService
 from .serializers import ServiceSerializer, SubServiceSerializer
 from server.pagination import CustomPagination
+import uuid
 
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
 
     def get_queryset(self):
@@ -31,7 +34,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
         return queryset.order_by('name')
 
     def create(self, request, *args, **kwargs):
-        # Check if a service with the same name exists
         name = request.data.get('name')
         if name and Service.objects.filter(name__iexact=name).exists():
             raise IntegrityError('A service with this name already exists')
@@ -50,7 +52,6 @@ class ServiceViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         name = request.data.get('name')
         
-        # Check for existing service with same name, excluding current instance
         if name and Service.objects.filter(name__iexact=name).exclude(id=instance.id).exists():
             raise IntegrityError('A service with this name already exists')
 
@@ -67,7 +68,8 @@ class ServiceViewSet(viewsets.ModelViewSet):
 class SubServiceViewSet(viewsets.ModelViewSet):
     serializer_class = SubServiceSerializer
     pagination_class = CustomPagination
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
     lookup_field = 'id'
 
     def get_queryset(self):
@@ -84,7 +86,8 @@ class SubServiceViewSet(viewsets.ModelViewSet):
 
     def get_main_service(self):
         try:
-            return Service.objects.get(id=self.kwargs.get('service_id'))
+            service_id = self.kwargs.get('service_id')
+            return Service.objects.get(id=service_id)
         except Service.DoesNotExist:
             raise ObjectDoesNotExist('Service not found')
 
@@ -116,7 +119,6 @@ class SubServiceViewSet(viewsets.ModelViewSet):
         main_service = self.get_main_service()
         name = request.data.get('name')
         
-        # Check if a sub-service with the same name exists under the same main service
         if name and SubService.objects.filter(
             main_service=main_service,
             name__iexact=name
@@ -145,7 +147,6 @@ class SubServiceViewSet(viewsets.ModelViewSet):
         main_service = self.get_main_service()
         name = request.data.get('name')
         
-        # Check for existing sub-service with same name under the same main service, excluding current instance
         if name and SubService.objects.filter(
             main_service=main_service,
             name__iexact=name

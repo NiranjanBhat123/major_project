@@ -73,13 +73,15 @@ class Client(models.Model):
     latitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
-        help_text=_("Latitude of the client's location")
+        help_text=_("Latitude of the client's location"),
+        null=True, blank=True
         
     )
     longitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
-        help_text=_("Longitude of the client's location")
+        help_text=_("Longitude of the client's location"),
+        null=True, blank=True
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
