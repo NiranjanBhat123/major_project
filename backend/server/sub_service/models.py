@@ -3,6 +3,14 @@ from django.db import models
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
 from service.models import Service
+from django.core.exceptions import ValidationError
+
+
+def validate_image_size(value):
+    """Validate that the image size is less than 2MB."""
+    filesize = value.size
+    if filesize > 2 * 1024 * 1024:
+        raise ValidationError(_("Maximum file size allowed is 2MB"))
 
 class SubService(models.Model):
     """Sub-services available under main services"""
@@ -11,6 +19,13 @@ class SubService(models.Model):
         default=uuid.uuid4,
         editable=False,
         help_text=_("Unique identifier for the sub-service")
+    )
+    image = models.ImageField(
+        upload_to='sub_service', 
+        null=True,
+        blank=True,
+        validators=[validate_image_size],
+        help_text=_("Optional image representing the service (max 2MB)")
     )
     name = models.CharField(
         max_length=100,

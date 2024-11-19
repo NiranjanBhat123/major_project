@@ -1,0 +1,12 @@
+POST /api/orders/
+{
+    "user": "client_uuid",
+    "provider": "provider_uuid",
+    "service": "service_uuid",
+    "scheduled_on": "2024-11-18T10:00:00Z",
+    "total_price": "150.00",
+    "items": [
+        {"provider_service": "provider_service_uuid1"},
+        {"provider_service": "provider_service_uuid2"}
+    ]
+}

@@ -20,6 +20,8 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
 
 # Models
 from .models import ServiceProvider, ProviderService, SubService
@@ -31,7 +33,8 @@ from .serializers import (
     ServiceProviderCreateUpdateSerializer,
     ProviderServiceSerializer,
     ProviderServiceCreateSerializer,
-    LoginSerializer
+    LoginSerializer,
+    SimpleProviderServiceSerializer
 )
 
 # Pagination
@@ -322,3 +325,39 @@ class LoginView(APIView):
             'message': 'Login failed',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        
+class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
+    serializer_class = ProviderServiceSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        subservice_id = self.kwargs.get('subservice_id')
+        return ProviderService.objects.filter(
+            sub_service_id=subservice_id
+        ).select_related('provider')
+        
+        
+class ProviderServicesViewSet(ReadOnlyModelViewSet):
+    permission_classes = [AllowAny]
+    
+    def get_serializer_class(self):
+        # If provider_id is in query params, use simple serializer
+        if self.request.query_params.get('provider_id'):
+            return SimpleProviderServiceSerializer
+        # Otherwise use the detailed serializer
+        return ProviderServiceSerializer
+    
+    def get_queryset(self):
+        provider_id = self.request.query_params.get('provider_id')
+        subservice_id = self.kwargs.get('subservice_id')
+        
+        queryset = ProviderService.objects.select_related('provider', 'sub_service')
+        
+        if provider_id:
+            return queryset.filter(provider_id=provider_id)
+        elif subservice_id:
+            return queryset.filter(sub_service_id=subservice_id)
+            
+        return queryset.none()  # Return empty queryset if no filter provided
