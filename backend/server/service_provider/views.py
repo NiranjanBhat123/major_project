@@ -47,6 +47,27 @@ from .validate_service_provider import FaceMatcher
 from django.db import transaction
 
 
+import copy
+from math import radians, cos, sin, asin, sqrt
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees)
+    """
+    # Convert decimal degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
+
+    # Haversine formula
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat/2)**2 + cos(lat1) * cos(lat2) * sin(dlon/2)**2
+    c = 2 * asin(sqrt(a))
+    # Radius of earth in kilometers
+    r = 6371
+    return c * r
+
+
 
 
 @api_view(['POST'])
@@ -327,18 +348,6 @@ class LoginView(APIView):
         }, status=status.HTTP_400_BAD_REQUEST)
         
         
-        
-class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
-    serializer_class = ProviderServiceSerializer
-    permission_classes = [AllowAny]
-    
-    def get_queryset(self):
-        subservice_id = self.kwargs.get('subservice_id')
-        return ProviderService.objects.filter(
-            sub_service_id=subservice_id
-        ).select_related('provider')
-        
-        
 class ProviderServicesViewSet(ReadOnlyModelViewSet):
     permission_classes = [AllowAny]
     
@@ -361,3 +370,52 @@ class ProviderServicesViewSet(ReadOnlyModelViewSet):
             return queryset.filter(sub_service_id=subservice_id)
             
         return queryset.none()  # Return empty queryset if no filter provided
+
+# class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
+#     serializer_class = ProviderServiceSerializer
+#     permission_classes = [AllowAny]
+    
+#     def get_queryset(self):
+#         subservice_id = self.kwargs.get('subservice_id')
+#         return ProviderService.objects.filter(
+#             sub_service_id=subservice_id
+#         ).select_related('provider')
+
+class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
+    serializer_class = ProviderServiceSerializer
+    permission_classes = [AllowAny]
+   
+    def list(self, request, *args, **kwargs):
+        subservice_id = self.kwargs.get('subservice_id')
+        client_lat = float(self.request.query_params.get('latitude'))
+        client_lon = float(self.request.query_params.get('longitude'))
+        radius = float(self.request.query_params.get('radius', 10))  # Default 10km radius
+       
+        # Get base queryset with provider information
+        queryset = ProviderService.objects.filter(
+            sub_service_id=subservice_id
+        ).select_related('provider')
+       
+        # Calculate distances and filter
+        provider_services_with_distance = []
+        for provider_service in queryset:
+            provider = provider_service.provider
+            distance = haversine_distance(
+                client_lat, client_lon,
+                float(provider.latitude),
+                float(provider.longitude)
+            )
+            if distance <= radius:
+                # Create a new object or modify existing one to ensure distance is properly set
+                provider_service = copy.copy(provider_service)  # Create a shallow copy
+                setattr(provider_service, 'distance', round(distance, 2))  # Set distance as an attribute
+                provider_services_with_distance.append(provider_service)
+       
+        # Sort by distance
+        provider_services_with_distance.sort(key=lambda x: x.distance)
+       
+        # Serialize and return the data
+        serializer = self.get_serializer(provider_services_with_distance, many=True)
+        return Response(serializer.data)
+        
+        

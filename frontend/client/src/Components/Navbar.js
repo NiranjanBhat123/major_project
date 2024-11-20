@@ -13,7 +13,9 @@ import {
   Fade,
   Chip,
   Typography,
-  Autocomplete
+  Autocomplete,
+  InputAdornment,
+  TextField,
 } from '@mui/material';
 
 import { styled, alpha } from '@mui/material/styles';
@@ -85,10 +87,11 @@ const LocationChip = styled(Chip)(({ theme }) => ({
 // (StyledAppBar, LogoContainer, LogoText, LocationChip definitions remain unchanged)
 
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
+  width: '23rem',
   '& .MuiOutlinedInput-root': {
     backgroundColor: alpha(theme.palette.grey[100], 0.8),
     borderRadius: '8px',
-    width: '400px',
+    padding: '2px 4px',
     transition: theme.transitions.create(['background-color', 'box-shadow']),
     '& fieldset': {
       borderColor: 'transparent',
@@ -104,18 +107,13 @@ const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
       },
     },
   },
-  '& .MuiAutocomplete-endAdornment': {
-    right: '8px',
-    top: 'calc(50% - 14px)',
+  '& .MuiAutocomplete-input': {
+    padding: '7.5px 4px 7.5px 0 !important',
+    height: '25px',
+    fontSize: '0.875rem',
   },
-  '& .MuiAutocomplete-clearIndicator': {
-    color: theme.palette.grey[500],
-    '&:hover': {
-      color: theme.palette.grey[700],
-    },
-  },
-}));
 
+}));
 const SearchLoadingIndicator = styled(CircularProgress)(({ theme }) => ({
   color: theme.palette.grey[500],
   size: 20,
@@ -129,8 +127,6 @@ const Navbar = () => {
   const [location, setLocation] = useState(null);
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
   const [userName, setUserName] = useState('');
-  const [subServices, setSubServices] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [searchValue, setSearchValue] = useState(null);
   const [inputValue, setInputValue] = useState('');
   const [searchTimeout, setSearchTimeout] = useState(null);
@@ -233,6 +229,7 @@ const Navbar = () => {
         handleOpenAuthModal, 
         isLoggedIn,
         handleLogout,
+        setSelectedSubService,
       } = useWelcomeViewContext();
     
       const handleProfileClick = (event) => {
@@ -256,6 +253,7 @@ const Navbar = () => {
     // You can handle the selected service here
     if (newValue) {
       console.log('Selected service:', newValue);
+      setSelectedSubService(newValue);
       navigate(`/service/${newValue.main_service}`);
       // Add your logic for handling the selected service
     }
@@ -275,92 +273,100 @@ const Navbar = () => {
       noOptionsText="No services found"
       ListboxProps={{
         sx: {
-          maxHeight: '400px', // Adjust maximum height of the dropdown
+          maxHeight: '400px',
           '& .MuiAutocomplete-listbox': {
             padding: 0,
           }
         }
       }}
       renderInput={(params) => (
-        <Box ref={params.InputProps.ref} sx={{ display: 'flex', alignItems: 'center' }}>
-          <SearchIcon sx={{ color: 'grey.500', ml: 2, position: 'absolute', zIndex: 1 }} />
-          <Box 
-            component="input"
-            {...params.inputProps}
-            sx={{
-              width: '100%',
-              height: '40px',
-              pl: 5,
-              pr: 2,
-              border: 'none',
-              outline: 'none',
-              borderRadius: '8px',
-              backgroundColor: 'transparent',
-              fontSize: '0.875rem',
-              '&::placeholder': {
-                color: 'grey.500',
-              },
-            }}
-            placeholder="Search for services..."
-          />
-          {isSearching ? (
-            <SearchLoadingIndicator size={20} sx={{ mr: 2, position: 'absolute', right: 8 }} />
-          ) : inputValue ? (
+        <TextField
+          {...params}
+         placeholder="Search for services..."
+          InputProps={{
+            ...params.InputProps,
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'grey.500' }} />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {isSearching && (
+            <SearchLoadingIndicator size={20} sx={{ mr: 1 }} />
+          )}
+          {inputValue && (
             <IconButton
               size="small"
               onClick={() => {
                 setInputValue('');
                 setFilteredServices([]);
               }}
-              sx={{ 
-                mr: 1,
+              sx={{
                 p: 0.5,
+                position: 'absolute',  // Position absolutely
+                right: '8px',          // Place at the end
                 '&:hover': {
-                  backgroundColor: alpha('#000', 0.04),
+                  backgroundColor: 'transparent',
                 }
               }}
             >
-              <ClearIcon sx={{ fontSize: 18, color: 'grey.500' }} />
+              <ClearIcon sx={{ 
+                fontSize: 18, 
+                color: 'grey.500'
+              }} />
             </IconButton>
-          ) : null}
+          )}
         </Box>
+      ),
+    }}
+    sx={{
+      '& .MuiOutlinedInput-root': {
+        p: '2px 4px',
+        paddingRight: '36px', // Add space for the clear icon
+      },
+      '& .MuiIconButton-root': {
+        marginRight: 0,
+      }
+    }}
+  />
       )}
       renderOption={(props, option) => (
-        <MenuItem 
+        <MenuItem
           {...props}
           sx={{
             py: 1.5,
             px: 2,
             minHeight: 'auto',
             width: '100%',
-            whiteSpace: 'normal', // Allow text to wrap
+            whiteSpace: 'normal',
             '&:hover': {
               backgroundColor: alpha('#000', 0.04),
             }
           }}
         >
-          <Box sx={{ 
+          <Box sx={{
             width: '100%',
-            minWidth: 0, // Enables text truncation
+            minWidth: 0,
           }}>
-            <Typography 
-              variant="body2" 
-              sx={{ 
+            <Typography
+              variant="body2"
+              sx={{
                 fontWeight: 500,
-                wordWrap: 'break-word', // Enable word wrapping
+                wordWrap: 'break-word',
                 overflowWrap: 'break-word',
               }}
             >
               {option.name}
             </Typography>
             {option.description && (
-              <Typography 
-                variant="caption" 
-                sx={{ 
+              <Typography
+                variant="caption"
+                sx={{
                   color: 'grey.600',
                   display: 'block',
                   mt: 0.5,
-                  wordWrap: 'break-word', // Enable word wrapping
+                  wordWrap: 'break-word',
                   overflowWrap: 'break-word',
                 }}
               >
@@ -375,8 +381,8 @@ const Navbar = () => {
           mt: 1,
           borderRadius: '8px',
           boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          width: '600px', // Set a fixed width for the dropdown
-          maxWidth: '80vw', // Prevent overflow on smaller screens
+          width: '600px',
+          maxWidth: '80vw',
           '& .MuiAutocomplete-listbox': {
             padding: 0,
             maxHeight: '400px',
@@ -387,12 +393,12 @@ const Navbar = () => {
       PopperProps={{
         placement: 'bottom-start',
         sx: {
-          width: '600px !important', // Force popper to be wider
+          width: '600px !important',
           maxWidth: '80vw !important',
         }
       }}
     />
-);
+  );
 
   return (
     <>
@@ -400,7 +406,7 @@ const Navbar = () => {
         <Toolbar sx={{ py: 1.5, gap: 2 }}>
           {/* Logo section remains the same */}
           <LogoContainer>
-            <LogoText variant="h1">
+            <LogoText variant="h1" onClick={() =>{ navigate('/'); setSearchValue(null);}}>
               <HandymanIcon className="icon" />
               FixNGo
             </LogoText>
@@ -422,6 +428,7 @@ const Navbar = () => {
           <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
             {searchComponent}
           </Box>
+          
 
           {/* Rest of the Navbar remains the same */}
            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -468,7 +475,7 @@ const Navbar = () => {
                   <MenuItem sx={{ py: 1.5 }}>
                     <PersonIcon sx={{ mr: 2, color: 'grey.600' }} /> Profile
                   </MenuItem>
-                  <MenuItem sx={{ py: 1.5 }}>
+                  <MenuItem sx={{ py: 1.5 }} onClick={() => navigate('/orders')}>
                     <ReceiptIcon sx={{ mr: 2, color: 'grey.600' }} /> My Orders
                   </MenuItem>
                   <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: 'error.main' }}>

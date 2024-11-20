@@ -15,6 +15,8 @@ import {
 import { Groups as GroupsIcon, Category as CategoryIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+
 
 
 const MotionCard = motion(Card);
@@ -25,6 +27,7 @@ const MainServices = () => {
   const [error, setError] = useState(null);
   const theme = useTheme();
   const navigate = useNavigate();
+  const {setSelectedSubService} =useWelcomeViewContext();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -47,6 +50,7 @@ const MainServices = () => {
   }, []);
 
   const handleCardClick = (serviceId) => {
+    setSelectedSubService(null);
     navigate(`/service/${serviceId}`);
   };
 
