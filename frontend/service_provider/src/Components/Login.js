@@ -4,6 +4,7 @@ import { Typography, TextField, Button, Box, Link, Alert, CircularProgress } fro
 import CloseIcon from '@mui/icons-material/Close';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { requestAndStoreLocation } from "../utils/LocationHandler";
 
 const Login = () => {
   const { setEmpty, showSignUp } = useWelcomeViewContext();
@@ -57,6 +58,12 @@ const Login = () => {
         localStorage.setItem('providerId', response.data.data.provider_id);
         localStorage.setItem('providerName', response.data.data.name);
         localStorage.setItem('providerEmail', response.data.data.email);
+
+        await requestAndStoreLocation(
+          () => {}, // Success callback
+          (errorMsg) => setError(`Login successful but ${errorMsg}. You can update location later.`)
+        );
+
         navigate('/main');
       } 
       else setError(response.data.message);

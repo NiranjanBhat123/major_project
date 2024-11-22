@@ -3,21 +3,25 @@ from .models import Client
 from django.contrib.auth.hashers import make_password, check_password
 from django.core.exceptions import ValidationError
 
-
 class ClientSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=5)
+    full_address = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Client
         fields = [
-            'id', 'name', 'email', 'password', 'mobile_number', 'street_address',
-            'city', 'state', 'postal_code'
+            'id', 'name', 'email', 'mobile_number', 
+            'street_address', 'city', 'state', 'postal_code', 
+            'latitude', 'longitude', 'full_address'
         ]
-        read_only_fields = ['id']  # Make id read-only
-    
+        read_only_fields = ['id']
+
     def create(self, validated_data):
         validated_data['password'] = make_password(validated_data['password'])
         return super().create(validated_data)
+
+    def get_full_address(self, obj):
+        return obj.get_full_address()
 
     def validate_email(self, value):
         """Ensure that email is unique."""
@@ -47,7 +51,6 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, data):
         email = data.get('email')
         password = data.get('password')
-        print("Received data:", data)
 
         try:
             client = Client.objects.get(email=email)
@@ -63,3 +66,7 @@ class LoginSerializer(serializers.Serializer):
 
         data['user'] = client
         return data
+
+
+class ClientDetailSerializer(ClientSerializer):
+    pass

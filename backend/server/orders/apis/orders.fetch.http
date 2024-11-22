@@ -1,0 +1,88 @@
+### Fetch orders of a particular provider
+GET http://127.0.0.1:8000/orders/?provider_id={uuid}
+
+### Response
+[
+    {
+        "id": "2ae1c7d4-f1da-4c49-bdfe-be494e9b85b5",
+        "user": "d3e858e3-63bf-4ae3-a806-34f634c5152e",
+        "provider": "ce918ea9-f793-403f-a7e6-56e93442dd4a",
+        "service": "d61082cc-b0d8-440c-a68c-9ec7e508e02e",
+        "ordered_on": "2024-11-19T13:04:13.308001Z",
+        "scheduled_on": "2024-11-21T18:00:00Z",
+        "otp": "123456",
+        "status": "pending",
+        "total_price": "210.00",
+        "review": "",
+        "rating": null,
+        "items": [
+            {
+                "id": "f43e80b9-8636-4ba2-8e09-aac5b0106964",
+                "provider_service": 2
+            }
+        ],
+        "status_history": [
+            {
+                "id": "22d8ebd8-c9fc-45db-9ed0-12b17ebabd26",
+                "status": "pending",
+                "changed_on": "2024-11-20T05:36:02.478324Z"
+            },
+            {
+                "id": "8afdb2c4-8736-42b8-ae15-721a50fbc46f",
+                "status": "accepted",
+                "changed_on": "2024-11-19T13:27:48.034603Z"
+            },
+            {
+                "id": "9e3e74f6-e203-4571-a63f-02d0360075c9",
+                "status": "pending",
+                "changed_on": "2024-11-19T13:34:57.710144Z"
+            },
+            {
+                "id": "e164d1b8-5ec0-48ae-b27c-7ffb723af02c",
+                "status": "accepted",
+                "changed_on": "2024-11-20T05:35:17.106896Z"
+            }
+        ]
+    },
+    {
+        "id": "b2ea1d00-cdf4-4acc-84c8-34cbf0ed959c",
+        "user": "0791bb75-df6b-4ec1-bcf4-cad2cdfd1905",
+        "provider": "ce918ea9-f793-403f-a7e6-56e93442dd4a",
+        "service": "d61082cc-b0d8-440c-a68c-9ec7e508e02e",
+        "ordered_on": "2024-11-19T13:06:04.435244Z",
+        "scheduled_on": "2024-11-20T18:00:00Z",
+        "otp": "123456",
+        "status": "pending",
+        "total_price": "210.00",
+        "review": "",
+        "rating": null,
+        "items": [
+            {
+                "id": "b962356f-5745-4b84-80b7-c7665d16a004",
+                "provider_service": 2
+            }
+        ],
+        "status_history": [
+            {
+                "id": "00e3df86-b5b2-413a-b081-a9021525cd07",
+                "status": "rejected",
+                "changed_on": "2024-11-20T05:35:22.532221Z"
+            },
+            {
+                "id": "a839fca6-c8e1-42f5-8aa2-410d61d21715",
+                "status": "pending",
+                "changed_on": "2024-11-20T05:35:53.307673Z"
+            },
+            {
+                "id": "af8d6652-1ea5-40f0-a36b-f5a36fcb021a",
+                "status": "rejected",
+                "changed_on": "2024-11-19T13:28:22.983647Z"
+            },
+            {
+                "id": "cd808503-ad71-437e-884c-d0e0ec7155c4",
+                "status": "pending",
+                "changed_on": "2024-11-19T13:34:43.231920Z"
+            }
+        ]
+    }
+]

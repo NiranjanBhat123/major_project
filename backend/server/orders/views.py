@@ -12,6 +12,7 @@ class OrderCreateListView(APIView):
     def get(self, request):
         # Filter by client_id
         client_id = request.query_params.get('client_id')
+        print(client_id)
         if client_id:
             orders = Orders.objects.filter(user_id=client_id)
             serializer = OrderSerializer(orders, many=True)
@@ -19,6 +20,7 @@ class OrderCreateListView(APIView):
             
         # Filter by provider_id
         provider_id = request.query_params.get('provider_id')
+        print(provider_id)
         if provider_id:
             orders = Orders.objects.filter(provider_id=provider_id)
             serializer = OrderSerializer(orders, many=True)
@@ -47,7 +49,7 @@ class OrderStatusUpdateView(APIView):
         # Validate status transition
         valid_transitions = {
             OrderStatus.PENDING: [OrderStatus.ACCEPTED, OrderStatus.REJECTED],
-            OrderStatus.ACCEPTED: [OrderStatus.COMPLETED, OrderStatus.CANCELLED],
+            OrderStatus.ACCEPTED: [OrderStatus.COMPLETED, OrderStatus.CANCELLED, OrderStatus.REJECTED],
             OrderStatus.COMPLETED: [],  # No further transitions allowed
             OrderStatus.CANCELLED: [],  # No further transitions allowed
             OrderStatus.REJECTED: []    # No further transitions allowed

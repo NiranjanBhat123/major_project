@@ -1,20 +1,12 @@
-# views.py
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import ClientSerializer, LoginSerializer
-from .models import Client
+from .serializers import ClientSerializer, LoginSerializer, ClientDetailSerializer
 from django.views.decorators.csrf import csrf_exempt
-
-
-from rest_framework import status
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import ClientSerializer, LoginSerializer
-from .models import Client
-
+from django.utils.decorators import method_decorator
+from client.models import Client
 
 class SignupView(APIView):
     """
@@ -23,20 +15,17 @@ class SignupView(APIView):
     def post(self, request):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
-            # Save the new client instance
             client = serializer.save()
             
-            # Generate tokens for the new client
             refresh = RefreshToken.for_user(client)
             
-            # Prepare response data
             response_data = {
                 'tokens': {
                     'access_token': str(refresh.access_token),
                     'refresh_token': str(refresh),
                 },
                 'user': {
-                    'id': str(client.id),  # Convert UUID to string
+                    'id': str(client.id),
                     'email': client.email,
                     'name': client.name,
                 }
@@ -45,27 +34,25 @@ class SignupView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class LoginView(APIView):
     """
     View for user login. Returns authentication tokens and user details.
     """
-    @csrf_exempt
     def post(self, request):
-        print(request.data)
         serializer = LoginSerializer(data=request.data)
         
         if serializer.is_valid():
             user = serializer.validated_data['user']
             refresh = RefreshToken.for_user(user)
             
-            # Prepare response data
             response_data = {
                 'tokens': {
                     'access_token': str(refresh.access_token),
                     'refresh_token': str(refresh),
                 },
                 'user': {
-                    'id': str(user.id),  # Convert UUID to string
+                    'id': str(user.id),
                     'email': user.email,
                     'name': user.name,
                 }
@@ -73,3 +60,29 @@ class LoginView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClientDetailView(generics.RetrieveAPIView):
+    """
+    API endpoint to retrieve client details by ID.
+    Requires authentication.
+    """
+    serializer_class = ClientDetailSerializer
+    permission_classes = [AllowAny]
+    lookup_field = 'id'
+    lookup_url_kwarg = 'client_id'
+    queryset = Client.objects.all()
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Override retrieve method to handle potential not found scenarios.
+        """
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except Client.DoesNotExist:
+            return Response({
+                'error': 'Client not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
