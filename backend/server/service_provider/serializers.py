@@ -194,8 +194,7 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError(_("Invalid email or password."))
 
             
-            
-            
+
 class ProviderServiceSerializer(serializers.ModelSerializer):
     provider_id = serializers.UUIDField(source='provider.id', read_only=True)
     provider_name = serializers.CharField(source='provider.full_name', read_only=True)
@@ -210,6 +209,7 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
         read_only=True,
         default=0.0
     )
+    distance = serializers.FloatField(read_only=True)  # Changed this line
 
     class Meta:
         model = ProviderService
@@ -223,12 +223,55 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
             'provider_mobile_number',
             'provider_is_active',
             'price',
+            'distance'
         ]
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['provider_rating'] = random.randint(1, 5)  # Random float between 1 and 5, rounded to 2 decimals
+        representation['provider_rating'] = random.randint(1, 5)  # Random rating between 1 and 5
+        
+        # Modified this part
+        if hasattr(instance, 'distance'):
+            representation['distance'] = float(instance.distance)
+        else:
+            representation['distance'] = None
+            
         return representation
+
+            
+# class ProviderServiceSerializer(serializers.ModelSerializer):
+#     provider_id = serializers.UUIDField(source='provider.id', read_only=True)
+#     provider_name = serializers.CharField(source='provider.full_name', read_only=True)
+#     provider_address = serializers.CharField(source='provider.street_address', read_only=True)
+#     provider_photo = Base64ImageField(source='provider.photo', read_only=True)
+#     provider_mobile_number = serializers.CharField(source='provider.mobile_number', read_only=True)
+#     provider_is_active = serializers.BooleanField(source='provider.is_active', read_only=True)
+#     provider_rating = serializers.DecimalField(
+#         source='provider.average_rating',
+#         max_digits=3,
+#         decimal_places=2,
+#         read_only=True,
+#         default=0.0
+#     )
+
+#     class Meta:
+#         model = ProviderService
+#         fields = [
+#             'id',
+#             'provider_id',
+#             'provider_name',
+#             'provider_address',
+#             'provider_photo',
+#             'provider_rating',
+#             'provider_mobile_number',
+#             'provider_is_active',
+#             'price',
+#         ]
+
+#     def to_representation(self, instance):
+#         representation = super().to_representation(instance)
+#         representation['provider_rating'] = random.randint(1, 5)  # Random float between 1 and 5, rounded to 2 decimals
+#         return representation
     
 class SimpleProviderServiceSerializer(serializers.ModelSerializer):
     sub_service_name = serializers.CharField(source='sub_service.name', read_only=True)
