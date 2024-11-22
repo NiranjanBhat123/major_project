@@ -1,33 +1,33 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   Box,
   Typography,
   Card,
   CardContent,
-  CardMedia,
   Button,
   Rating,
   Popover,
   Grid,
   Divider,
-  Avatar,
   List,
   ListItem,
   ListItemText,
   Checkbox,
   Stack,
   Backdrop,
+  Avatar,
+  CardMedia,
+  IconButton,
 } from "@mui/material";
-import { motion} from 'framer-motion';
-import { Star, MapPin, Clock, ChevronRight, Phone,Bike} from "lucide-react";
+import { motion } from 'framer-motion';
+import { Star, MapPin, Clock, ChevronRight, Phone, Bike , X} from "lucide-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Calendar, Check } from "lucide-react";
 import Spashscreen from "../pages/Spashscreen";
-
 
 export const ServiceProviderImage = ({ provider, providerName }) => {
     const theme = useTheme();
@@ -64,7 +64,8 @@ export const ServiceProviderCard = ({ provider, index }) => {
     const [selectedTime, setSelectedTime] = useState(null);
     const [showOrderSummary, setShowOrderSummary] = useState(false);
     const [showSuccessSplash, setShowSuccessSplash] = useState(false);
-  
+    //const [orderCompleted, setOrderCompleted] = useState(false);
+
     const handleBookNowClick = (event) => {
       setAnchorEl(event.currentTarget);
       setSelectedServices([]);
@@ -107,7 +108,17 @@ export const ServiceProviderCard = ({ provider, index }) => {
           throw new Error("Failed to create order");
         }
   
-        handleClose(true); // Close with success
+      setAnchorEl(null);
+      setShowOrderSummary(false);
+      setSelectedDate(null);
+      setSelectedTime(null);
+      setSelectedServices([]);
+      
+      // Use a small timeout to ensure state updates are processed
+      setTimeout(() => {
+        setShowSuccessSplash(true);
+      }, 100);
+
       } catch (error) {
         console.error("Error creating order:", error);
         // You might want to add error handling UI here
@@ -147,18 +158,13 @@ export const ServiceProviderCard = ({ provider, index }) => {
       }
     };
   
-    const handleClose = (isSuccess = false) => {
+    const handleClose = () => {
       setAnchorEl(null);
       setShowOrderSummary(false);
       setSelectedDate(null);
       setSelectedTime(null);
       setSelectedServices([]);
-      if (isSuccess) {
-        setShowSuccessSplash(true);
-        setTimeout(() => {
-          setShowSuccessSplash(false);
-        }, 3000);
-      }
+     
     };
   
     const handleServiceToggle = (service) => {
@@ -290,8 +296,8 @@ export const ServiceProviderCard = ({ provider, index }) => {
             backdropFilter: "blur(4px)",
             zIndex: theme.zIndex.drawer + 1,
           }}
-          open={open}
-          onClick={handleClose}
+         open={open}
+         onClick={handleClose}
         />
   
         <Popover
@@ -316,11 +322,23 @@ export const ServiceProviderCard = ({ provider, index }) => {
               p: 4,
               margin: "32px 0", // Add margin to ensure it doesn't touch the screen edges
               position: "fixed",
-              left: "30%",
-              transform: "translateX(-50%) !important",
+              top: "50% !important",
+              left: "50% !important",
+              transform: "translate(-50%, -50%) !important",
             },
           }}
         >
+          <IconButton 
+        onClick={handleClose}
+        sx={{ 
+          position: 'absolute',
+          right: 8,
+          top: 8,
+        }}
+      >
+        <X size={20} />
+      </IconButton>
+
           <Box>
             {!showOrderSummary ? (
               <>
@@ -524,7 +542,9 @@ export const ServiceProviderCard = ({ provider, index }) => {
         </Popover>
         <Spashscreen
           open={showSuccessSplash}
-          onClose={() => setShowSuccessSplash(false)}
+          onClose={() =>{
+             setShowSuccessSplash(false);
+            }}
         />
       </motion.div>
     );

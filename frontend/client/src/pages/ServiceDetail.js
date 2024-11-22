@@ -11,7 +11,7 @@ import { motion, AnimatePresence} from 'framer-motion';
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
 import { ServiceProviderCard, SubServiceCard } from "../Styles/StyledComponents";
 
-// ... LoadingAnimation component remains the same
+
 
 const LoadingAnimation = () => {
   const theme = useTheme();
