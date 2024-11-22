@@ -13,6 +13,7 @@ import {
   Container,
   Collapse,
   IconButton,
+  Button,
 } from "@mui/material";
 import {
   Truck,
@@ -24,6 +25,7 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
+import ChatModal from './ChatModal';
 
 const OrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -31,6 +33,7 @@ const OrdersList = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [expandedOrders, setExpandedOrders] = useState({});
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -50,7 +53,7 @@ const OrdersList = () => {
         }
 
         const data = await response.json();
-
+        
         const sortedOrders = data.sort(
           (a, b) => new Date(b.ordered_on) - new Date(a.ordered_on)
         );
@@ -130,6 +133,7 @@ const OrdersList = () => {
   };
 
   return (
+    <>
     <Container maxWidth="lg">
       <Grid container spacing={3}>
         {/* Filters */}
@@ -204,6 +208,7 @@ const OrdersList = () => {
         <Grid item xs={12} md={9}>
           <Grid container spacing={2}>
             {filteredOrders.map((order) => (
+              <>
               <Grid item xs={12} key={order.id}>
                 <Card elevation={3}>
                   <CardContent>
@@ -328,24 +333,43 @@ const OrdersList = () => {
                         {/* Provider & OTP Section */}
                         <Grid container spacing={2} sx={{ mb: 3 }}>
                           <Grid item xs={6}>
-                            <Box
-                              sx={{
-                                bgcolor: "rgba(0,0,0,0.04)",
-                                p: 2,
-                                borderRadius: 2,
-                              }}
-                            >
-                              <Typography
-                                variant="subtitle2"
-                                color="text.secondary"
-                                gutterBottom
+                            <Box sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              bgcolor: "rgba(0,0,0,0.04)",
+                              p: 2,
+                              borderRadius: 2,
+                            }}>
+                              <Box>
+                                <Typography
+                                  variant="subtitle2"
+                                  color="text.secondary"
+                                  gutterBottom
+                                >
+                                  Service Provider
+                                </Typography>
+                                <Typography variant="body1" fontWeight={500}>
+                                  {order.provider_name}
+                                </Typography>
+                              </Box>
+                              <Button
+                                variant="contained"
+                                onClick={() => setChatOpen(true)}
+                                sx={{
+                                  height: "2rem",
+                                  padding: "0 15px",
+                                  borderRadius: "15px",
+                                  bgcolor: 'success.main',
+                                  '&:hover': {
+                                    bgcolor: 'success.dark',
+                                  },
+                                }}
                               >
-                                Service Provider
-                              </Typography>
-                              <Typography variant="body1" fontWeight={500}>
-                                {order.provider_name}
-                              </Typography>
+                                Chat
+                              </Button>
                             </Box>
+                            
                           </Grid>
                           <Grid item xs={6}>
                             <Box
@@ -471,6 +495,15 @@ const OrdersList = () => {
                   </CardContent>
                 </Card>
               </Grid>
+              <ChatModal
+                  open={chatOpen}
+                  onClose={() => setChatOpen(false)}
+                  providerId={order.provider}
+                  providerName={order.provider_name}
+                  clientId={localStorage.getItem("userId")}
+                  clientName={localStorage.getItem("userName")}
+              />
+              </>
             ))}
             {filteredOrders.length === 0 && (
               <Grid item xs={12}>
@@ -487,6 +520,7 @@ const OrdersList = () => {
         </Grid>
       </Grid>
     </Container>
+    </>
   );
 };
 

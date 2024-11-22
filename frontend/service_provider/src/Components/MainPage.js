@@ -10,24 +10,13 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { CheckCircle } from 'lucide-react';
-import { keyframes } from '@emotion/react';
+import OTPVerificationModal from './OTPVerificationModal';
 import ChatModal from './ChatModal';
-
-const vibrate = keyframes`
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-  20%, 40%, 60%, 80% { transform: translateX(5px); }
-`;
+import Footer from './Footer';
 
 const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [otpDialogOpen, setOTPDialogOpen] = useState(false);
-  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
-  const [otpError, setOtpError] = useState(false);
-  const [otpTries, setOtpTries] = useState(0);
-  const [alert, setAlert] = useState({ show: false, message: '', type: 'info' });
-  const MAX_OTP_TRIES = 3;
   const [chatOpen, setChatOpen] = useState(false);
 
   const formatDate = (dateString) => {
@@ -64,92 +53,6 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
   const handleRejectConfirm = () => {
     updateStatus(order.id, "rejected");
     setRejectDialogOpen(false);
-  };
-
-  const handleOtpChange = (index, value) => {
-    if(!/^\d*$/.test(value)) return;
-    if(value.length > 1) return;
-
-    const newOtpValues = [...otpValues];
-    newOtpValues[index] = value;
-    setOtpValues(newOtpValues);
-
-    if(value && index < 5) {
-      const nextInput = document.querySelector(`input[name=otp-${index + 1}]`);
-      if(nextInput) nextInput.focus();
-    }
-  };
-
-  const handleKeyDown = (index, e) => {
-    if(e.key === 'Backspace' && !otpValues[index] && index > 0) {
-      const prevInput = document.querySelector(`input[name=otp-${index - 1}]`);
-      if(prevInput) prevInput.focus();
-    }
-  };
-
-  const handlePaste = (e) => {
-    e.preventDefault();
-    const pastedData = e.clipboardData.getData('text');
-    if (!/^\d+$/.test(pastedData)) return;
-
-    const pastedOTP = pastedData.slice(0, 6).split('');
-    const newOtpValues = [...otpValues];
-
-    pastedOTP.forEach((value, index) => {
-      if (index < 6) {
-        newOtpValues[index] = value;
-      }
-    });
-
-    setOtpValues(newOtpValues);
-  };
-
-  const handleOTPVerify = async () => {
-    try {
-      const otpValue = otpValues.join('');
-      const expectedOTP = order.otp;
-
-      if (otpValue === expectedOTP) {
-        await updateStatus(order.id, "completed");
-        setAlert({
-          show: true,
-          message: 'Order completed successfully!',
-          type: 'success'
-        });
-        setTimeout(() => {
-          setOTPDialogOpen(false);
-          resetOTPState();
-        }, 2000);
-      } else {
-        setOtpError(true);
-        setOtpTries((prevTries) => {
-          const newTries = prevTries + 1;
-          if (newTries >= MAX_OTP_TRIES) {
-            setAlert({
-              show: true,
-              message: 'Maximum OTP attempts reached. Please try again later.',
-              type: 'error'
-            });
-            setOTPDialogOpen(false);
-            resetOTPState();
-          }
-          return newTries;
-        });
-        setAlert({
-          show: true,
-          message: 'Invalid OTP. Please try again.',
-          type: 'error'
-        });
-      }
-    } catch (err) {
-      console.error('Failed to verify OTP:', err);
-    }
-  };
-
-  const resetOTPState = () => {
-    setOtpValues(['', '', '', '', '', '']);
-    setOtpError(false);
-    setOtpTries(0);
   };
 
   return (
@@ -208,7 +111,7 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
             <LocationOn sx={{ color: 'text.secondary', fontSize: 'small' }} />
             <Typography variant="body2">{client.full_address}</Typography>
           </Box>
-          <Typography variant="caption" color="text.secondary" fontSize='0.9rem'>
+          <Typography variant="body2" fontSize='0.9rem'>
             Distance: {haversineDistance(
               parseFloat(client.latitude), parseFloat(client.longitude),
               parseFloat(JSON.parse(localStorage.getItem("userLocation")).latitude),
@@ -336,79 +239,19 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
         </DialogActions>
       </Dialog>
 
-      <Dialog
+      <OTPVerificationModal 
         open={otpDialogOpen}
         onClose={() => setOTPDialogOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>OTP Verification</DialogTitle>
-        <DialogContent>
-          {alert.show && (
-            <Alert
-              severity={alert.type}
-              sx={{mb: 2, width: '100%'}}
-              onClose={() => setAlert({ ...alert, show: false })}
-            >
-              {alert.message}
-            </Alert>
-          )}
-
-          <DialogContentText sx={{mb: 2}}>
-            Enter the OTP to complete the order
-          </DialogContentText>
-
-          <Box
-            sx={{
-              display: 'flex',
-              gap: '8px',
-              justifyContent: 'center',
-              mb: 2,
-              animation: otpError ? `${vibrate} 0.5s` : 'none'
-            }}
-          >
-            {otpValues.map((value, index) => (
-              <TextField
-                key={index}
-                name={`otp-${index}`}
-                value={value}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                onPaste={handlePaste}
-                variant="outlined"
-                error={otpError}
-                inputProps={{
-                  maxLength: 1,
-                  style: {
-                    textAlign: 'center',
-                    fontSize: '1.5rem',
-                    padding: '8px',
-                    width: '40px',
-                    height: '40px',
-                  }
-                }}
-              />
-            ))}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOTPDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleOTPVerify} 
-            color="primary" 
-            disabled={otpValues.some(value => value === '')}
-          >
-            Verify
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onVerify={async (otpValue) => (otpValue === order.otp)}
+        client={client.name}
+        updateStatus={() => updateStatus(order.id, "completed")}
+      />
 
       <ChatModal
         open={chatOpen}
         onClose={() => setChatOpen(false)}
-        providerId={localStorage.getItem("providerId")} // Adjust based on how you store provider ID
+        providerId={localStorage.getItem("providerId")}
+        providerName={localStorage.getItem("providerName")}
         clientId={client.id}
         clientName={client.name}
       />
@@ -571,13 +414,14 @@ const MainPage = () => {
             boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <Typography variant="h6" color="primary.dark">
+          <Typography variant="h6" color="primary.dark" textAlign="left">
             {sectionName}
           </Typography>
         </Box>
         
         <Box 
           sx={{
+            textAlign: 'left',
             maxHeight: 'calc(100vh - 400px)',
             overflowY: 'scroll',
             '&::-webkit-scrollbar': {
@@ -718,7 +562,7 @@ const MainPage = () => {
             pt: '120px',
             px: 3,
             pb: 3,
-            mb: 3,
+            mb: 2,
             textAlign: 'center',
           }}
         >
@@ -734,40 +578,42 @@ const MainPage = () => {
               {error}
             </Alert>
           )}
+
+          {
+            loading ? (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                <CircularProgress />
+              </Box>
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 3,
+                  flexDirection: { xs: 'column', md: 'row' },
+                  pl: 3,
+                  pr: 3,
+                }}
+              >
+                {/* New Orders Card */}
+                <Section 
+                  key="1" 
+                  sectionName="New Orders"
+                  orders={newOrders}
+                  newOrder={true}
+                />
+
+                {/* Upcoming Orders Card */}
+                <Section 
+                  key="2"
+                  sectionName="Upcoming Orders"
+                  orders={upcomingOrders}
+                  newOrder={false}
+                />
+              </Box>
+          )}
         </Box>
 
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 3,
-              flexDirection: { xs: 'column', md: 'row' },
-              pl: 3,
-              pr: 3,
-              mb: { xs: '25px' },
-            }}
-          >
-            {/* New Orders Card */}
-            <Section 
-              key="1" 
-              sectionName="New Orders"
-              orders={newOrders}
-              newOrder={true}
-            />
-
-            {/* Upcoming Orders Card */}
-            <Section 
-              key="2"
-              sectionName="Upcoming Orders"
-              orders={upcomingOrders}
-              newOrder={false}
-            />
-          </Box>
-        )}
+        <Footer/>
 
         <Menu
           anchorEl={anchorEl}

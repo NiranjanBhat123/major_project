@@ -35,7 +35,8 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
           text: data.message,
           sender: data.sender,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isSentByMe: data.sender === providerId
+          // Add isSentByMe flag when receiving message
+          isSentByMe: data.sender === clientId
         }]);
       };
       
@@ -55,7 +56,7 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
     if(newMessage.trim() && wsInstance) {
       const messageData = {
         message: newMessage,
-        sender: providerId,
+        sender: clientId,
       };
       
       wsInstance.send(JSON.stringify(messageData));
@@ -71,17 +72,17 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
   };
 
   const renderMessage = (msg, index) => {
-    const isSentByMe = msg.sender === providerId;
+    const isSentByMe = msg.sender === clientId;
     
     return (
       <Box
         key={index}
         sx={{
-          display: 'flex',
-          justifyContent: isSentByMe ? 'flex-end' : 'flex-start',
-          px: 1,
-          maxWidth: '100%',
-          position: 'relative'
+            display: 'flex',
+            justifyContent: isSentByMe ? 'flex-end' : 'flex-start',
+            px: 1,
+            maxWidth: '100%',
+            position: 'relative'
         }}
       >
         {!isSentByMe && (
@@ -91,11 +92,10 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
               height: 32,
               mr: 1,
               bgcolor: 'primary.dark',
-              fontSize: '0.875rem',
-              flexShrink: 0
+              fontSize: '0.875rem'
             }}
           >
-            {clientName?.charAt(0)}
+            {providerName?.charAt(0)}
           </Avatar>
         )}
         <Paper
@@ -145,11 +145,10 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
               height: 32,
               ml: 1,
               bgcolor: 'primary.main',
-              fontSize: '0.875rem',
-              flexShrink: 0
+              fontSize: '0.875rem'
             }}
           >
-            {providerName?.charAt(0)}
+            {clientName?.charAt(0)}
           </Avatar>
         )}
       </Box>
@@ -169,7 +168,6 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
           borderRadius: '12px',
           margin: '16px',
           border: (theme) => `1px solid ${theme.palette.text.disabled}`,
-          overflow: 'hidden'
         }
       }}
     >
@@ -198,11 +196,9 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
               height: 40
             }}
           >
-            {clientName?.charAt(0)}
+            {providerName?.charAt(0)}
           </Avatar>
-          <Typography variant="h6" sx={{ fontSize: '1.125rem' }}>
-            Chat with {clientName}
-          </Typography>
+          <Typography variant="h6">Chat with {providerName}</Typography>
         </Box>
         <IconButton 
           onClick={onClose}
@@ -214,12 +210,12 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
 
       <DialogContent 
         sx={{
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          bgcolor: '#f5f5f5',
-          overflow: 'hidden'
+            p: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            bgcolor: '#f5f5f5',
+            overflow: 'hidden'
         }}
       >
         <Box 
@@ -231,7 +227,6 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
             gap: 1.5,
             pb: 2,
             mt: 2,
-            px: { xs: 0.5, sm: 1 },
             '&::-webkit-scrollbar': {
               width: '8px',
             },

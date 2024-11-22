@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
-import { Typography, TextField, Button, Box, Link, Alert } from '@mui/material';
+import { Typography, TextField, Button, Box, Link } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const SignUp = () => {
