@@ -1,8 +1,10 @@
 import { Box, Dialog, Typography, Button, IconButton } from '@mui/material';
 import { Check, X } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 const OrderSuccessSplash = ({ open, onClose }) => {
+  const navigate = useNavigate();
   return (
     <Dialog
       open={open}
@@ -93,13 +95,13 @@ const OrderSuccessSplash = ({ open, onClose }) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={onClose}
+            onClick={()=>navigate('/orders')}
             sx={{
               minWidth: 200,
               py: 1.5,
             }}
           >
-            Done
+            Go to Orders
           </Button>
         </motion.div>
       </Box>

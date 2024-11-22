@@ -1,5 +1,5 @@
 import React, { useState, createContext, useContext, useEffect } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 const WelcomeViewContext = createContext(null);
 
 export const useWelcomeViewContext = () => useContext(WelcomeViewContext);
@@ -10,13 +10,14 @@ const WelcomeViewContextProvider = ({ children }) => {
   const [signUpEmail, setSignUpEmail] = useState("");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-
+  const [selectedSubService, setSelectedSubService] = useState(null);
+  const navigate = useNavigate();
   // Check authentication status on mount and after any localStorage changes
   useEffect(() => {
     const checkAuthStatus = () => {
       const accessToken = localStorage.getItem('accessToken');
       const userId = localStorage.getItem('userId');
-      if (accessToken && userId) {
+      if (accessToken && userId ) {
         setIsLoggedIn(true);
       } else {
         setIsLoggedIn(false);
@@ -61,10 +62,12 @@ const WelcomeViewContextProvider = ({ children }) => {
     localStorage.removeItem('userEmail');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('userLocation');
     setIsLoggedIn(false);
     setEmpty();
     setIsAuthModalOpen(false);
     setSignUpEmail("");
+    navigate("/");
   };
 
   const contextValues = {
@@ -73,6 +76,7 @@ const WelcomeViewContextProvider = ({ children }) => {
     signUpData,
     isAuthModalOpen,
     isLoggedIn,
+    selectedSubService,
     setEmpty, 
     showSignUp, 
     showLogin, 
@@ -82,7 +86,8 @@ const WelcomeViewContextProvider = ({ children }) => {
     handleCloseAuthModal,
     handleOpenAuthModal,
     handleLogin,
-    handleLogout
+    handleLogout,
+    setSelectedSubService,
   };
 
   return (
