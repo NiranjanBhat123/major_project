@@ -62,9 +62,9 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ClientDetailView(generics.RetrieveAPIView):
+class ClientDetailView(generics.RetrieveAPIView, generics.UpdateAPIView):
     """
-    API endpoint to retrieve client details by ID.
+    API endpoint to retrieve and partially update client details by ID.
     Requires authentication.
     """
     serializer_class = ClientDetailSerializer
@@ -81,6 +81,25 @@ class ClientDetailView(generics.RetrieveAPIView):
             instance = self.get_object()
             serializer = self.get_serializer(instance)
             return Response(serializer.data)
+        except Client.DoesNotExist:
+            return Response({
+                'error': 'Client not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    def partial_update(self, request, *args, **kwargs):
+        """
+        Handle partial update of client details.
+        """
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                self.perform_update(serializer)
+                return Response(serializer.data)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
         except Client.DoesNotExist:
             return Response({
                 'error': 'Client not found'

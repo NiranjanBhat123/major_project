@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { 
-  AppBar, 
-  Toolbar, 
-  Button, 
-  IconButton, 
-  Box, 
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  AppBar,
+  Toolbar,
+  Button,
+  IconButton,
+  Box,
   Avatar,
   Menu,
   MenuItem,
@@ -16,69 +16,67 @@ import {
   Autocomplete,
   InputAdornment,
   TextField,
-} from '@mui/material';
+} from "@mui/material";
 
-import { styled, alpha } from '@mui/material/styles';
-import ClearIcon from '@mui/icons-material/Clear';
-import CircularProgress from '@mui/material/CircularProgress';
-import SearchIcon from '@mui/icons-material/Search';
-import LoginIcon from '@mui/icons-material/Login';
-import PersonIcon from '@mui/icons-material/Person';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ReceiptIcon from '@mui/icons-material/Receipt';
-import HandymanIcon from '@mui/icons-material/Handyman';
-import AuthModal from './AuthModal';
+import { styled, alpha } from "@mui/material/styles";
+import ClearIcon from "@mui/icons-material/Clear";
+import CircularProgress from "@mui/material/CircularProgress";
+import SearchIcon from "@mui/icons-material/Search";
+import LoginIcon from "@mui/icons-material/Login";
+import PersonIcon from "@mui/icons-material/Person";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import AuthModal from "./AuthModal";
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
-
-
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
   backgroundColor: theme.palette.common.white,
-  transition: 'all 0.3s ease',
-  boxShadow: isscrolled === 'true' ? '0 2px 8px rgba(0,0,0,0.1)' : 'none',
-  borderBottom: '1px solid',
+  transition: "all 0.3s ease",
+  boxShadow: isscrolled === "true" ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+  borderBottom: "1px solid",
   borderColor: alpha(theme.palette.grey[300], 0.8),
 }));
 
 const LogoContainer = styled(Box)({
-  display: 'flex',
-  alignItems: 'center',
-  marginRight: '32px',
-  cursor: 'pointer',
+  display: "flex",
+  alignItems: "center",
+  marginRight: "32px",
+  cursor: "pointer",
 });
 
 const LogoText = styled(Typography)(({ theme }) => ({
-  fontFamily: 'Righteous, cursive', // Using Righteous font for a stylish look
-  fontSize: '2rem',
-  fontWeight: 'bold',
+  fontFamily: "Righteous, cursive", // Using Righteous font for a stylish look
+  fontSize: "2rem",
+  fontWeight: "bold",
   background: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px',
-  '& .icon': {
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  display: "flex",
+  alignItems: "center",
+  gap: "8px",
+  "& .icon": {
     color: theme.palette.primary.main,
-    fontSize: '1.8rem',
-    transform: 'rotate(-15deg)',
+    fontSize: "1.8rem",
+    transform: "rotate(-15deg)",
   },
-  '& .highlight': {
+  "& .highlight": {
     color: theme.palette.primary.main,
   },
 }));
 
 const LocationChip = styled(Chip)(({ theme }) => ({
   backgroundColor: alpha(theme.palette.grey[100], 0.8),
-  '&:hover': {
+  "&:hover": {
     backgroundColor: alpha(theme.palette.grey[200], 0.8),
   },
-  height: '40px',
-  padding: '0 8px',
-  '& .MuiChip-icon': {
+  height: "40px",
+  padding: "0 8px",
+  "& .MuiChip-icon": {
     color: theme.palette.grey[600],
   },
-  '& .MuiChip-label': {
+  "& .MuiChip-label": {
     color: theme.palette.grey[700],
     fontWeight: 500,
   },
@@ -87,66 +85,65 @@ const LocationChip = styled(Chip)(({ theme }) => ({
 // (StyledAppBar, LogoContainer, LogoText, LocationChip definitions remain unchanged)
 
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
-  width: '23rem',
-  '& .MuiOutlinedInput-root': {
+  width: "23rem",
+  "& .MuiOutlinedInput-root": {
     backgroundColor: alpha(theme.palette.grey[100], 0.8),
-    borderRadius: '8px',
-    padding: '2px 4px',
-    transition: theme.transitions.create(['background-color', 'box-shadow']),
-    '& fieldset': {
-      borderColor: 'transparent',
+    borderRadius: "8px",
+    padding: "2px 4px",
+    transition: theme.transitions.create(["background-color", "box-shadow"]),
+    "& fieldset": {
+      borderColor: "transparent",
     },
-    '&:hover': {
+    "&:hover": {
       backgroundColor: alpha(theme.palette.grey[100], 1),
     },
-    '&.Mui-focused': {
+    "&.Mui-focused": {
       backgroundColor: theme.palette.common.white,
       boxShadow: `0 0 0 2px ${alpha(theme.palette.primary.main, 0.2)}`,
-      '& fieldset': {
+      "& fieldset": {
         borderColor: theme.palette.primary.main,
       },
     },
   },
-  '& .MuiAutocomplete-input': {
-    padding: '7.5px 4px 7.5px 0 !important',
-    height: '25px',
-    fontSize: '0.875rem',
+  "& .MuiAutocomplete-input": {
+    padding: "7.5px 4px 7.5px 0 !important",
+    height: "25px",
+    fontSize: "0.875rem",
   },
-
 }));
 const SearchLoadingIndicator = styled(CircularProgress)(({ theme }) => ({
   color: theme.palette.grey[500],
   size: 20,
 }));
 
-
-
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [location, setLocation] = useState(null);
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
-  const [userName, setUserName] = useState('');
+  const [userName, setUserName] = useState("");
   const [searchValue, setSearchValue] = useState(null);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [filteredServices, setFilteredServices] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const navigate = useNavigate();
 
   // Fetch subservices from the backend
-  const fetchSubServices = async (searchTerm = '') => {
+  const fetchSubServices = async (searchTerm = "") => {
     try {
       setIsSearching(true);
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const response = await fetch('http://127.0.0.1:8000/sub_services/listAll/');
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/sub_services/listAll/"
+      );
       const data = await response.json();
-      
+
       if (data.status && data.data.results) {
         if (searchTerm) {
-          const filtered = data.data.results.filter(service => 
+          const filtered = data.data.results.filter((service) =>
             service.name.toLowerCase().includes(searchTerm.toLowerCase())
           );
           setFilteredServices(filtered);
@@ -155,7 +152,7 @@ const Navbar = () => {
         }
       }
     } catch (error) {
-      console.error('Error fetching subservices:', error);
+      console.error("Error fetching subservices:", error);
       setFilteredServices([]);
     } finally {
       setIsSearching(false);
@@ -165,17 +162,17 @@ const Navbar = () => {
   // Debounced search handler
   const handleSearchInput = (event, newInputValue) => {
     setInputValue(newInputValue);
-    
+
     // Clear previous timeout
     if (searchTimeout) {
       clearTimeout(searchTimeout);
     }
-  
+
     // Set new timeout for search
     const newTimeout = setTimeout(() => {
       fetchSubServices(newInputValue);
     }, 300); // 300ms delay
-  
+
     setSearchTimeout(newTimeout);
   };
 
@@ -186,73 +183,72 @@ const Navbar = () => {
   // Existing useEffects remain the same...
 
   useEffect(() => {
-        const handleScroll = () => {
-          setIsScrolled(window.pageYOffset > 0);
-        };
-    
-        window.addEventListener('scroll', handleScroll);
-        return () => {
-          window.removeEventListener('scroll', handleScroll);
-        };
-      }, []);
-    
-      // Load user data and location
-      useEffect(() => {
-        const storedUserName = localStorage.getItem('userName');
-        if (storedUserName) {
-          setUserName(storedUserName);
-        }
-    
-        const userLocation = localStorage.getItem('userLocation');
-        if (userLocation) {
-          try {
-            const parsedLocation = JSON.parse(userLocation);
-            setLocation(parsedLocation);
-          } catch (error) {
-            console.error('Error parsing location:', error);
-          }
-        }
-      }, []);
+    const handleScroll = () => {
+      setIsScrolled(window.pageYOffset > 0);
+    };
 
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Load user data and location
+  useEffect(() => {
+    const storedUserName = localStorage.getItem("userName");
+    if (storedUserName) {
+      setUserName(storedUserName);
+    }
+
+    const userLocation = localStorage.getItem("userLocation");
+    if (userLocation) {
+      try {
+        const parsedLocation = JSON.parse(userLocation);
+        setLocation(parsedLocation);
+      } catch (error) {
+        console.error("Error parsing location:", error);
+      }
+    }
+  }, []);
 
   // (scroll handler, user data loading, etc.)
 
   const formatAddress = (address) => {
-        if (!address) return '';
-        const parts = address.split(',');
-        return parts.slice(0, 2).join(',');
-      };
-    
-      const { 
-        isAuthModalOpen, 
-        handleCloseAuthModal, 
-        handleOpenAuthModal, 
-        isLoggedIn,
-        handleLogout,
-        setSelectedSubService,
-      } = useWelcomeViewContext();
-    
-      const handleProfileClick = (event) => {
-        setAnchorEl(event.currentTarget);
-      };
-    
-      const handleMenuClose = () => {
-        setAnchorEl(null);
-      };
-    
-      const handleLocationClick = (event) => {
-        setLocationAnchorEl(event.currentTarget);
-      };
-    
-      const handleLocationMenuClose = () => {
-        setLocationAnchorEl(null);
-      };
+    if (!address) return "";
+    const parts = address.split(",");
+    return parts.slice(0, 2).join(",");
+  };
+
+  const {
+    isAuthModalOpen,
+    handleCloseAuthModal,
+    handleOpenAuthModal,
+    isLoggedIn,
+    handleLogout,
+    setSelectedSubService,
+  } = useWelcomeViewContext();
+
+  const handleProfileClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLocationClick = (event) => {
+    setLocationAnchorEl(event.currentTarget);
+  };
+
+  const handleLocationMenuClose = () => {
+    setLocationAnchorEl(null);
+  };
 
   const handleSearchChange = (event, newValue) => {
     setSearchValue(newValue);
     // You can handle the selected service here
     if (newValue) {
-      console.log('Selected service:', newValue);
+      console.log("Selected service:", newValue);
       setSelectedSubService(newValue);
       navigate(`/service/${newValue.main_service}`);
       // Add your logic for handling the selected service
@@ -267,69 +263,71 @@ const Navbar = () => {
       inputValue={inputValue}
       onInputChange={handleSearchInput}
       options={filteredServices}
-      getOptionLabel={(option) => option.name || ''}
+      getOptionLabel={(option) => option.name || ""}
       loading={isSearching}
       loadingText="Searching..."
       noOptionsText="No services found"
       ListboxProps={{
         sx: {
-          maxHeight: '400px',
-          '& .MuiAutocomplete-listbox': {
+          maxHeight: "400px",
+          "& .MuiAutocomplete-listbox": {
             padding: 0,
-          }
-        }
+          },
+        },
       }}
       renderInput={(params) => (
         <TextField
           {...params}
-         placeholder="Search for services..."
+          placeholder="Search for services..."
           InputProps={{
             ...params.InputProps,
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon sx={{ color: 'grey.500' }} />
+                <SearchIcon sx={{ color: "grey.500" }} />
               </InputAdornment>
             ),
             endAdornment: (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {isSearching && (
-            <SearchLoadingIndicator size={20} sx={{ mr: 1 }} />
-          )}
-          {inputValue && (
-            <IconButton
-              size="small"
-              onClick={() => {
-                setInputValue('');
-                setFilteredServices([]);
-              }}
-              sx={{
-                p: 0.5,
-                position: 'absolute',  // Position absolutely
-                right: '8px',          // Place at the end
-                '&:hover': {
-                  backgroundColor: 'transparent',
-                }
-              }}
-            >
-              <ClearIcon sx={{ 
-                fontSize: 18, 
-                color: 'grey.500'
-              }} />
-            </IconButton>
-          )}
-        </Box>
-      ),
-    }}
-    sx={{
-      '& .MuiOutlinedInput-root': {
-        p: '2px 4px',
-        paddingRight: '36px', // Add space for the clear icon
-      },
-      '& .MuiIconButton-root': {
-        marginRight: 0,
-      }
-    }}
-  />
+              <Box sx={{ display: "flex", alignItems: "center" }}>
+                {isSearching && (
+                  <SearchLoadingIndicator size={20} sx={{ mr: 1 }} />
+                )}
+                {inputValue && (
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setInputValue("");
+                      setFilteredServices([]);
+                    }}
+                    sx={{
+                      p: 0.5,
+                      position: "absolute", // Position absolutely
+                      right: "8px", // Place at the end
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                    }}
+                  >
+                    <ClearIcon
+                      sx={{
+                        fontSize: 18,
+                        color: "grey.500",
+                      }}
+                    />
+                  </IconButton>
+                )}
+              </Box>
+            ),
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              p: "2px 4px",
+              paddingRight: "36px", // Add space for the clear icon
+            },
+            "& .MuiIconButton-root": {
+              marginRight: 0,
+            },
+          }}
+        />
       )}
       renderOption={(props, option) => (
         <MenuItem
@@ -337,24 +335,26 @@ const Navbar = () => {
           sx={{
             py: 1.5,
             px: 2,
-            minHeight: 'auto',
-            width: '100%',
-            whiteSpace: 'normal',
-            '&:hover': {
-              backgroundColor: alpha('#000', 0.04),
-            }
+            minHeight: "auto",
+            width: "100%",
+            whiteSpace: "normal",
+            "&:hover": {
+              backgroundColor: alpha("#000", 0.04),
+            },
           }}
         >
-          <Box sx={{
-            width: '100%',
-            minWidth: 0,
-          }}>
+          <Box
+            sx={{
+              width: "100%",
+              minWidth: 0,
+            }}
+          >
             <Typography
               variant="body2"
               sx={{
                 fontWeight: 500,
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
+                wordWrap: "break-word",
+                overflowWrap: "break-word",
               }}
             >
               {option.name}
@@ -363,11 +363,11 @@ const Navbar = () => {
               <Typography
                 variant="caption"
                 sx={{
-                  color: 'grey.600',
-                  display: 'block',
+                  color: "grey.600",
+                  display: "block",
                   mt: 0.5,
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
+                  wordWrap: "break-word",
+                  overflowWrap: "break-word",
                 }}
               >
                 {option.description}
@@ -379,34 +379,44 @@ const Navbar = () => {
       PaperProps={{
         sx: {
           mt: 1,
-          borderRadius: '8px',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-          width: '600px',
-          maxWidth: '80vw',
-          '& .MuiAutocomplete-listbox': {
+          borderRadius: "8px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+          width: "600px",
+          maxWidth: "80vw",
+          "& .MuiAutocomplete-listbox": {
             padding: 0,
-            maxHeight: '400px',
-            width: '100%',
-          }
-        }
+            maxHeight: "400px",
+            width: "100%",
+          },
+        },
       }}
       PopperProps={{
-        placement: 'bottom-start',
+        placement: "bottom-start",
         sx: {
-          width: '600px !important',
-          maxWidth: '80vw !important',
-        }
+          width: "600px !important",
+          maxWidth: "80vw !important",
+        },
       }}
     />
   );
 
   return (
     <>
-      <StyledAppBar position="sticky" isscrolled={isScrolled.toString()} elevation={0}>
+      <StyledAppBar
+        position="sticky"
+        isscrolled={isScrolled.toString()}
+        elevation={0}
+      >
         <Toolbar sx={{ py: 1.5, gap: 2 }}>
           {/* Logo section remains the same */}
           <LogoContainer>
-            <LogoText variant="h1" onClick={() =>{ navigate('/'); setSearchValue(null);}}>
+            <LogoText
+              variant="h1"
+              onClick={() => {
+                navigate("/");
+                setSearchValue(null);
+              }}
+            >
               <HandymanIcon className="icon" />
               FixNGo
             </LogoText>
@@ -414,7 +424,11 @@ const Navbar = () => {
 
           {/* Location chip remains the same */}
           {location && (
-            <Tooltip title="Click to view full address" arrow placement="bottom">
+            <Tooltip
+              title="Click to view full address"
+              arrow
+              placement="bottom"
+            >
               <LocationChip
                 icon={<LocationOnIcon />}
                 label={formatAddress(location.address)}
@@ -425,33 +439,37 @@ const Navbar = () => {
           )}
 
           {/* Replace the existing search field with the new searchComponent */}
-          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
             {searchComponent}
           </Box>
-          
 
           {/* Rest of the Navbar remains the same */}
-           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-             {isLoggedIn ? (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {isLoggedIn ? (
               <>
-                <IconButton color="primary" sx={{ backgroundColor: alpha('#000', 0.04) }}>
+                <IconButton
+                  color="primary"
+                  sx={{ backgroundColor: alpha("#000", 0.04) }}
+                >
                   <ShoppingCartIcon />
                 </IconButton>
-                <IconButton 
+                <IconButton
                   onClick={handleProfileClick}
-                  sx={{ 
+                  sx={{
                     p: 0.5,
-                    backgroundColor: alpha('#000', 0.04),
-                    '&:hover': {
-                      backgroundColor: alpha('#000', 0.08),
-                    }
+                    backgroundColor: alpha("#000", 0.04),
+                    "&:hover": {
+                      backgroundColor: alpha("#000", 0.08),
+                    },
                   }}
                 >
-                  <Avatar sx={{ 
-                    bgcolor: 'primary.main',
-                    width: 32,
-                    height: 32
-                  }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: "primary.main",
+                      width: 32,
+                      height: 32,
+                    }}
+                  >
                     {userName?.charAt(0)?.toUpperCase()}
                   </Avatar>
                 </IconButton>
@@ -465,33 +483,45 @@ const Navbar = () => {
                     sx: {
                       mt: 1.5,
                       minWidth: 180,
-                      borderRadius: '8px',
-                      backgroundColor: 'common.white',
+                      borderRadius: "8px",
+                      backgroundColor: "common.white",
                     },
                   }}
-                  transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-                  anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
                   <MenuItem sx={{ py: 1.5 }}>
-                    <PersonIcon sx={{ mr: 2, color: 'grey.600' }} /> Profile
+                    <PersonIcon sx={{ mr: 2, color: "grey.600" }} />
+                    <Link
+                      to="/profile"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      Profile
+                    </Link>
                   </MenuItem>
-                  <MenuItem sx={{ py: 1.5 }} onClick={() => navigate('/orders')}>
-                    <ReceiptIcon sx={{ mr: 2, color: 'grey.600' }} /> My Orders
+                  <MenuItem
+                    sx={{ py: 1.5 }}
+                    onClick={() => navigate("/orders")}
+                  >
+                    <ReceiptIcon sx={{ mr: 2, color: "grey.600" }} /> My Orders
                   </MenuItem>
-                  <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: 'error.main' }}>
+                  <MenuItem
+                    onClick={handleLogout}
+                    sx={{ py: 1.5, color: "error.main" }}
+                  >
                     <LoginIcon sx={{ mr: 2 }} /> Logout
                   </MenuItem>
                 </Menu>
               </>
             ) : (
-              <Button 
-                variant="contained" 
-                color="primary" 
-                startIcon={<LoginIcon />} 
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<LoginIcon />}
                 onClick={handleOpenAuthModal}
                 sx={{
-                  borderRadius: '8px',
-                  textTransform: 'none',
+                  borderRadius: "8px",
+                  textTransform: "none",
                   px: 3,
                   py: 1,
                 }}
@@ -512,41 +542,47 @@ const Navbar = () => {
         PaperProps={{
           elevation: 2,
           sx: {
-            maxWidth: '400px',
-            padding: '16px',
-            borderRadius: '8px',
-            fontFamily: 'Poppins, sans-serif', // Add this line to set Poppins as default
+            maxWidth: "400px",
+            padding: "16px",
+            borderRadius: "8px",
+            fontFamily: "Poppins, sans-serif", // Add this line to set Poppins as default
           },
         }}
       >
         <Box sx={{ p: 1 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: 1, 
-            color: 'grey.700',
-            mb: 1,
-            fontFamily: 'Poppins, sans-serif' // Add this line
-          }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              color: "grey.700",
+              mb: 1,
+              fontFamily: "Poppins, sans-serif", // Add this line
+            }}
+          >
             <LocationOnIcon color="primary" fontSize="small" />
             Current Location
           </Box>
-          <Box sx={{ 
-            color: 'grey.800', 
-            fontWeight: 500,
-            fontFamily: 'Poppins, sans-serif' // Add this line
-          }}>
+          <Box
+            sx={{
+              color: "grey.800",
+              fontWeight: 500,
+              fontFamily: "Poppins, sans-serif", // Add this line
+            }}
+          >
             {location?.address}
           </Box>
-          <Box sx={{ 
-            mt: 2,
-            pt: 2,
-            borderTop: 1,
-            borderColor: 'grey.200',
-            color: 'grey.600',
-            fontSize: '0.75rem',
-            fontFamily: 'Poppins, sans-serif' // Add this line
-          }}>
+          <Box
+            sx={{
+              mt: 2,
+              pt: 2,
+              borderTop: 1,
+              borderColor: "grey.200",
+              color: "grey.600",
+              fontSize: "0.75rem",
+              fontFamily: "Poppins, sans-serif", // Add this line
+            }}
+          >
             Last updated: {new Date(location?.timestamp).toLocaleString()}
           </Box>
         </Box>

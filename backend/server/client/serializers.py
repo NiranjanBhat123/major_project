@@ -69,4 +69,33 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ClientDetailSerializer(ClientSerializer):
-    pass
+    class Meta(ClientSerializer.Meta):
+        extra_kwargs = {
+            'name': {'required': False},
+            'mobile_number': {'required': False},
+            'street_address': {'required': False},
+            'city': {'required': False},
+            'state': {'required': False},
+            'postal_code': {'required': False}
+        }
+
+    def validate_mobile_number(self, value):
+        """
+        Ensure that mobile number is exactly 10 digits and unique,
+        allowing the current user's existing number.
+        """
+        if not value.isdigit() or len(value) != 10:
+            raise ValidationError("Mobile number must be exactly 10 digits.")
+        
+        # Check if the mobile number is already in use by another user
+        existing_clients = Client.objects.filter(mobile_number=value)
+        
+        # If this is a partial update (editing an existing user)
+        if self.instance:
+            # Exclude the current user's record from the uniqueness check
+            existing_clients = existing_clients.exclude(id=self.instance.id)
+        
+        if existing_clients.exists():
+            raise ValidationError("This mobile number is already in use.")
+        
+        return value
