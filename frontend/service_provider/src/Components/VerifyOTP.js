@@ -7,7 +7,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const VerifyOTP = () => {
-  const { setEmpty, showSignUp, signUpEmail, updateSignUpEmail } = useWelcomeViewContext();
+  const { setEmpty, showSignUp, showLogin, signUpEmail } = useWelcomeViewContext();
   const navigate = useNavigate();
   const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [generatedOTP, setGeneratedOTP] = useState('');
@@ -117,7 +117,6 @@ const VerifyOTP = () => {
     const enteredOTP = otpValues.join('');
 
     if(enteredOTP === generatedOTP) {
-      updateSignUpEmail("");
       setAlert({
         show: true,
         message: 'OTP verified successfully! Redirecting to registration...',
@@ -125,7 +124,8 @@ const VerifyOTP = () => {
       });
       setTimeout(() => {
         navigate("/registration");
-      }, 4000);
+        showLogin();
+      }, 3000);
     }
     else {
       setAlert({

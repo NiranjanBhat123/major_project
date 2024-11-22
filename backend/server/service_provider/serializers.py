@@ -135,19 +135,14 @@ class ServiceProviderCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data.pop('confirm_password', None)
         provider_services_data = validated_data.pop('provider_services', [])
-        
-        # Hash the password before creating the provider
-        password = validated_data.get('password')
-        if password:
-            validated_data['password'] = make_password(password)
-            
+
         provider = ServiceProvider.objects.create(**validated_data)
-        
+
         for service_data in provider_services_data:
             ProviderService.objects.create(provider=provider, **service_data)
-        
+
         return provider
-        
+
     def update(self, instance, validated_data):
         validated_data.pop('confirm_password', None)
         password = validated_data.pop('password', None)
@@ -178,35 +173,26 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password')
         
         if not email or not password:
-            raise serializers.ValidationError(
-                _("Both email and password are required.")
-            )
+            raise serializers.ValidationError(_("Both email and password are required."))
             
         try:
             provider = ServiceProvider.objects.get(email=email)
             
             if not provider.is_active:
-                raise serializers.ValidationError(
-                    _("This account has been deactivated.")
-                )
+                raise serializers.ValidationError(_("This account has been deactivated."))
                 
             if not provider.password:
-                raise serializers.ValidationError(
-                    _("Please set up your password first.")
-                )
+                raise serializers.ValidationError(_("Please set up your password first."))
                 
             if not check_password(password, provider.password):
-                raise serializers.ValidationError(
-                    _("Invalid email or password.")
-                )
+                raise serializers.ValidationError(_("Invalid email or password."))
                 
             data['user'] = provider
             return data
             
         except ServiceProvider.DoesNotExist:
-            raise serializers.ValidationError(
-                _("Invalid email or password.")
-            )
+            raise serializers.ValidationError(_("Invalid email or password."))
+
             
 
 class ProviderServiceSerializer(serializers.ModelSerializer):

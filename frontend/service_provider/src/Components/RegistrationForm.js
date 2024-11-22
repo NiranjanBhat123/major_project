@@ -1,24 +1,61 @@
-import React, { useState } from 'react';
-import { Typography, Alert, Box, Button, TextField } from "@mui/material";
+import React, {useState} from 'react';
+import {Typography, Alert, Box, Button, TextField} from "@mui/material";
 import Grid from "@mui/material/Grid2";
+import {requestAndStoreLocation} from "../utils/LocationHandler";
 
-const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
+const RegistrationForm = (
+  {formData, setFormData, setCurrentStep, mainServices}
+) => {
   const [errors, setErrors] = useState({});
   const [photoPreview, setPhotoPreview] = useState(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
+    const {name, value} = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
 
-    // Clear error when user starts typing
     if(errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
       }));
+    }
+  };
+
+  const handleLocationClick = async () => {
+    setIsGettingLocation(true);
+    try {
+      const success = await requestAndStoreLocation(
+        () => {
+          setFormData(prev => {
+            const locationData = JSON.parse(localStorage.getItem('userLocation'));
+            return {
+              ...prev,
+              latitude: locationData.latitude.toString(),
+              longitude: locationData.longitude.toString()
+            };
+          });
+        },
+        (errorMessage) => {
+          setErrors(prev => ({
+            ...prev,
+            location: errorMessage
+          }));
+        }
+      );
+
+      if(!success) {
+        throw new Error("Failed to retrieve location.");
+      }
+    }
+    catch (error) {
+      console.error(error.message);
+    }
+    finally {
+      setIsGettingLocation(false);
     }
   };
 
@@ -95,42 +132,26 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
     e.preventDefault();
     const newErrors = {};
 
-    Object.keys(formData).forEach(key => {
-      if(!formData[key] && key !== 'photo') {
-        newErrors[key] = 'This field is required';
-      }
-    });
-
     const passwordError = validatePassword(formData.password);
     if(passwordError) newErrors.password = passwordError;
 
-    if(formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    if(formData.password !== formData.confirm_password) {
+      newErrors.confirm_password = 'Passwords do not match';
     }
 
-    const mobileError = validateMobileNumber(formData.mobileNumber);
-    if(mobileError) newErrors.mobileNumber = mobileError;
+    const mobileError = validateMobileNumber(formData.mobile_number);
+    if(mobileError) newErrors.mobile_number = mobileError;
 
     const aadhaarError = validateAadhaar(formData.aadhaar);
     if(aadhaarError) newErrors.aadhaar = aadhaarError;
 
-    const pincodeError = validatePincode(formData.pincode);
-    if(pincodeError) newErrors.pincode = pincodeError;
+    const pincodeError = validatePincode(formData.postal_code);
+    if(pincodeError) newErrors.postal_code = pincodeError;
 
     if(!formData.photo) newErrors.photo = 'Please upload a photo';
 
     setErrors(newErrors);
-    if(Object.keys(newErrors).length === 0) {
-      console.log('From Child, Form submitted: ', formData);
-
-      // Create FormData object for file upload
-      // const formDataToSubmit = new FormData();
-      // Object.keys(formData).forEach(key => {
-      //   formDataToSubmit.append(key, formData[key]);
-      // });
-
-      setCurrentStep('2');
-    }
+    if(Object.keys(newErrors).length === 0) setCurrentStep('2');
   };
 
   return (
@@ -149,15 +170,27 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
       </Typography>
       <form onSubmit={handleSubmit}>
         <Grid container rowSpacing={1} columnSpacing={2}>
+          {/* Email Field - Disabled */}
+          <Grid size={12}>
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              value={formData.email}
+              disabled
+              sx={{mb: 2}}
+            />
+          </Grid>
+
           <Grid size={6}>
             <TextField
               fullWidth
               label="First Name"
-              name="firstName"
-              value={formData.firstName}
+              name="first_name"
+              value={formData.first_name}
               onChange={handleInputChange}
-              error={!!errors.firstName}
-              helperText={errors.firstName}
+              error={!!errors.first_name}
+              helperText={errors.first_name}
               required
             />
           </Grid>
@@ -165,11 +198,11 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
             <TextField
               fullWidth
               label="Last Name"
-              name="lastName"
-              value={formData.lastName}
+              name="last_name"
+              value={formData.last_name}
               onChange={handleInputChange}
-              error={!!errors.lastName}
-              helperText={errors.lastName}
+              error={!!errors.last_name}
+              helperText={errors.last_name}
               required
             />
           </Grid>
@@ -191,11 +224,11 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               fullWidth
               label="Confirm Password"
               type="password"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              name="confirm_password"
+              value={formData.confirm_password}
               onChange={handleInputChange}
-              error={!!errors.confirmPassword}
-              helperText={errors.confirmPassword}
+              error={!!errors.confirm_password}
+              helperText={errors.confirm_password}
               required
             />
           </Grid>
@@ -215,11 +248,11 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
             <TextField
               fullWidth
               label="Mobile Number"
-              name="mobileNumber"
-              value={formData.mobileNumber}
+              name="mobile_number"
+              value={formData.mobile_number}
               onChange={handleInputChange}
-              error={!!errors.mobileNumber}
-              helperText={errors.mobileNumber}
+              error={!!errors.mobile_number}
+              helperText={errors.mobile_number}
               required
             />
           </Grid>
@@ -239,9 +272,9 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               }}
             >
               <option value=""></option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="O">Other</option>
             </TextField>
           </Grid>
           <Grid size={6}>
@@ -260,46 +293,66 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               inputProps={{
                 accept: 'image/*'
               }}
+              InputProps={{
+                endAdornment: photoPreview && (
+                  <Box
+                    component="img"
+                    src={photoPreview}
+                    alt="Preview"
+                    sx={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 1,
+                      objectFit: 'cover',
+                      mr: 1
+                    }}
+                  />
+                )
+              }}
             />
-            {photoPreview && (
-              <Box
-                sx={{
-                  mt: 1,
-                  width: '100px',
-                  height: '100px',
-                  borderRadius: '4px',
-                  overflow: 'hidden',
-                  border: '1px solid',
-                  borderColor: 'divider'
-                }}
-              >
-                <img
-                  src={photoPreview}
-                  alt="Preview"
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
-                  }}
-                />
-              </Box>
-            )}
           </Grid>
-          <Grid size={6}>
+
+          {/* Main Service Dropdown */}
+          <Grid size={12}>
+            <TextField
+              fullWidth
+              select
+              label="Main Service"
+              name="main_service"
+              value={formData.main_service}
+              onChange={handleInputChange}
+              error={!!errors.main_service}
+              helperText={errors.main_service}
+              required
+              SelectProps={{
+                native: true,
+              }}
+              sx={{mb: 2}}
+            >
+              <option value=""></option>
+              {mainServices.map((service) => (
+                <option key={service.id} value={service.id}>
+                  {service.name}
+                </option>
+              ))}
+            </TextField>
+          </Grid>
+
+          <Grid size={12}>
             <TextField
               fullWidth
               label="Street Address"
-              name="streetAddress"
-              value={formData.streetAddress}
+              name="street_address"
+              value={formData.street_address}
               onChange={handleInputChange}
-              error={!!errors.streetAddress}
-              helperText={errors.streetAddress}
+              error={!!errors.street_address}
+              helperText={errors.street_address}
               required
               multiline
-              rows={2}
+              rows={1}
             />
           </Grid>
-          <Grid size={6}>
+          <Grid size={4}>
             <TextField
               fullWidth
               label="City"
@@ -311,7 +364,7 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               required
             />
           </Grid>
-          <Grid size={6}>
+          <Grid size={4}>
             <TextField
               fullWidth
               label="State"
@@ -327,54 +380,54 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               }}
             >
               <option value=""></option>
-              <option value="AN">Andaman and Nicobar Islands</option>
-              <option value="AP">Andhra Pradesh</option>
-              <option value="AR">Arunachal Pradesh</option>
-              <option value="AS">Assam</option>
-              <option value="BR">Bihar</option>
-              <option value="CH">Chandigarh</option>
-              <option value="CT">Chhattisgarh</option>
-              <option value="DN">Dadra and Nagar Haveli</option>
-              <option value="DD">Daman and Diu</option>
-              <option value="DL">Delhi</option>
-              <option value="GA">Goa</option>
-              <option value="GJ">Gujarat</option>
-              <option value="HR">Haryana</option>
-              <option value="HP">Himachal Pradesh</option>
-              <option value="JK">Jammu and Kashmir</option>
-              <option value="JH">Jharkhand</option>
-              <option value="KA">Karnataka</option>
-              <option value="KL">Kerala</option>
-              <option value="LA">Ladakh</option>
-              <option value="LD">Lakshadweep</option>
-              <option value="MP">Madhya Pradesh</option>
-              <option value="MH">Maharashtra</option>
-              <option value="MN">Manipur</option>
-              <option value="ML">Meghalaya</option>
-              <option value="MZ">Mizoram</option>
-              <option value="NL">Nagaland</option>
-              <option value="OR">Odisha</option>
-              <option value="PY">Puducherry</option>
-              <option value="PB">Punjab</option>
-              <option value="RJ">Rajasthan</option>
-              <option value="SK">Sikkim</option>
-              <option value="TN">Tamil Nadu</option>
-              <option value="TG">Telangana</option>
-              <option value="TR">Tripura</option>
-              <option value="UP">Uttar Pradesh</option>
-              <option value="UT">Uttarakhand</option>
-              <option value="WB">West Bengal</option>
+              <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+              <option value="Andhra Pradesh">Andhra Pradesh</option>
+              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+              <option value="Assam">Assam</option>
+              <option value="Bihar">Bihar</option>
+              <option value="Chandigarh">Chandigarh</option>
+              <option value="Chhattisgarh">Chhattisgarh</option>
+              <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+              <option value="Daman and Diu">Daman and Diu</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Goa">Goa</option>
+              <option value="Gujarat">Gujarat</option>
+              <option value="Haryana">Haryana</option>
+              <option value="Himachal Pradesh">Himachal Pradesh</option>
+              <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+              <option value="Jharkhand">Jharkhand</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Kerala">Kerala</option>
+              <option value="Ladakh">Ladakh</option>
+              <option value="Lakshadweep">Lakshadweep</option>
+              <option value="Madhya Pradesh">Madhya Pradesh</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Manipur">Manipur</option>
+              <option value="Meghalaya">Meghalaya</option>
+              <option value="Mizoram">Mizoram</option>
+              <option value="Nagaland">Nagaland</option>
+              <option value="Odisha">Odisha</option>
+              <option value="Puducherry">Puducherry</option>
+              <option value="Punjab">Punjab</option>
+              <option value="Rajasthan">Rajasthan</option>
+              <option value="Sikkim">Sikkim</option>
+              <option value="Tamil Nadu">Tamil Nadu</option>
+              <option value="Telangana">Telangana</option>
+              <option value="Tripura">Tripura</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+              <option value="Uttarakhand">Uttarakhand</option>
+              <option value="West Bengal">West Bengal</option>
             </TextField>
           </Grid>
-          <Grid size={6}>
+          <Grid size={4}>
             <TextField
               fullWidth
-              label="Pincode"
-              name="pincode"
-              value={formData.pincode}
+              label="Postal Code"
+              name="postal_code"
+              value={formData.postal_code}
               onChange={handleInputChange}
-              error={!!errors.pincode}
-              helperText={errors.pincode}
+              error={!!errors.postal_code}
+              helperText={errors.postal_code}
               required
               inputProps={{
                 maxLength: 6,
@@ -382,30 +435,68 @@ const RegistrationForm = ({ formData, setFormData, setCurrentStep }) => {
               }}
             />
           </Grid>
+
+          <Box sx={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+            <Grid size={4}>
+              <TextField
+                label="Latitude"
+                name="latitude"
+                value={formData.latitude}
+                onChange={handleInputChange}
+                error={!!errors.latitude}
+                helperText={errors.latitude}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid size={4}>
+              <TextField
+                label="Longitude"
+                name="longitude"
+                value={formData.longitude}
+                onChange={handleInputChange}
+                error={!!errors.longitude}
+                helperText={errors.longitude}
+                required
+                fullWidth
+              />
+            </Grid>
+            <Grid size={4}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleLocationClick}
+                disabled={isGettingLocation}
+                fullWidth
+              >
+                {isGettingLocation ? 'Getting Location...' : 'Get location'}
+              </Button>
+            </Grid>
+          </Box>
+
+          {/* Error Alert */}
+          {Object.keys(errors).length > 0 && (
+            <Alert severity="error" sx={{mt: 2, width: '100%'}}>
+              Please fix the errors before submitting the form.
+            </Alert>
+          )}
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            size="large"
+            sx={{
+              mt: 3,
+              height: '48px',
+              fontSize: '1.1rem',
+            }}
+          >
+            Next
+          </Button>
         </Grid>
-
-        {Object.keys(errors).length > 0 && (
-          <Alert severity="error" sx={{mt: 2}}>
-            Please fix the errors before submitting the form.
-          </Alert>
-        )}
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          size="large"
-          sx={{
-            mt: 3,
-            height: '48px',
-            fontSize: '1.1rem',
-          }}
-        >
-          Next
-        </Button>
       </form>
     </>
-
   );
 };
 

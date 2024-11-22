@@ -5,6 +5,10 @@ from django.urls import reverse
 from django.db.models import Count, Q
 from .models import ServiceProvider, ProviderService
 
+admin.site.site_header = "FixNGo Admin"
+admin.site.site_title = "FixNGo Admin Portal"
+admin.site.index_title = "Welcome to FixNGo Admin Portal"
+
 class ProviderServiceInline(admin.TabularInline):
     model = ProviderService
     extra = 1

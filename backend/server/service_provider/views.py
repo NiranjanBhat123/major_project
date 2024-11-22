@@ -99,12 +99,8 @@ def verify_faces(request):
                 destination.write(chunk)
                 
         result = matcher.verify_faces(img1_path, img2_path)
-        print(result)
         os.remove(os.path.join(images_dir, image1.name))
         os.remove(os.path.join(images_dir, image2.name))
-
-
-
 
     except Exception as e:
         return Response({"success": False, "error": str(e)}, status=400)
@@ -293,6 +289,7 @@ class SignupView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
+        # print(request.data)
         serializer = ServiceProviderCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             provider = serializer.save()
@@ -346,6 +343,7 @@ class LoginView(APIView):
             'message': 'Login failed',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
         
         
 class ProviderServicesViewSet(ReadOnlyModelViewSet):

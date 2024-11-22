@@ -1,4 +1,5 @@
-PATCH /api/orders/<order_uuid>/update_status/
+### Order status update
+PATCH http://127.0.0.1:8000/orders/<order_uuid>/status/
 {
     "status": "completed"
 }

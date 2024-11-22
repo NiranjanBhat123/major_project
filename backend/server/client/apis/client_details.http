@@ -1,0 +1,18 @@
+### Client details
+
+GET http://127.0.0.1:8000/client/d3e858e3-63bf-4ae3-a806-34f634c5152e/
+
+### Response
+{
+    "id": "d3e858e3-63bf-4ae3-a806-34f634c5152e",
+    "name": "Virat Kohli",
+    "email": "viratkohli@fixngo.com",
+    "mobile_number": "9999988888",
+    "street_address": "#176/2B, Kanakagiri, Sewage farm road, Vidyaranyapuram, Mysuru",
+    "city": "Mysuru",
+    "state": "Karnataka",
+    "postal_code": "570008",
+    "latitude": "12.281446",
+    "longitude": "76.653467",
+    "full_address": "#176/2B, Kanakagiri, Sewage farm road, Vidyaranyapuram, Mysuru, Mysuru, Karnataka, 570008"
+}

@@ -7,6 +7,7 @@ from service.models import Service
 from client.models import Client
 from service_provider.models import ServiceProvider
 from service_provider.models import ProviderService
+from sub_service.models import SubService
 
 class OrderStatus(models.TextChoices):
     PENDING = 'pending', _('Pending')

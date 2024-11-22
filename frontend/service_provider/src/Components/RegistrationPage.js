@@ -1,28 +1,62 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from "react";
+import {useNavigate} from "react-router-dom";
+import {useWelcomeViewContext} from "../Contexts/WelcomeViewContextProvider";
+import axios from "axios";
 import {
   Box, Typography, Paper
 } from '@mui/material';
 import RegistrationForm from "./RegistrationForm";
 import PhotoMatching from "./PhotoMatching";
 
-const Registration = () => {
-  const [currentStep, setCurrentStep] = useState('1');
+const RegistrationPage = () => {
+  const {signUpEmail} = useWelcomeViewContext();
+  const navigate = useNavigate();
+  const [mainServices, setMainServices] = useState([]);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    email: signUpEmail,
+    main_service: "",
     password: '',
-    confirmPassword: '',
+    confirm_password: '',
+    first_name: '',
+    last_name: '',
     aadhaar: '',
-    mobileNumber: '',
+    mobile_number: '',
     gender: '',
     photo: null,
-    streetAddress: '',
+    street_address: '',
     city: '',
     state: '',
-    pincode: ''
+    postal_code: '',
+    latitude: '',
+    longitude: '',
+    is_active: true
   });
-  const [isTitleVisible, setIsTitleVisible] = useState(false)
+  const [currentStep, setCurrentStep] = useState('1');
+  const [isTitleVisible, setIsTitleVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
   const titleRef = useRef(null);
+
+  useEffect(() => {
+    const fetchMainServices = async () => {
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/services/');
+        if(response.data.status) {
+          const filteredServices = response.data.data.results.map(service => ({
+            id: service.data.id,
+            name: service.data.name,
+          }));
+          setMainServices(filteredServices);
+        }
+      }
+      catch(error) {
+        console.error('Error fetching services:', error);
+        setError('Failed to fetch services. Please refresh the page.');
+      }
+    };
+
+    fetchMainServices();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +70,51 @@ const Registration = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleFinalSubmit = async () => {
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const formDataToSend = new FormData();
+
+      Object.keys(formData).forEach(key => {
+        if(key === 'photo' && formData[key]) formDataToSend.append(key, formData[key]);
+        else if(key === 'latitude' || key === 'longitude') {
+          const value = parseFloat(formData[key]).toFixed(6);
+          formDataToSend.append(key, value);
+        }
+        else formDataToSend.append(key, formData[key]);
+      });
+
+      const response = await axios.post(
+        'http://127.0.0.1:8000/service_providers/signup/',
+        formDataToSend,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if(response.data.status) {
+        localStorage.setItem('accessToken', response.data.data.access_token);
+        localStorage.setItem('refreshToken', response.data.data.refresh_token);
+        localStorage.setItem('providerId', response.data.data.provider_id);
+        localStorage.setItem('providerName', response.data.data.name);
+        localStorage.setItem('providerEmail', response.data.data.email);
+        navigate('/main');
+      }
+      else setError(response.data.message);
+    }
+    catch(error) {
+      console.error('Registration error:', error);
+      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+    }
+    finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -45,7 +124,6 @@ const Registration = () => {
         position: 'relative',
       }}
     >
-
       <Box
         sx={{
           position: 'fixed',
@@ -126,10 +204,9 @@ const Registration = () => {
             width: '100%',
           }}
         >
-
           <Box
             ref={titleRef}
-            sx={{ textAlign: 'center', mb: 8 }}
+            sx={{textAlign: 'center', mb: 8}}
           >
             <Typography
               variant="title"
@@ -175,16 +252,21 @@ const Registration = () => {
 
           <Paper elevation={4} sx={{width: '50%', p: 4, borderRadius: 2}}>
             {
-              currentStep === '1'?
-              <RegistrationForm
-                formData={formData}
-                setFormData={setFormData}
-                setCurrentStep={setCurrentStep}
-              />:
-              <PhotoMatching
-                formData={formData}
-                setCurrentStep={setCurrentStep}
-              />
+              currentStep === '1' ?
+                <RegistrationForm
+                  formData={formData}
+                  setFormData={setFormData}
+                  setCurrentStep={setCurrentStep}
+                  mainServices={mainServices}
+                /> :
+                <PhotoMatching
+                  formData={formData}
+                  setCurrentStep={setCurrentStep}
+                  handleFinalSubmit={handleFinalSubmit}
+                  isSubmitting={isSubmitting}
+                  error={error}
+                  setError={setError}
+                />
             }
           </Paper>
         </Box>
@@ -193,4 +275,4 @@ const Registration = () => {
   );
 };
 
-export default Registration;
+export default RegistrationPage;

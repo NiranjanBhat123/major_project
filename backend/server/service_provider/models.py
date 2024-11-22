@@ -197,17 +197,23 @@ class ServiceProvider(models.Model):
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"
-    
+
+    # if self.password and (
+    #     not self.pk or
+    #     self._state.adding or
+    #     self.password != ServiceProvider.objects.get(pk=self.pk).password
+    # ):
+
     def save(self, *args, **kwargs):
-            # Hash password if it's being set for the first time or changed
+    # Hash password if it's being set for the first time or changed
         if self.password and (
             not self.pk or 
             self._state.adding or 
-            self.password != ServiceProvider.objects.get(pk=self.pk).password
+            (not self._state.adding and 
+            self.password != ServiceProvider.objects.get(pk=self.pk).password)
         ):
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
-
 
     def clean(self):
         """Ensure provider can only select sub-services from their main service"""

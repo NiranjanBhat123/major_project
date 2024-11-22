@@ -32,13 +32,18 @@ const WelcomeContent = () => {
         sx={{
           color: 'background.paper',
           mb: 2,
+          textShadow: '2px 2px 4px rgba(0, 0, 0, 0.4)',
         }}
       >
         FixNGo
       </Typography>
       <Typography
         variant="h5"
-        sx={{ color: 'background.paper', mb: 4 }}
+        sx={{
+          color: 'background.paper',
+          mb: 4,
+          textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)',
+        }}
       >
         A Platform for On-Demand Local Home Services
       </Typography>
@@ -48,6 +53,7 @@ const WelcomeContent = () => {
           position: 'absolute',
           bottom: '2rem',
           color: 'background.paper',
+          textShadow: '1px 1px 3px rgba(0, 0, 0, 0.5)',
         }}
       >
         Service Providers
