@@ -6,7 +6,7 @@ import {
 import { X } from 'lucide-react';
 import SendIcon from '@mui/icons-material/Send';
 
-const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientName }) => {
+const ChatModal = ({open, onClose, providerId, providerName, clientId, clientName }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [wsInstance, setWsInstance] = useState(null);
@@ -21,6 +21,7 @@ const ChatModal = ({ open, onClose, providerId, providerName, clientId, clientNa
   }, [messages]);
 
   useEffect(() => {
+    console.log(providerId,providerName);
     if(open) {
       const roomId = `${providerId}-${clientId}`;
       const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomId}/`);

@@ -19,15 +19,37 @@ import {
   Avatar,
   CardMedia,
   IconButton,
+ 
 } from "@mui/material";
+
+import {
+ 
+  Clock,
+  Calendar,
+ 
+  Star,
+  MapPin,
+  ChevronRight,
+  Phone,
+  Bike,
+  X,
+  Check
+} from "lucide-react";
+
+
+
+
 import { motion } from 'framer-motion';
-import { Star, MapPin, Clock, ChevronRight, Phone, Bike , X} from "lucide-react";
+// import { Star, MapPin, Clock, ChevronRight, Phone, Bike , X} from "lucide-react";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { Calendar, Check } from "lucide-react";
+// import { Calendar, Check } from "lucide-react";
 import Spashscreen from "../pages/Spashscreen";
+
+
+
 
 export const ServiceProviderImage = ({ provider, providerName }) => {
     const theme = useTheme();
@@ -594,5 +616,10 @@ export const SubServiceCard = ({ subService, isSelected, onClick }) => {
       </Card>
     );
   };
+
+
+
+
+
 
 
