@@ -9,6 +9,11 @@ import {
   Collapse,
   IconButton,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import {
   Truck,
@@ -19,12 +24,15 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  X,
 } from "lucide-react";
 import ChatModal from "../Components/ChatModal";
 
-const OrderCard = ({ order }) => {
+const OrderCard = ({ order ,onOrderUpdate}) => {
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleOrderExpand = () => {
     setExpanded(!expanded);
@@ -35,8 +43,8 @@ const OrderCard = ({ order }) => {
       case "pending": return "#FFA500";
       case "completed": return "#4CAF50";
       case "cancelled": return "#F44336";
-      case "accepted": return "#2196F3";
-      case "rejected": return "#9C27B0";
+      case "accepted": return "#42a7f5";
+      case "rejected": return "#d742f5";
       default: return "#757575";
     }
   };
@@ -49,6 +57,43 @@ const OrderCard = ({ order }) => {
       case "accepted": return <Truck size={16} />;
       case "rejected": return <AlertTriangle size={16} />;
       default: return null;
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    // Check if order is in a cancellable state
+    if (!["pending", "accepted"].includes(order.status.toLowerCase())) {
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/orders/${order.id}/status/`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: 'cancelled' })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to cancel order');
+      }
+
+      const updatedOrder = await response.json();
+      
+      // If onOrderUpdate callback is provided, call it to update parent component
+      if (onOrderUpdate) {
+        onOrderUpdate(updatedOrder);
+      }
+
+      // Close the dialog
+      setCancelDialogOpen(false);
+    } catch (error) {
+      console.error('Error cancelling order:', error);
+      // Optionally show an error message to the user
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -155,7 +200,7 @@ const OrderCard = ({ order }) => {
                         {order.provider_name}
                       </Typography>
                     </Box>
-                    <Button
+                    {(order.status==="accepted" || order.status==="pending")&&<Button
                       variant="contained"
                       onClick={() => setChatOpen(true)}
                       sx={{
@@ -167,7 +212,7 @@ const OrderCard = ({ order }) => {
                       }}
                     >
                       Chat
-                    </Button>
+                    </Button>}
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
@@ -256,10 +301,35 @@ const OrderCard = ({ order }) => {
                   </Typography>
                 </Box>
               </Box>
+              {/* Cancel Order Option */}
+              {["pending", "accepted"].includes(order.status.toLowerCase()) && (
+                <Box 
+                  sx={{ 
+                    mt: 3, 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    borderTop: '1px solid rgba(0,0,0,0.1)',
+                    pt: 2 
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="error"
+                    startIcon={<X size={16} />}
+                    onClick={() => setCancelDialogOpen(true)}
+                    sx={{
+                      borderRadius: 3,
+                    }}
+                  >
+                    Cancel Order
+                  </Button>
+                </Box>
+              )}
             </Box>
             <ChatModal
               open={chatOpen}
               onClose={() => setChatOpen(false)}
+              orderId={order.id}
               providerId={order.provider}
               providerName={order.provider_name}
               clientId={localStorage.getItem("userId")}
@@ -268,6 +338,38 @@ const OrderCard = ({ order }) => {
           </Collapse>
         </CardContent>
       </Card>
+      <Dialog
+        open={cancelDialogOpen}
+        onClose={() => setCancelDialogOpen(false)}
+        aria-labelledby="cancel-order-dialog-title"
+        aria-describedby="cancel-order-dialog-description"
+      >
+        <DialogTitle id="cancel-order-dialog-title">
+          Cancel Order
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="cancel-order-dialog-description">
+            Are you sure you want to cancel this order? 
+            This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setCancelDialogOpen(false)} 
+            color="primary"
+          >
+            No, Keep Order
+          </Button>
+          <Button 
+            onClick={handleCancelOrder} 
+            color="error" 
+            variant="contained"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Cancelling...' : 'Yes, Cancel Order'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };

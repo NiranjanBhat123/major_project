@@ -1,16 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, TextField, IconButton, 
-  Box, Typography, Paper, InputAdornment, Avatar 
+  Box, Typography, Paper, InputAdornment, Avatar,
+  CircularProgress
 } from "@mui/material";
-import { X } from 'lucide-react';
+import { X, Image as ImageIcon } from 'lucide-react';
 import SendIcon from '@mui/icons-material/Send';
 
-const ChatModal = ({open, onClose, providerId, providerName, clientId, clientName }) => {
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, clientName }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [wsInstance, setWsInstance] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -21,9 +26,8 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
   }, [messages]);
 
   useEffect(() => {
-    console.log(providerId,providerName);
     if(open) {
-      const roomId = `${providerId}-${clientId}`;
+      const roomId = `${orderId}`;
       const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomId}/`);
       
       ws.onopen = () => {
@@ -32,17 +36,30 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
       
       ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        setMessages(prev => [...prev, {
-          text: data.message,
-          sender: data.sender,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          // Add isSentByMe flag when receiving message
-          isSentByMe: data.sender === clientId
-        }]);
-      };
-      
-      ws.onclose = () => {
-        console.log('Disconnected from chat server');
+        
+        if (data.type === 'chat_history') {
+          setMessages(data.messages.map(msg => ({
+            type: msg.message_type,
+            content: msg.message_type === 'TEXT' ? 
+              msg.message : 
+              `data:image/jpeg;base64,${msg.image_data}`,  // Convert hex to base64
+            sender: msg.sender,
+            sender_type: msg.sender_type,
+            timestamp: msg.timestamp,
+            isSentByMe: msg.sender_type === 'CLIENT'
+          })));
+        } else {
+          setMessages(prev => [...prev, {
+            type: data.message_type,
+            content: data.message_type === 'TEXT' ? 
+              data.message : 
+              `data:image/jpeg;base64,${data.image_data}`,  // Convert hex to base64
+            sender: data.sender,
+            sender_type: data.sender_type,
+            timestamp: data.timestamp,
+            isSentByMe: data.sender_type === 'CLIENT'
+          }]);
+        }
       };
       
       setWsInstance(ws);
@@ -51,17 +68,63 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
         ws.close();
       };
     }
-  }, [open, providerId, clientId]);
+  }, [open, orderId]);
 
   const handleSendMessage = () => {
     if(newMessage.trim() && wsInstance) {
       const messageData = {
+        message_type: 'TEXT',
         message: newMessage,
         sender: clientId,
+        is_client: true
       };
       
       wsInstance.send(JSON.stringify(messageData));
       setNewMessage('');
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size
+    if (file.size > MAX_IMAGE_SIZE) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Only image files are allowed');
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const base64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+      });
+
+      const messageData = {
+        message_type: 'IMAGE',
+        image: base64,
+        sender: clientId,
+        is_client: true
+      };
+
+      wsInstance.send(JSON.stringify(messageData));
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -73,17 +136,19 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
   };
 
   const renderMessage = (msg, index) => {
-    const isSentByMe = msg.sender === clientId;
+    const isSentByMe = msg.isSentByMe;
     
     return (
+
       <Box
         key={index}
         sx={{
-            display: 'flex',
-            justifyContent: isSentByMe ? 'flex-end' : 'flex-start',
-            px: 1,
-            maxWidth: '100%',
-            position: 'relative'
+          display: 'flex',
+          justifyContent: isSentByMe ? 'flex-end' : 'flex-start',
+          px: 1,
+          maxWidth: '100%',
+          position: 'relative',
+          mb: 2
         }}
       >
         {!isSentByMe && (
@@ -93,7 +158,8 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
               height: 32,
               mr: 1,
               bgcolor: 'primary.dark',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
+              flexShrink: 0
             }}
           >
             {providerName?.charAt(0)}
@@ -102,38 +168,50 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
         <Paper
           sx={{
             maxWidth: { xs: '85%', sm: '75%' },
-            minWidth: '120px',
             p: 1.5,
             borderRadius: isSentByMe ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
             bgcolor: isSentByMe ? 'primary.main' : 'white',
             color: isSentByMe ? 'white' : 'text.primary',
-            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
             overflowWrap: 'break-word',
             wordBreak: 'break-word',
             hyphens: 'auto'
           }}
         >
-          <Typography 
-            variant="body1" 
-            sx={{ 
-              whiteSpace: 'pre-wrap',
-              overflowWrap: 'break-word',
-              wordBreak: 'break-word',
-              hyphens: 'auto',
-              fontSize: '0.9375rem',
-              lineHeight: 1.5
-            }}
-          >
-            {msg.text}
-          </Typography>
+          {msg.type === 'TEXT' ? (
+            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+              {msg.content}
+            </Typography>
+          ) : (
+            <Box
+              sx={{
+                '& img': {
+                  maxWidth: '100%',
+                  maxHeight: '300px',
+                  borderRadius: '8px',
+                  objectFit: 'contain',
+                  display: 'block',
+                  margin: '0 auto'
+                }
+              }}
+             
+            >
+              <img 
+              src={msg.content} 
+              alt="Chat attachment" 
+              loading='lazy'
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              />
+            </Box>
+          )}
           <Typography 
             variant="caption" 
             sx={{ 
               display: 'block',
               textAlign: 'right',
               mt: 0.5,
-              opacity: 0.8,
-              fontSize: '0.75rem'
+              opacity: 0.8
             }}
           >
             {msg.timestamp}
@@ -146,7 +224,8 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
               height: 32,
               ml: 1,
               bgcolor: 'primary.main',
-              fontSize: '0.875rem'
+              fontSize: '0.875rem',
+              flexShrink: 0
             }}
           >
             {clientName?.charAt(0)}
@@ -164,11 +243,9 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
       fullWidth
       PaperProps={{
         sx: {
-          height: '80vh',
+          height: '90vh',
           maxHeight: '600px',
-          borderRadius: '12px',
-          margin: '16px',
-          border: (theme) => `1px solid ${theme.palette.text.disabled}`,
+          borderRadius: '12px'
         }
       }}
     >
@@ -178,45 +255,27 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
           color: 'white',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 2,
-          p: 1.5,
-          borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
+          justifyContent: 'space-between'
         }}
       >
-        <Box sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 1,
-        }}>
-          <Avatar 
-            sx={{ 
-              bgcolor: 'primary.dark',
-              width: 40,
-              height: 40
-            }}
-          >
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Avatar sx={{ bgcolor: 'primary.dark' }}>
             {providerName?.charAt(0)}
           </Avatar>
           <Typography variant="h6">Chat with {providerName}</Typography>
         </Box>
-        <IconButton 
-          onClick={onClose}
-          sx={{ color: 'white' }}
-        >
+        <IconButton onClick={onClose} sx={{ color: 'white' }}>
           <X />
         </IconButton>
       </DialogTitle>
 
       <DialogContent 
         sx={{
-            p: 2,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-            bgcolor: '#f5f5f5',
-            overflow: 'hidden'
+          p: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          bgcolor: '#f5f5f5'
         }}
       >
         <Box 
@@ -224,75 +283,76 @@ const ChatModal = ({open, onClose, providerId, providerName, clientId, clientNam
             flexGrow: 1,
             overflow: 'auto',
             display: 'flex',
-            flexDirection: 'column',
-            gap: 1.5,
-            pb: 2,
-            mt: 2,
-            '&::-webkit-scrollbar': {
-              width: '8px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(0, 0, 0, 0.2)',
-              borderRadius: '4px',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: 'rgba(0, 0, 0, 0.3)',
-            },
+            flexDirection: 'column'
           }}
         >
-          {messages.map((msg, index) => renderMessage(msg, index))}
+          {messages.map((message, index) => renderMessage(message, index))}
           <div ref={messagesEndRef} />
         </Box>
-
-        <TextField
-          fullWidth
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Message"
-          multiline
-          maxRows={4}
-          variant="standard"
-          InputProps={{
-            disableUnderline: true,
-            endAdornment: (
-              <InputAdornment position="end">
-                {
-                  newMessage.trim() &&
-                    <IconButton 
-                      onClick={handleSendMessage} 
-                      sx={{
-                        bgcolor: 'primary.main',
-                        color: 'white',
-                        '&:hover': {
-                          bgcolor: '#1EAC52'
-                        },
-                        padding: '6px',
-                        borderRadius: '50%'
-                      }}
-                    >
-                      <SendIcon sx={{ fontSize: 20 }} />
-                    </IconButton>
-                }
-              </InputAdornment>
-            )
-          }}
+        
+        <Box
+          component="form"
           sx={{
-            '& .MuiInputBase-root': {
-              p: 1,
-              pr: 1.5,
-              backgroundColor: 'white',
-              borderRadius: '30px'
-            },
-            '& .MuiInputBase-input': {
-              padding: '8px 12px'
-            }
+            display: 'flex',
+            gap: 1,
+            alignItems: 'flex-end',
+            mt: 'auto'
           }}
-        />
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSendMessage();
+          }}
+        >
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+          />
+          
+          <IconButton
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isUploading}
+            sx={{ color: 'primary.main' }}
+          >
+            {isUploading ? (
+              <CircularProgress size={24} />
+            ) : (
+              <ImageIcon />
+            )}
+          </IconButton>
+
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                bgcolor: 'white',
+                borderRadius: '20px'
+              }
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton 
+                    onClick={handleSendMessage}
+                    disabled={!newMessage.trim()}
+                    sx={{ color: 'primary.main' }}
+                  >
+                    <SendIcon />
+                  </IconButton>
+                </InputAdornment>
+              )
+            }}
+          />
+        </Box>
       </DialogContent>
     </Dialog>
   );
