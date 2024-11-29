@@ -250,6 +250,7 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
       <ChatModal
         open={chatOpen}
         onClose={() => setChatOpen(false)}
+        orderId={order.id}
         providerId={localStorage.getItem("providerId")}
         providerName={localStorage.getItem("providerName")}
         clientId={client.id}

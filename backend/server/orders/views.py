@@ -48,7 +48,7 @@ class OrderStatusUpdateView(APIView):
         
         # Validate status transition
         valid_transitions = {
-            OrderStatus.PENDING: [OrderStatus.ACCEPTED, OrderStatus.REJECTED],
+            OrderStatus.PENDING: [OrderStatus.ACCEPTED, OrderStatus.REJECTED, OrderStatus.CANCELLED],
             OrderStatus.ACCEPTED: [OrderStatus.COMPLETED, OrderStatus.CANCELLED, OrderStatus.REJECTED],
             OrderStatus.COMPLETED: [],  # No further transitions allowed
             OrderStatus.CANCELLED: [],  # No further transitions allowed

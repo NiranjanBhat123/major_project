@@ -81,7 +81,13 @@ const OrdersList = () => {
     setFilteredOrders(result);
   }, [statusFilter, timeFilter, orders]);
 
- 
+  const handleOrderUpdate = (updatedOrder) => {
+    // Update the orders state with the new order status
+    const updatedOrders = orders.map(order => 
+      order.id === updatedOrder.id ? updatedOrder : order
+    );
+    setOrders(updatedOrders);
+  };
 
  
 
@@ -161,7 +167,7 @@ const OrdersList = () => {
           <Grid item xs={12} md={9}>
             <Grid container spacing={2}>
               {filteredOrders.map((order) => (
-                <OrderCard key={order.id} order={order}/>
+                <OrderCard key={order.id} order={order}  onOrderUpdate={handleOrderUpdate}/>
               ))}
               {filteredOrders.length === 0 && (
                 <Grid item xs={12}>
