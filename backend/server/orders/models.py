@@ -61,6 +61,19 @@ class Orders(models.Model):
         decimal_places=2,
         help_text=_("Total cost of the order")
     )
+    client_latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        help_text=_("Latitude of the client's location"),
+        null=True, blank=True
+        
+    )
+    client_longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        help_text=_("Longitude of the client's location"),
+        null=True, blank=True
+    )
     review = models.TextField(
         null=True,
         blank=True,

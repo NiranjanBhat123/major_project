@@ -6,6 +6,8 @@ import {
 } from "@mui/material";
 import { X, Image as ImageIcon } from 'lucide-react';
 import SendIcon from '@mui/icons-material/Send';
+import chatBg from '../images/chat_bg.jpg';
+
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -139,7 +141,6 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
     const isSentByMe = msg.isSentByMe;
     
     return (
-
       <Box
         key={index}
         sx={{
@@ -275,7 +276,22 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
           display: 'flex',
           flexDirection: 'column',
           gap: 2,
-          bgcolor: '#f5f5f5'
+          bgcolor: '#f5f5f5',
+          backgroundImage: `url(${chatBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(245, 245, 245, 0.8)', // Slight overlay to improve readability
+            zIndex: 1
+          }
         }}
       >
         <Box 
@@ -283,7 +299,9 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
             flexGrow: 1,
             overflow: 'auto',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            position: 'relative',
+            zIndex: 2
           }}
         >
           {messages.map((message, index) => renderMessage(message, index))}
@@ -296,7 +314,9 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
             display: 'flex',
             gap: 1,
             alignItems: 'flex-end',
-            mt: 'auto'
+            mt: 'auto',
+            position: 'relative',
+            zIndex: 2
           }}
           onSubmit={(e) => {
             e.preventDefault();

@@ -58,7 +58,7 @@ class OrdersAdmin(admin.ModelAdmin):
             'fields': (('id', 'user'), ('provider', 'service'))
         }),
         (_('Order Details'), {
-            'fields': (('ordered_on', 'scheduled_on'), ('otp', 'status', 'total_price'))
+            'fields': (('ordered_on', 'scheduled_on'), ('otp', 'status', 'total_price'),('client_latitude','client_longitude'))
         }),
         (_('Feedback'), {
             'fields': ('review', 'rating'),
@@ -135,10 +135,18 @@ class OrderItemsAdmin(admin.ModelAdmin):
 @admin.register(OrderStatusHistory)
 class OrderStatusHistoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'order', 'status', 'changed_on')
+    search_fields = ('id', 'order__id', 'status')
     list_filter = ('status', 'changed_on')
-    search_fields = ('order__id',)
     readonly_fields = ('id', 'changed_on')
-    raw_id_fields = ('order',)
+
+    actions = ['delete_all']
+
+    def delete_all(self, request, queryset):
+        queryset.delete()
+        self.message_user(request, "All selected status history entries have been deleted.")
+    delete_all.short_description = "Delete All Selected Status History"
+    
+    
     
     def has_add_permission(self, request):
         return False

@@ -43,7 +43,7 @@ const OrdersList = () => {
         }
 
         const data = await response.json();
-
+        
         const sortedOrders = data.sort(
           (a, b) => new Date(b.ordered_on) - new Date(a.ordered_on)
         );

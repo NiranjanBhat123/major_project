@@ -15,9 +15,11 @@ import ChatModal from './ChatModal';
 import Footer from './Footer';
 
 const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
+  console.log(order)
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [otpDialogOpen, setOTPDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
+  const [clientAddress, setClientAddress] = useState('Loading address...');
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString('en-US', {
@@ -49,6 +51,23 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
     
     return (c * r).toFixed(1);
   };
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      try {
+        const response = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${order.client_latitude}&lon=${order.client_longitude}`);
+        
+        if (response.data && response.data.display_name) {
+          setClientAddress(response.data.display_name);
+        }
+      } catch (error) {
+        console.error('Failed to fetch address:', error);
+        setClientAddress('Address not available');
+      }
+    };
+
+    fetchAddress();
+  }, [order.client_latitude, order.client_longitude]);
 
   const handleRejectConfirm = () => {
     updateStatus(order.id, "rejected");
@@ -109,11 +128,11 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <LocationOn sx={{ color: 'text.secondary', fontSize: 'small' }} />
-            <Typography variant="body2">{client.full_address}</Typography>
+            <Typography variant="body2">{clientAddress}</Typography>
           </Box>
           <Typography variant="body2" fontSize='0.9rem'>
             Distance: {haversineDistance(
-              parseFloat(client.latitude), parseFloat(client.longitude),
+              parseFloat(order.client_latitude), parseFloat(order.client_longitude),
               parseFloat(JSON.parse(localStorage.getItem("userLocation")).latitude),
               parseFloat((JSON.parse(localStorage.getItem("userLocation")).longitude))
             )} KM

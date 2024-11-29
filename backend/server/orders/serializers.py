@@ -62,7 +62,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'user', 'provider', 'provider_name', 'service', 'service_name', 'service_image',
             'ordered_on', 'scheduled_on', 'otp', 'status', 'total_price', 
-            'review', 'rating', 'items', 'status_history'
+            'review', 'rating', 'items', 'status_history','client_latitude','client_longitude'
         ]
         read_only_fields = ['ordered_on', 'otp']
 

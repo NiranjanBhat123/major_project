@@ -127,11 +127,12 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
           <Box sx={{ display: "flex", gap: 2 }}>
             <Box
               component="img"
-              src={order.image}
+              src={order.service_image}
               sx={{
                 width: 100,
                 height: 100,
                 objectFit: "cover",
+                borderRadius: 2,
               }}
             />
 
