@@ -539,90 +539,6 @@ const MainPage = () => {
           background: `linear-gradient(135deg, rgba(100, 149, 237, 0.1), rgba(255, 105, 180, 0.1))`,
         }}
       >
-        {/* Header */}
-        <Box
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            display: "flex",
-            alignItems: "center",
-            padding: "0 10px",
-            height: "70px",
-            zIndex: 1100,
-            background: "rgba(255, 255, 255, 0.7)",
-            backdropFilter: "blur(10px)",
-            borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
-            boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: "0 10px",
-              width: "100%",
-            }}
-          >
-            <Typography
-              variant="title"
-              sx={{
-                color: "secondary.main",
-                fontSize: "2rem",
-                textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-              }}
-            >
-              FixNGo
-            </Typography>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  color: "background.paper",
-                  borderRadius: "1.5rem",
-                  bgcolor: "secondary.main",
-                  padding: "0.5rem",
-                }}
-              >
-                <LocationOn sx={{ fontSize: "1.2rem" }} />
-                <Typography sx={{ fontSize: "1rem" }}>
-                  {getFormattedLocation()}
-                </Typography>
-              </Box>
-              <Tooltip title="Account settings">
-                <IconButton
-                  onClick={handleClick}
-                  size="small"
-                  aria-controls={open ? "account-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                >
-                  <Avatar
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      bgcolor: "secondary.main",
-                      color: "background.paper",
-                    }}
-                  >
-                    {userName.charAt(0).toUpperCase()}
-                  </Avatar>
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Box>
-        </Box>
-
         {/* Body */}
         <Box
           sx={{
@@ -681,9 +597,6 @@ const MainPage = () => {
             </Box>
           )}
         </Box>
-
-        <Footer />
-
         <Menu
           anchorEl={anchorEl}
           id="account-menu"
