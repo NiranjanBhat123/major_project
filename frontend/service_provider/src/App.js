@@ -11,6 +11,7 @@ import MainPage from "./Components/MainPage";
 import ServiceProviderProfile from "./Components/ServiceProviderProfile";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
+import OrderHistory from "./Components/OrderHistory";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,7 +57,7 @@ const App = () => {
   }, [navigate, currentLocation.pathname]);
 
   // Determine routes that should have Navbar and Footer
-  const protectedRoutes = ['/main', '/profile'];
+  const protectedRoutes = ['/main', '/profile','/orders'];
   const showNavbarAndFooter = isAuthenticated && protectedRoutes.includes(currentLocation.pathname);
 
   return (
@@ -105,6 +106,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <ServiceProviderProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <ProtectedRoute>
+                  <OrderHistory />
                 </ProtectedRoute>
               }
             />
