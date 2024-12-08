@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from "react";
 import { Chart } from "react-google-charts";
-import axios from 'axios';
+import axios from "axios";
 import {
   Container,
   Typography,
@@ -12,35 +12,46 @@ import {
   styled,
   Tooltip as MUITooltip,
   CircularProgress,
-  Divider
-} from '@mui/material';
-import { Star, StarBorder, CalendarMonth, TrendingUp, MonetizationOn } from '@mui/icons-material';
+  Divider,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+} from "@mui/material";
+import {
+  Star,
+  StarBorder,
+  CalendarMonth,
+  TrendingUp,
+  MonetizationOn,
+  RateReview,
+  VerifiedUser,
+} from "@mui/icons-material";
 
 // Custom styled components with enhanced styling
 const DashboardPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(3),
   borderRadius: theme.spacing(2),
-  boxShadow: '0 12px 24px rgba(0,0,0,0.1)',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-5px)',
-    boxShadow: '0 15px 30px rgba(0,0,0,0.15)'
-  }
+  boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: "0 15px 30px rgba(0,0,0,0.15)",
+  },
 }));
 
 const StatCard = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flexDirection: 'column',
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexDirection: "column",
   padding: theme.spacing(3),
   borderRadius: theme.spacing(2),
-  background: 'linear-gradient(145deg, #f0f4f8 0%, #e6eaf0 100%)',
-  boxShadow: '0 8px 20px rgba(0,0,0,0.08)',
-  transition: 'transform 0.2s ease',
-  '&:hover': {
-    transform: 'scale(1.03)'
-  }
+  background: "linear-gradient(145deg, #f0f4f8 0%, #e6eaf0 100%)",
+  boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+  transition: "transform 0.2s ease",
+  "&:hover": {
+    transform: "scale(1.03)",
+  },
 }));
 
 const EnhancedOrderCard = styled(Box)(({ theme }) => ({
@@ -48,13 +59,28 @@ const EnhancedOrderCard = styled(Box)(({ theme }) => ({
   borderRadius: theme.spacing(2),
   padding: theme.spacing(2.5),
   border: `1px solid ${theme.palette.divider}`,
-  transition: 'all 0.3s ease',
-  boxShadow: '0 4px 10px rgba(0,0,0,0.05)',
-  '&:hover': {
-    transform: 'translateY(-8px)',
-    boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
-    borderColor: theme.palette.primary.main
-  }
+  transition: "all 0.3s ease",
+  boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+  position: "relative",
+  overflow: "hidden",
+  "&:hover": {
+    transform: "translateY(-8px)",
+    boxShadow: "0 8px 20px rgba(0,0,0,0.1)",
+    borderColor: theme.palette.primary.main,
+  },
+}));
+
+const ReviewBadge = styled(Box)(({ theme }) => ({
+  position: "absolute",
+  top: 0,
+  right: 0,
+  backgroundColor: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  padding: theme.spacing(0.5, 1),
+  borderBottomLeftRadius: theme.spacing(1),
+  display: "flex",
+  alignItems: "center",
+  gap: theme.spacing(0.5),
 }));
 
 export default function EnhancedOrderDashboard() {
@@ -65,7 +91,9 @@ export default function EnhancedOrderDashboard() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/orders/?provider_id=95261318-665e-438f-9879-fe515d0fba6d');
+        const response = await axios.get(
+          "http://127.0.0.1:8000/orders/?provider_id=95261318-665e-438f-9879-fe515d0fba6d"
+        );
         setOrders(response.data);
         setLoading(false);
       } catch (err) {
@@ -78,18 +106,19 @@ export default function EnhancedOrderDashboard() {
   }, []);
 
   const calculatedStats = useMemo(() => {
-    if (orders.length === 0) return {
-      subservicePieData: [['Subservice', 'Total Amount']],
-      statusDistribution: [['Status', 'Count']],
-      totalRevenue: 0,
-      totalOrders: 0,
-      monthOnMonthGrowth: 'N/A',
-      monthlyEarningsData: [['Month', 'Earnings']]
-    };
-  
+    if (orders.length === 0)
+      return {
+        subservicePieData: [["Subservice", "Total Amount"]],
+        statusDistribution: [["Status", "Count"]],
+        totalRevenue: 0,
+        totalOrders: 0,
+        monthOnMonthGrowth: "N/A",
+        monthlyEarningsData: [["Month", "Earnings"]],
+      };
+
     // Subservice Analysis
     const subserviceAnalysis = orders.reduce((acc, order) => {
-      order.items.forEach(item => {
+      order.items.forEach((item) => {
         const subservice = item.sub_service_name;
         acc[subservice] = acc[subservice] || { count: 0, amount: 0 };
         acc[subservice].count += 1;
@@ -97,111 +126,146 @@ export default function EnhancedOrderDashboard() {
       });
       return acc;
     }, {});
-  
+
     // Subservice Pie Chart Data
     const subservicePieData = [
-      ['Subservice', 'Total Amount'],
+      ["Subservice", "Total Amount"],
       ...Object.entries(subserviceAnalysis).map(([name, data]) => [
         name,
-        data.amount
-      ])
+        data.amount,
+      ]),
     ];
-  
+
     // Status Distribution
     const statusDistribution = [
-      ['Status', 'Count'],
-      ['Completed', orders.filter(order => order.status === 'completed').length],
-      ['Cancelled', orders.filter(order => order.status === 'cancelled').length],
-      ['Rejected', orders.filter(order => order.status === 'rejected').length]
+      ["Status", "Count"],
+      [
+        "Completed",
+        orders.filter((order) => order.status === "completed").length,
+      ],
+      [
+        "Cancelled",
+        orders.filter((order) => order.status === "cancelled").length,
+      ],
+      [
+        "Rejected",
+        orders.filter((order) => order.status === "rejected").length,
+      ],
     ];
-  
+
     // Total Revenue and Orders
-    const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total_price), 0);
+    const totalRevenue = orders.reduce(
+      (sum, order) => sum + parseFloat(order.total_price),
+      0
+    );
     const totalOrders = orders.length;
-  
+
     // Comprehensive Month-on-Month Earnings Calculation
     const currentYear = new Date().getFullYear();
     const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
-  
+
     // Initialize monthly earnings for the current year
     const monthlyEarnings = {};
     monthNames.forEach((_, index) => {
       monthlyEarnings[`${currentYear}-${index}`] = 0;
     });
-  
+
     // Calculate actual earnings for each month based on scheduled date
-    orders.forEach(order => {
+    orders.forEach((order) => {
       const scheduledDate = new Date(order.scheduled_on);
       if (scheduledDate.getFullYear() === currentYear) {
         const key = `${currentYear}-${scheduledDate.getMonth()}`;
         monthlyEarnings[key] += parseFloat(order.total_price);
       }
     });
-  
+
     // Convert monthly earnings to sorted array with labels
     const sortedMonthlyEarnings = monthNames.map((monthName, index) => {
       const earnings = monthlyEarnings[`${currentYear}-${index}`];
       return [`${monthName} ${currentYear}`, earnings];
     });
-  
+
     // Prepare monthly earnings line chart data
     const monthlyEarningsData = [
-      ['Month', 'Earnings'],
-      ...sortedMonthlyEarnings
+      ["Month", "Earnings"],
+      ...sortedMonthlyEarnings,
     ];
-  
+
     // Improved Month-on-Month Growth Calculation
-    let monthOnMonthGrowth = 'N/A';
-    const validMonths = sortedMonthlyEarnings.filter(([, earnings]) => earnings > 0);
-    
+    let monthOnMonthGrowth = "N/A";
+    const validMonths = sortedMonthlyEarnings.filter(
+      ([, earnings]) => earnings > 0
+    );
+
     if (validMonths.length > 1) {
       const currentIndex = validMonths.length - 1;
       const previousIndex = currentIndex - 1;
-      
+
       const currentMonthEarnings = validMonths[currentIndex][1];
       const lastMonthEarnings = validMonths[previousIndex][1];
-      
+
       // Handle zero earnings cases
       if (lastMonthEarnings > 0) {
-        monthOnMonthGrowth = ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings * 100).toFixed(2);
+        monthOnMonthGrowth = (
+          ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings) *
+          100
+        ).toFixed(2);
       } else if (currentMonthEarnings > 0) {
-        monthOnMonthGrowth = 'Infinite';
+        monthOnMonthGrowth = "Infinite";
       } else {
-        monthOnMonthGrowth = '0';
+        monthOnMonthGrowth = "0";
       }
     }
-  
+
     return {
       subservicePieData,
       statusDistribution,
       totalRevenue,
       totalOrders,
       monthOnMonthGrowth,
-      monthlyEarningsData
+      monthlyEarningsData,
     };
   }, [orders]);
 
   const chartOptions = {
     pieHole: 0.4,
-    backgroundColor: 'transparent',
-    legend: { position: 'bottom', textStyle: { color: '#333' } },
-    chartArea: { width: '90%', height: '70%' },
-    colors: ['#4285F4', '#34A853', '#FBBC05', '#EA4335']
+    backgroundColor: "transparent",
+    legend: { position: "bottom", textStyle: { color: "#333" } },
+    chartArea: { width: "90%", height: "70%" },
+    colors: ["#4285F4", "#34A853", "#FBBC05", "#EA4335"],
   };
 
   const lineChartOptions = {
     ...chartOptions,
-    curveType: 'function',
-    hAxis: { title: 'Month' },
-    vAxis: { title: 'Earnings (₹)' }
+    curveType: "function",
+    hAxis: { title: "Month" },
+    vAxis: { title: "Earnings (₹)" },
   };
 
   if (loading) {
     return (
-      <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Container
+        maxWidth="xl"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <CircularProgress />
       </Container>
     );
@@ -209,7 +273,15 @@ export default function EnhancedOrderDashboard() {
 
   if (error) {
     return (
-      <Container maxWidth="xl" sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+      <Container
+        maxWidth="xl"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
         <Typography variant="h6" color="error">
           Error loading orders: {error.message}
         </Typography>
@@ -368,15 +440,68 @@ export default function EnhancedOrderDashboard() {
                       ))}
                     </Box>
 
-                    {/* Total Price */}
+                    {/* Total Price and Rating */}
                     <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
-                      <Typography variant="subtitle1" color="text.primary">
-                        Total Price
-                      </Typography>
-                      <Typography variant="h6" color="primary" fontWeight="bold">
-                        ₹{parseFloat(order.total_price).toFixed(2)}
-                      </Typography>
+                      <Box>
+                        <Typography variant="subtitle1" color="text.primary">
+                          Total Price
+                        </Typography>
+                        <Typography variant="h6" color="primary" fontWeight="bold">
+                          ₹{parseFloat(order.total_price).toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center">
+                        {order.review ? (
+                          <Box display="flex" alignItems="center">
+                            <Rating
+                              value={order.rating}
+                              readOnly
+                              precision={0.5}
+                              icon={<Star fontSize="inherit" />}
+                              emptyIcon={<StarBorder fontSize="inherit" />}
+                            />
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{ ml: 1 }}
+                            >
+                              ({order.rating})
+                            </Typography>
+                          </Box>
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            No Review
+                          </Typography>
+                        )}
+                      </Box>
                     </Box>
+
+                    {/* Review Comment */}
+                    {order.review && (
+                      <Box
+                        mt={2}
+                        p={2}
+                        bgcolor="background.paper"
+                        borderRadius={2}
+                      >
+                        <Box display="flex" alignItems="center" mb={1}>
+                          <RateReview
+                            fontSize="small"
+                            color="primary"
+                            sx={{ mr: 1 }}
+                          />
+                          <Typography
+                            variant="subtitle2"
+                            color="text.secondary"
+                          >
+                            Customer Review
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" color="text.primary">
+                          {order.review}
+                        </Typography>
+                      </Box>
+                    )}
                   </EnhancedOrderCard>
                 </Grid>
               ))}
