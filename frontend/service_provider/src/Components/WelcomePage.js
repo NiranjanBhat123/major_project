@@ -7,14 +7,26 @@ import VerifyOTP from "./VerifyOTP";
 import { Box } from '@mui/material';
 
 const WelcomePage = () => {
-  const { view } = useWelcomeViewContext();
+  const { view = "welcome" } = useWelcomeViewContext() || {};
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log("Current Welcome View:", view);
+  }, [view]);
 
   return (
-    <Box className="welcome" data-view={view}
+    <Box 
+      className="welcome" 
+      data-view={view}
       sx={{
         position: 'relative',
         width: '80%',
-        height: '90%',
+        height: '90vh',
+        margin: 'auto',
+        marginTop:"2rem",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
         borderRadius: '20px',
         boxSizing: 'border-box',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
