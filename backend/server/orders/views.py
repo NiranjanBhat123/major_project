@@ -70,3 +70,41 @@ class OrderStatusUpdateView(APIView):
         
         serializer = OrderSerializer(order)
         return Response(serializer.data)
+    
+class OrderReviewUpdateView(APIView):
+    permission_classes = [AllowAny]
+    
+    def patch(self, request, order_id):
+        order = get_object_or_404(Orders, id=order_id)
+        
+        # Check if order is completed
+        if order.status != OrderStatus.COMPLETED:
+            return Response(
+                {'error': 'Only completed orders can be reviewed'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check if review already exists
+        if order.rating and order.review:
+            return Response(
+                {'error': 'Review already submitted for this order'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate rating
+        rating = request.data.get('rating')
+        review = request.data.get('review')
+        
+        if not rating or not review:
+            return Response(
+                {'error': 'Both rating and review are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update order with review and rating
+        order.rating = rating
+        order.review = review
+        order.save()
+        
+        serializer = OrderSerializer(order)
+        return Response(serializer.data)

@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { X, Image as ImageIcon } from 'lucide-react';
 import SendIcon from '@mui/icons-material/Send';
-import chatBg from '../images/chat_bg.jpg';
+//import chatBg from '../images/chat_bg.jpg';
 
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -277,7 +277,7 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
           flexDirection: 'column',
           gap: 2,
           bgcolor: '#f5f5f5',
-          backgroundImage: `url(${chatBg})`,
+          backgroundImage: `https://www.shutterstock.com/image-vector/social-media-sketch-vector-seamless-600nw-1660950727.jpg`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

@@ -14,6 +14,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Rating,
 } from "@mui/material";
 import {
   Truck,
@@ -25,14 +26,17 @@ import {
   ChevronDown,
   ChevronUp,
   X,
+  Star,
 } from "lucide-react";
 import ChatModal from "../Components/ChatModal";
+import ReviewModal from "./ReviewModal"; // Import the new ReviewModal
 
-const OrderCard = ({ order ,onOrderUpdate}) => {
+const OrderCard = ({ order, onOrderUpdate }) => {
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
 
   const toggleOrderExpand = () => {
     setExpanded(!expanded);
@@ -40,23 +44,35 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
-      case "pending": return "#FFA500";
-      case "completed": return "#4CAF50";
-      case "cancelled": return "#F44336";
-      case "accepted": return "#42a7f5";
-      case "rejected": return "#d742f5";
-      default: return "#757575";
+      case "pending":
+        return "#FFA500";
+      case "completed":
+        return "#4CAF50";
+      case "cancelled":
+        return "#F44336";
+      case "accepted":
+        return "#42a7f5";
+      case "rejected":
+        return "#d742f5";
+      default:
+        return "#757575";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status.toLowerCase()) {
-      case "pending": return <Clock size={16} />;
-      case "completed": return <CheckCircle size={16} />;
-      case "cancelled": return <XCircle size={16} />;
-      case "accepted": return <Truck size={16} />;
-      case "rejected": return <AlertTriangle size={16} />;
-      default: return null;
+      case "pending":
+        return <Clock size={16} />;
+      case "completed":
+        return <CheckCircle size={16} />;
+      case "cancelled":
+        return <XCircle size={16} />;
+      case "accepted":
+        return <Truck size={16} />;
+      case "rejected":
+        return <AlertTriangle size={16} />;
+      default:
+        return null;
     }
   };
 
@@ -68,20 +84,23 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
 
     setIsLoading(true);
     try {
-      const response = await fetch(`http://127.0.0.1:8000/orders/${order.id}/status/`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'cancelled' })
-      });
+      const response = await fetch(
+        `http://127.0.0.1:8000/orders/${order.id}/status/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status: "cancelled" }),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to cancel order');
+        throw new Error("Failed to cancel order");
       }
 
       const updatedOrder = await response.json();
-      
+
       // If onOrderUpdate callback is provided, call it to update parent component
       if (onOrderUpdate) {
         onOrderUpdate(updatedOrder);
@@ -90,10 +109,41 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
       // Close the dialog
       setCancelDialogOpen(false);
     } catch (error) {
-      console.error('Error cancelling order:', error);
+      console.error("Error cancelling order:", error);
       // Optionally show an error message to the user
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async (orderId, rating, reviewText) => {
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:8000/orders/${orderId}/review/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            rating: rating,
+            review: reviewText,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to submit review");
+      }
+
+      const updatedOrder = await response.json();
+
+      if (onOrderUpdate) {
+        onOrderUpdate(updatedOrder);
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      // Optionally show an error message to the user
     }
   };
 
@@ -140,13 +190,17 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
               <Typography variant="h6" fontWeight={600} color="primary">
                 {order.service_name}
               </Typography>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+              >
                 <Calendar size={16} />
                 <Typography variant="body2" color="text.secondary">
                   Ordered: {new Date(order.ordered_on).toLocaleDateString()}
                 </Typography>
               </Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}
+              >
                 <Truck size={16} />
                 <Typography variant="body2" color="text.secondary">
                   Scheduled: {new Date(order.scheduled_on).toLocaleString()}
@@ -194,46 +248,92 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
                     }}
                   >
                     <Box>
-                      <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                      <Typography
+                        variant="subtitle2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
                         Service Provider
                       </Typography>
                       <Typography variant="body1" fontWeight={500}>
                         {order.provider_name}
                       </Typography>
                     </Box>
-                    {(order.status==="accepted" || order.status==="pending")&&<Button
-                      variant="contained"
-                      onClick={() => setChatOpen(true)}
-                      sx={{
-                        height: "2rem",
-                        padding: "0 15px",
-                        borderRadius: "15px",
-                        bgcolor: "success.main",
-                        "&:hover": { bgcolor: "success.dark" },
-                      }}
-                    >
-                      Chat
-                    </Button>}
+                    {(order.status === "accepted" ||
+                      order.status === "pending") && (
+                      <Button
+                        variant="contained"
+                        onClick={() => setChatOpen(true)}
+                        sx={{
+                          height: "2rem",
+                          padding: "0 15px",
+                          borderRadius: "15px",
+                          bgcolor: "success.main",
+                          "&:hover": { bgcolor: "success.dark" },
+                        }}
+                      >
+                        Chat
+                      </Button>
+                    )}
                   </Box>
                 </Grid>
                 <Grid item xs={6}>
-                  <Box
-                    sx={{
-                      bgcolor: "rgba(0,0,0,0.04)",
-                      p: 2,
-                      borderRadius: 2,
-                    }}
-                  >
-                    <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                      Verification OTP
-                    </Typography>
-                    <Typography variant="h6" color="primary" fontWeight={600}>
-                      {order.otp}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Share with service provider
-                    </Typography>
-                  </Box>
+                 
+                  {/* OTP or Review Section */}
+                  {order.status.toLowerCase() !== "completed" ? (
+                    <Box
+                      sx={{
+                        bgcolor: "rgba(0,0,0,0.04)",
+                        p: 2,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
+                        Verification OTP
+                      </Typography>
+                      <Typography variant="h6" color="primary" fontWeight={600}>
+                        {order.otp}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Share with service provider
+                      </Typography>
+                    </Box>
+                  ) : order.rating && order.review ? (
+                    <Box
+                      sx={{
+                        bgcolor: "rgba(0,0,0,0.04)",
+                        p: 2,
+                        borderRadius: 2,
+                      }}
+                    >
+                      <Typography
+                        variant="subtitle2"
+                        color="text.secondary"
+                        gutterBottom
+                      >
+                        Your Review
+                      </Typography>
+                      <Rating
+                        value={order.rating}
+                        readOnly
+                        precision={1}
+                        icon={<Star fill="currentColor" />}
+                        emptyIcon={<Star />}
+                        sx={{
+                          "& .MuiRating-iconFilled": {
+                            color: "primary.main",
+                          },
+                        }}
+                      />
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {order.review}
+                      </Typography>
+                    </Box>
+                  ) : null}
                 </Grid>
               </Grid>
 
@@ -259,7 +359,9 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
                       • {item.sub_service_name}
                     </Typography>
                     <Chip
-                      label={`₹${parseFloat(item.price).toLocaleString("en-IN")}`}
+                      label={`₹${parseFloat(item.price).toLocaleString(
+                        "en-IN"
+                      )}`}
                       color="primary"
                       size="small"
                       variant="outlined"
@@ -304,13 +406,13 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
               </Box>
               {/* Cancel Order Option */}
               {["pending", "accepted"].includes(order.status.toLowerCase()) && (
-                <Box 
-                  sx={{ 
-                    mt: 3, 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    borderTop: '1px solid rgba(0,0,0,0.1)',
-                    pt: 2 
+                <Box
+                  sx={{
+                    mt: 3,
+                    display: "flex",
+                    justifyContent: "center",
+                    borderTop: "1px solid rgba(0,0,0,0.1)",
+                    pt: 2,
                   }}
                 >
                   <Button
@@ -326,7 +428,30 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
                   </Button>
                 </Box>
               )}
+              {order.status.toLowerCase() === "completed" && (!order.rating || !order.review) && (
+                <Box 
+                  sx={{ 
+                    mt: 3, 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    borderTop: '1px solid rgba(0,0,0,0.1)',
+                    pt: 2 
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => setReviewModalOpen(true)}
+                    sx={{
+                      borderRadius: 3,
+                    }}
+                  >
+                    Write a Review
+                  </Button>
+                </Box>
+              )}
             </Box>
+
             <ChatModal
               open={chatOpen}
               onClose={() => setChatOpen(false)}
@@ -335,6 +460,13 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
               providerName={order.provider_name}
               clientId={localStorage.getItem("userId")}
               clientName={localStorage.getItem("userName")}
+            />
+            <ReviewModal
+              open={reviewModalOpen}
+              onClose={() => setReviewModalOpen(false)}
+              orderId={order.id}
+              providerName={order.provider_name}
+              onSubmitReview={handleSubmitReview}
             />
           </Collapse>
         </CardContent>
@@ -345,29 +477,24 @@ const OrderCard = ({ order ,onOrderUpdate}) => {
         aria-labelledby="cancel-order-dialog-title"
         aria-describedby="cancel-order-dialog-description"
       >
-        <DialogTitle id="cancel-order-dialog-title">
-          Cancel Order
-        </DialogTitle>
+        <DialogTitle id="cancel-order-dialog-title">Cancel Order</DialogTitle>
         <DialogContent>
           <DialogContentText id="cancel-order-dialog-description">
-            Are you sure you want to cancel this order? 
-            This action cannot be undone.
+            Are you sure you want to cancel this order? This action cannot be
+            undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
-            onClick={() => setCancelDialogOpen(false)} 
-            color="primary"
-          >
+          <Button onClick={() => setCancelDialogOpen(false)} color="primary">
             No, Keep Order
           </Button>
-          <Button 
-            onClick={handleCancelOrder} 
-            color="error" 
+          <Button
+            onClick={handleCancelOrder}
+            color="error"
             variant="contained"
             disabled={isLoading}
           >
-            {isLoading ? 'Cancelling...' : 'Yes, Cancel Order'}
+            {isLoading ? "Cancelling..." : "Yes, Cancel Order"}
           </Button>
         </DialogActions>
       </Dialog>

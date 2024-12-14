@@ -77,6 +77,7 @@ class Orders(models.Model):
     review = models.TextField(
         null=True,
         blank=True,
+        max_length=500, 
         help_text=_("Optional feedback from the client after order completion")
     )
     rating = models.PositiveIntegerField(
