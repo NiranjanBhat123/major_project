@@ -423,7 +423,7 @@ const Navbar = () => {
           </LogoContainer>
 
           {/* Location chip remains the same */}
-          {location && (
+          {location && 
             <Tooltip
               title="Click to view full address"
               arrow
@@ -436,7 +436,7 @@ const Navbar = () => {
                 clickable
               />
             </Tooltip>
-          )}
+          }
 
           {/* Replace the existing search field with the new searchComponent */}
           <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>

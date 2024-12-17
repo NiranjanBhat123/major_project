@@ -276,7 +276,6 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
           p: 2,
           display: 'flex',
           flexDirection: 'column',
-          gap: 2,
           bgcolor: '#f5f5f5',
           backgroundImage: `https://www.shutterstock.com/image-vector/social-media-sketch-vector-seamless-600nw-1660950727.jpg`,
           backgroundSize: 'cover',
@@ -299,7 +298,8 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
             flexGrow: 1,
             overflow: 'auto',
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            mt: 2
           }}
         >
           {messages.map((message, index) => renderMessage(message, index))}
@@ -311,8 +311,8 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
           sx={{
             display: 'flex',
             gap: 1,
-            alignItems: 'flex-end',
-            mt: 'auto'
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}
           onSubmit={(e) => {
             e.preventDefault();
@@ -341,32 +341,47 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
 
           <TextField
             fullWidth
-            multiline
-            maxRows={4}
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                bgcolor: 'white',
-                borderRadius: '20px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }
-            }}
+            placeholder="Message"
+            multiline
+            maxRows={4}
+            variant="standard"
             InputProps={{
+              disableUnderline: true,
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton 
-                    onClick={handleSendMessage}
-                    disabled={!newMessage.trim()}
-                    sx={{ color: 'primary.main' }}
-                  >
-                    <SendIcon />
-                  </IconButton>
+                  {
+                    newMessage.trim() &&
+                    <IconButton
+                      onClick={handleSendMessage}
+                      sx={{
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        '&:hover': {
+                          bgcolor: '#1EAC52'
+                        },
+                        padding: '6px',
+                        borderRadius: '50%'
+                      }}
+                    >
+                      <SendIcon sx={{ fontSize: 20 }} />
+                    </IconButton>
+                  }
                 </InputAdornment>
               )
+            }}
+            sx={{
+              '& .MuiInputBase-root': {
+                p: 1,
+                pr: 1.5,
+                backgroundColor: 'white',
+                borderRadius: '30px'
+              },
+              '& .MuiInputBase-input': {
+                padding: '8px 12px'
+              }
             }}
           />
         </Box>

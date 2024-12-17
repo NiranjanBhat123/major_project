@@ -51,13 +51,14 @@ const Login = () => {
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/service_providers/login/', formData);
-      
+
       if(response.data.status) {
         localStorage.setItem('accessToken', response.data.data.access_token);
         localStorage.setItem('refreshToken', response.data.data.refresh_token);
         localStorage.setItem('providerId', response.data.data.provider_id);
         localStorage.setItem('providerName', response.data.data.name);
         localStorage.setItem('providerEmail', response.data.data.email);
+        localStorage.setItem('mainServiceId', response.data.data.service_id);
 
         await requestAndStoreLocation(
           () => {}, // Success callback

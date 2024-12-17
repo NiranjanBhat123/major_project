@@ -102,6 +102,7 @@ const RegistrationPage = () => {
         localStorage.setItem('providerId', response.data.data.provider_id);
         localStorage.setItem('providerName', response.data.data.name);
         localStorage.setItem('providerEmail', response.data.data.email);
+        localStorage.setItem('mainServiceId', response.data.data.service_id);
         navigate('/main');
       }
       else setError(response.data.message);
