@@ -334,7 +334,8 @@ class LoginView(APIView):
                     'refresh_token': str(refresh),
                     'provider_id': str(provider.id),
                     'email': provider.email,
-                    'name': provider.full_name
+                    'name': provider.full_name,
+                    'service_id':provider.main_service.id
                 }
             }, status=status.HTTP_200_OK)
             

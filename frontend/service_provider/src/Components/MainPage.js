@@ -1,39 +1,15 @@
 import React, { useState, useEffect } from "react";
 import {
-  Box,
-  Typography,
-  Menu,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  IconButton,
-  Divider,
-  ListItemIcon,
-  Button,
-  Alert,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  TextField,
+  Box, Typography, Divider, Button, Alert, CircularProgress,
+  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from "@mui/material";
-import {
-  AccountCircle,
-  EventNote,
-  Logout,
-  LocationOn,
-  Call,
-} from "@mui/icons-material";
-import { useNavigate,Link } from "react-router-dom";
+import { LocationOn, Call } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import OTPVerificationModal from "./OTPVerificationModal";
 import ChatModal from "./ChatModal";
-import Footer from "./Footer";
 
 const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
-  console.log(order);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [otpDialogOpen, setOTPDialogOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -74,13 +50,19 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
     const fetchAddress = async () => {
       try {
         const response = await axios.get(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${order.client_latitude}&lon=${order.client_longitude}`
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${order.client_latitude}&lon=${order.client_longitude}`,
+          {
+            headers: {
+              'Accept-Language': 'en', // Enforce English as the response language
+            },
+          }
         );
 
         if (response.data && response.data.display_name) {
           setClientAddress(response.data.display_name);
         }
-      } catch (error) {
+      } 
+      catch(error) {
         console.error("Failed to fetch address:", error);
         setClientAddress("Address not available");
       }
@@ -99,13 +81,16 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
       <Box
         sx={{
           p: 2,
-          border: "1px solid rgba(255, 255, 255, 0.2)",
+          border: (theme) => `1px solid ${theme.palette.primary.main}`,
+          borderRadius: "1rem",
+          m: 2,
+          mb: 3,
           backdropFilter: "blur(10px)",
           transition: "all 0.5s ease-in-out",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.3)",
           "&:hover": {
             boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
           },
+          
         }}
       >
         <Box
@@ -319,10 +304,6 @@ const OrderCard = ({ order, client, services, updateStatus, isNewOrder }) => {
 };
 
 const MainPage = () => {
-  const navigate = useNavigate();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [userName, setUserName] = useState("");
-  const [location, setLocation] = useState(null);
   const [newOrders, setNewOrders] = useState([]);
   const [upcomingOrders, setUpcomingOrders] = useState([]);
   const [clients, setClients] = useState({});
@@ -330,18 +311,7 @@ const MainPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const open = Boolean(anchorEl);
-
   useEffect(() => {
-    const name = localStorage.getItem("providerName");
-    if (name) setUserName(name);
-
-    const storedLocation = localStorage.getItem("userLocation");
-    if (storedLocation) {
-      const locationData = JSON.parse(storedLocation);
-      setLocation(locationData);
-    }
-
     fetchOrders();
   }, []);
 
@@ -428,32 +398,6 @@ const MainPage = () => {
     }
   };
 
-  const getFormattedLocation = () => {
-    if (!location?.address) return "Location not available";
-    const addressParts = location.address.split(",");
-
-    // Take last 2-3 parts of the address (usually city and state)
-    // Log addressParts to see what to display
-    return [addressParts[2], addressParts[5]].join(", ").trim();
-  };
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("providerId");
-    localStorage.removeItem("providerName");
-    localStorage.removeItem("providerEmail");
-    navigate("/");
-  };
-
   const Section = ({ sectionName, orders, newOrder }) => {
     return (
       <Box
@@ -487,7 +431,7 @@ const MainPage = () => {
         <Box
           sx={{
             textAlign: "left",
-            maxHeight: "calc(100vh - 400px)",
+            height: "32rem",
             overflowY: "scroll",
             "&::-webkit-scrollbar": {
               width: "8px",
@@ -552,13 +496,6 @@ const MainPage = () => {
             textAlign: "center",
           }}
         >
-          <Typography variant="h4" sx={{ color: "primary.main" }}>
-            Welcome, {userName.split(" ")[0]}!!
-          </Typography>
-          <Typography color="text.secondary">
-            Manage your orders and stay updated with your schedule
-          </Typography>
-
           {error && (
             <Alert severity="error" sx={{ mb: 2 }}>
               {error}
@@ -597,63 +534,6 @@ const MainPage = () => {
             </Box>
           )}
         </Box>
-        <Menu
-          anchorEl={anchorEl}
-          id="account-menu"
-          open={open}
-          onClose={handleClose}
-          onClick={handleClose}
-          slotProps={{
-            paper: {
-              elevation: 0,
-              sx: {
-                overflow: "visible",
-                filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                mt: 1.5,
-                bgcolor: "background.paper",
-                "&::before": {
-                  content: '""',
-                  display: "block",
-                  position: "absolute",
-                  top: 0,
-                  right: 14,
-                  width: 10,
-                  height: 10,
-                  bgcolor: "background.paper",
-                  transform: "translateY(-50%) rotate(45deg)",
-                  zIndex: 0,
-                },
-              },
-            },
-          }}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          <MenuItem>
-            <ListItemIcon>
-              <AccountCircle fontSize="small" sx={{ color: "text.muted" }} />
-            </ListItemIcon>
-            <Link
-              to="/profile"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              Profile
-            </Link>
-          </MenuItem>
-          <MenuItem>
-            <ListItemIcon>
-              <EventNote fontSize="small" sx={{ color: "text.muted" }} />
-            </ListItemIcon>
-            Orders
-          </MenuItem>
-          <Divider />
-          <MenuItem onClick={handleLogout}>
-            <ListItemIcon>
-              <Logout fontSize="small" sx={{ color: "text.muted" }} />
-            </ListItemIcon>
-            Logout
-          </MenuItem>
-        </Menu>
       </Box>
     </>
   );
