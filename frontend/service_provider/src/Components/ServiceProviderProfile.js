@@ -2,21 +2,16 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Grid,
   TextField,
   Button,
   Card,
   CardContent,
   Avatar,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Snackbar,
   Alert,
-  Paper,
-  Divider
+  Paper
 } from '@mui/material';
+import Grid from "@mui/material/Grid2";
 import { Save, Edit, Person } from '@mui/icons-material';
 import axios from 'axios';
 
@@ -61,7 +56,7 @@ const ServiceProviderProfile = () => {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/service_providers/${providerId}/`);
         const providerDetails = response.data;
-        
+
         const profileData = {
           first_name: providerDetails.first_name,
           last_name: providerDetails.last_name,
@@ -78,7 +73,7 @@ const ServiceProviderProfile = () => {
         setProfileData(profileData);
         setOriginalProfileData(profileData);
         setPreviewImage(providerDetails.photo);
-      } catch (error) {
+      } catch(error) {
         console.error('Error fetching provider details:', error);
         setSnackbar({
           open: true,
@@ -101,20 +96,20 @@ const ServiceProviderProfile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!profileData.first_name) newErrors.first_name = 'First name is required';
-    if (!profileData.last_name) newErrors.last_name = 'Last name is required';
-    if (!profileData.mobile_number) newErrors.mobile_number = 'Mobile number is required';
-    if (!profileData.street_address) newErrors.street_address = 'Street address is required';
-    if (!profileData.city) newErrors.city = 'City is required';
-    if (!profileData.state) newErrors.state = 'State is required';
-    if (!profileData.postal_code) newErrors.postal_code = 'Postal code is required';
-    if (!profileData.gender) newErrors.gender = 'Gender is required';
-    
-    if (Object.keys(newErrors).length > 0) {
+    if(!profileData.first_name) newErrors.first_name = 'First name is required';
+    if(!profileData.last_name) newErrors.last_name = 'Last name is required';
+    if(!profileData.mobile_number) newErrors.mobile_number = 'Mobile number is required';
+    if(!profileData.street_address) newErrors.street_address = 'Street address is required';
+    if(!profileData.city) newErrors.city = 'City is required';
+    if(!profileData.state) newErrors.state = 'State is required';
+    if(!profileData.postal_code) newErrors.postal_code = 'Postal code is required';
+    if(!profileData.gender) newErrors.gender = 'Gender is required';
+
+    if(Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     const formData = {
       first_name: profileData.first_name,
       last_name: profileData.last_name,
@@ -125,7 +120,7 @@ const ServiceProviderProfile = () => {
       postal_code: profileData.postal_code,
       gender: profileData.gender,
     };
-    
+
     try {
       const providerId = localStorage.getItem('providerId');
       await axios.patch(
@@ -137,7 +132,7 @@ const ServiceProviderProfile = () => {
           }
         }
       );
-      
+
       // Update localStorage with the new profile data
       const providerData = JSON.parse(localStorage.getItem('providerData') || '{}');
       const updatedProviderData = {
@@ -152,8 +147,8 @@ const ServiceProviderProfile = () => {
         gender: formData.gender
       };
       localStorage.setItem('providerData', JSON.stringify(updatedProviderData));
-      localStorage.setItem('providerName',formData.first_name+" "+formData.last_name)
-      
+      localStorage.setItem('providerName', formData.first_name + " " + formData.last_name)
+
       setSnackbar({
         open: true,
         message: 'Profile updated successfully',
@@ -162,14 +157,14 @@ const ServiceProviderProfile = () => {
       setIsEditing(false);
       setOriginalProfileData(profileData);
       setErrors({});
-    } catch (error) {
+    } catch(error) {
       console.error('Error updating profile:', error);
       setSnackbar({
         open: true,
         message: 'Failed to update profile',
         severity: 'error'
       });
-      if (error.response && error.response.data) {
+      if(error.response && error.response.data) {
         setErrors(error.response.data);
       }
     }
@@ -188,19 +183,19 @@ const ServiceProviderProfile = () => {
   const hasChanges = JSON.stringify(profileData) !== JSON.stringify(originalProfileData);
 
   return (
-    <Box 
+    <Box
       sx={{
         maxWidth: 1000,
         margin: 'auto',
-        mt: -4,
-        p: 2,
+        mt: 10,
+        p: 3,
       }}
     >
-      <Paper 
-        elevation={3} 
-        sx={{ 
-          borderRadius: 4, 
-          overflow: 'hidden' 
+      <Paper
+        elevation={3}
+        sx={{
+          borderRadius: 4,
+          overflow: 'hidden'
         }}
       >
         <Card sx={{ backgroundColor: 'transparent' }}>
@@ -208,16 +203,15 @@ const ServiceProviderProfile = () => {
             <Typography
               variant="h4"
               gutterBottom
-              sx={{ 
-                mb: 3, 
-                textAlign: 'center',
-                fontWeight: 'bold',
-                color: '#2c3e50'
+              sx={{
+                mb: 2,
+                fontWeight: 500,
+                textShadow: '1px 1px 2px rgba(0, 0, 0, 0.1)'
               }}
             >
-              My Profile
+              Profile
             </Typography>
-            
+
             <Box
               display="flex"
               justifyContent="center"
@@ -239,21 +233,21 @@ const ServiceProviderProfile = () => {
             </Box>
 
             <form onSubmit={handleSubmit}>
-              <Grid container spacing={3}>
+              <Grid container rowSpacing={1} columnSpacing={2}>
                 {/* Personal Information Column */}
-                <Grid item xs={12} md={6}>
-                  <Paper 
-                    elevation={2} 
-                    sx={{ 
-                      p: 3, 
+                <Grid size={6}>
+                  <Paper
+                    elevation={2}
+                    sx={{
+                      p: 3,
                       borderRadius: 3,
                       backgroundColor: 'rgba(255,255,255,0.8)'
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        mb: 2, 
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mb: 2,
                         color: '#34495e',
                         borderBottom: '2px solid #3498db',
                         pb: 1
@@ -261,8 +255,8 @@ const ServiceProviderProfile = () => {
                     >
                       Personal Details
                     </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} md={6}>
+                    <Grid container rowSpacing={1} columnSpacing={2}>
+                      <Grid size={6}>
                         <TextField
                           name="first_name"
                           label="First Name"
@@ -276,7 +270,7 @@ const ServiceProviderProfile = () => {
                           variant="outlined"
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
+                      <Grid size={6}>
                         <TextField
                           name="last_name"
                           label="Last Name"
@@ -290,7 +284,7 @@ const ServiceProviderProfile = () => {
                           variant="outlined"
                         />
                       </Grid>
-                      <Grid item xs={12}>
+                      <Grid size={12}>
                         <TextField
                           name="mobile_number"
                           label="Mobile Number"
@@ -304,43 +298,46 @@ const ServiceProviderProfile = () => {
                           variant="outlined"
                         />
                       </Grid>
-                      <Grid item xs={12}>
-                        <FormControl fullWidth error={!!errors.gender}>
-                          <InputLabel>Gender</InputLabel>
-                          <Select
-                            name="gender"
-                            value={profileData.gender}
-                            label="Gender"
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                            variant="outlined"
-                          >
-                            <MenuItem value="M">Male</MenuItem>
-                            <MenuItem value="F">Female</MenuItem>
-                            <MenuItem value="O">Other</MenuItem>
-                          </Select>
-                          {errors.gender && <Typography color="error" variant="caption">{errors.gender}</Typography>}
-                        </FormControl>
+                      <Grid size={12}>
+                        <TextField
+                          fullWidth
+                          select
+                          label="Gender"
+                          name="gender"
+                          value={profileData.gender}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          error={!!errors.gender}
+                          helperText={errors.gender}
+                          required
+                          SelectProps={{
+                            native: true,
+                          }}
+                        >
+                          <option value=""></option>
+                          <option value="M">Male</option>
+                          <option value="F">Female</option>
+                          <option value="O">Other</option>
+                        </TextField>
                       </Grid>
                     </Grid>
                   </Paper>
                 </Grid>
 
                 {/* Address Information Column */}
-                <Grid item xs={12} md={6}>
-                  <Paper 
-                    elevation={2} 
-                    sx={{ 
-                      p: 3, 
+                <Grid size={6}>
+                  <Paper
+                    elevation={2}
+                    sx={{
+                      p: 3,
                       borderRadius: 3,
                       backgroundColor: 'rgba(255,255,255,0.8)'
                     }}
                   >
-                    <Typography 
-                      variant="h6" 
-                      sx={{ 
-                        mb: 2, 
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        mb: 2,
                         color: '#34495e',
                         borderBottom: '2px solid #3498db',
                         pb: 1
@@ -348,8 +345,8 @@ const ServiceProviderProfile = () => {
                     >
                       Address Information
                     </Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
+                    <Grid container rowSpacing={1} columnSpacing={2}>
+                      <Grid size={12}>
                         <TextField
                           name="street_address"
                           label="Street Address"
@@ -363,7 +360,7 @@ const ServiceProviderProfile = () => {
                           variant="outlined"
                         />
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={6}>
                         <TextField
                           name="city"
                           label="City"
@@ -377,28 +374,30 @@ const ServiceProviderProfile = () => {
                           variant="outlined"
                         />
                       </Grid>
-                      <Grid item xs={12} md={4}>
-                        <FormControl fullWidth error={!!errors.state}>
-                          <InputLabel>State</InputLabel>
-                          <Select
-                            name="state"
-                            value={profileData.state}
-                            label="State"
-                            onChange={handleInputChange}
-                            disabled={!isEditing}
-                            required
-                            variant="outlined"
-                          >
-                            {STATES.map((state) => (
-                              <MenuItem key={state} value={state}>
-                                {state}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                          {errors.state && <Typography color="error" variant="caption">{errors.state}</Typography>}
-                        </FormControl>
+                      <Grid size={6}>
+                        <TextField
+                          fullWidth
+                          label="State"
+                          name="state"
+                          value={profileData.state}
+                          onChange={handleInputChange}
+                          disabled={!isEditing}
+                          error={!!errors.state}
+                          helperText={errors.state}
+                          required
+                          select
+                          SelectProps={{
+                            native: true,
+                          }}
+                        >
+                          {
+                            STATES.map(state => (
+                              <option value={state}>{state}</option>
+                            ))
+                          }
+                        </TextField>
                       </Grid>
-                      <Grid item xs={12} md={4}>
+                      <Grid size={12}>
                         <TextField
                           name="postal_code"
                           label="Postal Code"
@@ -415,61 +414,62 @@ const ServiceProviderProfile = () => {
                     </Grid>
                   </Paper>
                 </Grid>
-
-                {/* Action Buttons */}
-                <Grid item xs={12}>
-                  <Box display="flex" justifyContent="center" mt={2}>
-                    {!isEditing ? (
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        startIcon={<Edit />}
-                        onClick={() => setIsEditing(true)}
-                        sx={{ 
-                          px: 4, 
-                          py: 1.5,
-                          borderRadius: 3 
-                        }}
-                      >
-                        Edit Profile
-                      </Button>
-                    ) : (
-                      <Grid container spacing={2} justifyContent="center">
-                        <Grid item>
-                          <Button
-                            type="submit"
-                            variant="contained"
-                            color="primary"
-                            startIcon={<Save />}
-                            disabled={!hasChanges}
-                            sx={{ 
-                              px: 4, 
-                              py: 1.5,
-                              borderRadius: 3 
-                            }}
-                          >
-                            Save Changes
-                          </Button>
-                        </Grid>
-                        <Grid item>
-                          <Button
-                            variant="outlined"
-                            color="secondary"
-                            onClick={handleCancelEdit}
-                            sx={{ 
-                              px: 4, 
-                              py: 1.5,
-                              borderRadius: 3 
-                            }}
-                          >
-                            Cancel
-                          </Button>
-                        </Grid>
-                      </Grid>
-                    )}
-                  </Box>
-                </Grid>
               </Grid>
+
+              {!isEditing ? (
+                <Box display="flex" alignItems='center' justifyContent="center" gap='1' mt={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Edit />}
+                    onClick={() => setIsEditing(true)}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 3
+                    }}
+                  >
+                    Edit Profile
+                  </Button>
+                </Box>
+
+              ) : (
+                <Box sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 2,
+                  mt: 2
+                }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Save />}
+                    disabled={!hasChanges}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 3
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={handleCancelEdit}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      borderRadius: 3,
+                      color: 'primary.main',
+                      border: (theme) => `2px solid ${theme.palette.primary.main}`,
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              )}
             </form>
           </CardContent>
         </Card>
@@ -477,14 +477,17 @@ const ServiceProviderProfile = () => {
 
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={5000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{
+          mt: -1.5,
+        }}
       >
-        <Alert 
-          onClose={handleCloseSnackbar} 
-          severity={snackbar.severity} 
-          sx={{ width: '100%' }}
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%', borderRadius: '10px' }}
         >
           {snackbar.message}
         </Alert>
@@ -493,4 +496,4 @@ const ServiceProviderProfile = () => {
   );
 };
 
-export default ServiceProviderProfile
+export default ServiceProviderProfile;

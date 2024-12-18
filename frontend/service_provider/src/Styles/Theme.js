@@ -188,10 +188,10 @@ const Theme = createTheme({
           borderRadius: 12,
           boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            transform: 'translateY(-4px)',
-            boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
-          }
+          // '&:hover': {
+          //   transform: 'translateY(-4px)',
+          //   boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)'
+          // }
         }
       }
     },
