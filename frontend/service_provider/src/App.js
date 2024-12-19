@@ -79,7 +79,6 @@ const App = () => {
         <Box
           sx={{
             flexGrow: 1,
-            pt: showNavbarAndFooter ? "120px" : "0",
             width: "100%",
           }}
         >

@@ -9,11 +9,6 @@ import { Box } from '@mui/material';
 const WelcomePage = () => {
   const { view = "welcome" } = useWelcomeViewContext() || {};
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log("Current Welcome View:", view);
-  }, [view]);
-
   return (
     <Box 
       className="welcome" 
