@@ -12,7 +12,7 @@ class ClientSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'email', 'mobile_number', 
             'street_address', 'city', 'state', 'postal_code', 
-            'latitude', 'longitude', 'full_address'
+            'latitude', 'longitude', 'full_address','password',
         ]
         read_only_fields = ['id']
 

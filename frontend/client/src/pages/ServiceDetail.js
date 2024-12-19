@@ -174,7 +174,7 @@ const ServiceDetail = () => {
             if (locationData.latitude && locationData.longitude) {
               url.searchParams.append('latitude', locationData.latitude.toString());
               url.searchParams.append('longitude', locationData.longitude.toString());
-              url.searchParams.append('radius', '100000'); // 10km radius
+              url.searchParams.append('radius', '25'); // 25km radius
             } else {
               console.log('Location data invalid');
             }
