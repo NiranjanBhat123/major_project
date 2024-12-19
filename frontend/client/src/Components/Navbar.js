@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import MapIcon from "@mui/icons-material/Map"; // for a map icon
 import {
   AppBar,
   Toolbar,
@@ -16,7 +17,12 @@ import {
   Autocomplete,
   InputAdornment,
   TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
+
+import LocationPicker from "./LocationPicker";
 
 import { styled, alpha } from "@mui/material/styles";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -28,7 +34,9 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import HandymanIcon from "@mui/icons-material/Handyman";
+import CloseIcon from "@mui/icons-material/Close";
 import AuthModal from "./AuthModal";
+
 import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
@@ -127,6 +135,7 @@ const Navbar = () => {
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [filteredServices, setFilteredServices] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
   const navigate = useNavigate();
 
   // Fetch subservices from the backend
@@ -242,6 +251,69 @@ const Navbar = () => {
 
   const handleLocationMenuClose = () => {
     setLocationAnchorEl(null);
+  };
+
+  const handleOpenLocationPicker = () => {
+    setIsLocationPickerOpen(true);
+  };
+
+  const handleCloseLocationPicker = () => {
+    setIsLocationPickerOpen(false);
+  };
+
+  const handleConfirmLocation = async (lat, lng) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch location details");
+      }
+
+      const data = await response.json();
+
+      const locationData = {
+        latitude: lat,
+        longitude: lng,
+        address: data.display_name || `Latitude: ${lat}, Longitude: ${lng}`,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Store in localStorage
+      localStorage.setItem("userLocation", JSON.stringify(locationData));
+
+      // Update state
+      setLocation(locationData);
+
+      // Close the modal
+      handleCloseLocationPicker();
+    } catch (error) {
+      console.error("Error confirming location:", error);
+
+      // Fallback location data in case of API failure
+      const fallbackLocationData = {
+        latitude: lat,
+        longitude: lng,
+        address: `Latitude: ${lat}, Longitude: ${lng}`,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Store fallback in localStorage
+      localStorage.setItem(
+        "userLocation",
+        JSON.stringify(fallbackLocationData)
+      );
+
+      // Update state with fallback
+      setLocation(fallbackLocationData);
+
+      // Close the modal
+      handleCloseLocationPicker();
+
+      // Optionally show an error message to the user
+      alert("Could not fetch exact address. Using coordinates instead.");
+    }
   };
 
   const handleSearchChange = (event, newValue) => {
@@ -402,6 +474,7 @@ const Navbar = () => {
 
   return (
     <>
+    
       <StyledAppBar
         position="sticky"
         isscrolled={isScrolled.toString()}
@@ -545,7 +618,6 @@ const Navbar = () => {
             maxWidth: "400px",
             padding: "16px",
             borderRadius: "8px",
-            fontFamily: "Poppins, sans-serif", // Add this line to set Poppins as default
           },
         }}
       >
@@ -557,37 +629,110 @@ const Navbar = () => {
               gap: 1,
               color: "grey.700",
               mb: 1,
-              fontFamily: "Poppins, sans-serif", // Add this line
             }}
           >
             <LocationOnIcon color="primary" fontSize="small" />
-            Current Location
+            <Typography variant="subtitle2">Current Location</Typography>
           </Box>
-          <Box
-            sx={{
-              color: "grey.800",
-              fontWeight: 500,
-              fontFamily: "Poppins, sans-serif", // Add this line
-            }}
+
+          <Typography
+            variant="body1"
+            sx={{ color: "grey.800", fontWeight: 500, mb: 2 }}
           >
             {location?.address}
-          </Box>
-          <Box
+          </Typography>
+
+          <Typography
+            variant="caption"
             sx={{
-              mt: 2,
-              pt: 2,
+              display: "block",
+              color: "grey.600",
+              mb: 2,
               borderTop: 1,
               borderColor: "grey.200",
-              color: "grey.600",
-              fontSize: "0.75rem",
-              fontFamily: "Poppins, sans-serif", // Add this line
+              pt: 2,
             }}
           >
             Last updated: {new Date(location?.timestamp).toLocaleString()}
+          </Typography>
+
+          <Box sx={{ 
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center' // Center the button container
+          }}>
+            <Button
+              
+              startIcon={<MapIcon />}
+              onClick={() => {
+                handleOpenLocationPicker();
+                handleLocationMenuClose();
+              }}
+              sx={{
+                mt: 1,
+                textTransform: "none",
+                borderRadius: 2,
+                py: 1,
+                px: 3, // Add horizontal padding
+                minWidth: '200px', // Set a minimum width
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              Set Location on Map
+            </Button>
           </Box>
+
         </Box>
       </Menu>
 
+      <Dialog
+        open={isLocationPickerOpen}
+        onClose={handleCloseLocationPicker}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: { 
+            height: "80vh",
+            display: "flex",
+            flexDirection: "column"
+          }
+        }}
+      >
+        <DialogTitle>
+          Pick Your Location
+          <IconButton
+            aria-label="close"
+            onClick={handleCloseLocationPicker}
+            sx={{
+              position: "absolute",
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ 
+          padding: 0, 
+          height: "calc(100% - 64px)",
+          flexGrow: 1,
+          display: "flex" 
+        }}>
+          {isLocationPickerOpen && (
+            <LocationPicker
+              initialPosition={
+                location
+                  ? [location.latitude, location.longitude]
+                  : [12.2799972, 76.6520893]
+              }
+              onConfirm={handleConfirmLocation}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
       <AuthModal open={isAuthModalOpen} onClose={handleCloseAuthModal} />
     </>
   );

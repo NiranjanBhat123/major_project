@@ -308,7 +308,8 @@ export const ServiceProviderCard = ({ provider, index }) => {
         open={open}
         onClick={handleClose}
       />
-
+      
+      {/* Popover for ordering services */}
       <Popover
         open={open}
         anchorEl={anchorEl}
@@ -549,6 +550,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
           )}
         </Box>
       </Popover>
+
       <Spashscreen
         open={showSuccessSplash}
         onClose={() => {

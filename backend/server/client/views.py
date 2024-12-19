@@ -13,7 +13,9 @@ class SignupView(APIView):
     View for user signup. Handles creating a new user (Client) and returns tokens.
     """
     def post(self, request):
+        print(request.data)
         serializer = ClientSerializer(data=request.data)
+
         if serializer.is_valid():
             client = serializer.save()
             

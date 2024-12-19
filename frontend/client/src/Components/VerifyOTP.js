@@ -127,6 +127,7 @@ const VerifyOTP = () => {
     if(enteredOTP === generatedOTP) {
       try {
         // Make the signup API call with the stored signUpData
+        console.log("signUpData:", signUpData);
         const response = await fetch('http://127.0.0.1:8000/client/signup/', {
           method: 'POST',
           headers: {

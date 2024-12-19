@@ -91,10 +91,13 @@ export default function EnhancedOrderDashboard() {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
+        const providerId = localStorage.getItem("providerId");
         const response = await axios.get(
-          "http://127.0.0.1:8000/orders/?provider_id=95261318-665e-438f-9879-fe515d0fba6d"
+          //"http://127.0.0.1:8000/orders/?provider_id=95261318-665e-438f-9879-fe515d0fba6d"
+          `http://127.0.0.1:8000/orders/?provider_id=${providerId}`
         );
         setOrders(response.data);
+        console.log(response.data);
         setLoading(false);
       } catch (err) {
         setError(err);
