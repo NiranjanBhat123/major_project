@@ -67,7 +67,7 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [loadingProviders, setLoadingProviders] = useState(false);
   const [error, setError] = useState(null);
-  const { selectedSubService, setSelectedSubService } = useWelcomeViewContext();
+  const { selectedSubService, setSelectedSubService,location } = useWelcomeViewContext();
   const [isInitialMount, setIsInitialMount] = useState(true);
 
   const subServicesContainerRef = useRef(null);
@@ -203,7 +203,7 @@ const ServiceDetail = () => {
     };
   
     fetchProviders();
-  }, [selectedSubService]);
+  }, [selectedSubService,location]);
 
   useEffect(() => {
     if (!loading && selectedSubService && subServiceRefs.current[selectedSubService.id]) {
