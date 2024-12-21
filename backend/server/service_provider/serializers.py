@@ -4,8 +4,13 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import ServiceProvider, ProviderService
 from service.models import Service
 from sub_service.models import SubService
+from orders.models import Orders
+from orders.models import OrderStatus
+from orders.models import OrderStatusHistory
 from django.core.files.base import ContentFile
 import random
+from django.db.models import Avg, Count, Case, When,F, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 
 import base64
 
@@ -203,13 +208,13 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
     provider_mobile_number = serializers.CharField(source='provider.mobile_number', read_only=True)
     provider_is_active = serializers.BooleanField(source='provider.is_active', read_only=True)
     provider_rating = serializers.DecimalField(
-        source='provider.average_rating',
         max_digits=3,
         decimal_places=2,
-        read_only=True,
-        default=0.0
+        read_only=True
     )
-    distance = serializers.FloatField(read_only=True)  # Changed this line
+    rating_counts = serializers.DictField(read_only=True)
+    provider_reviews = serializers.ListField(read_only=True)
+    distance = serializers.FloatField(read_only=True)
 
     class Meta:
         model = ProviderService
@@ -220,6 +225,8 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
             'provider_address',
             'provider_photo',
             'provider_rating',
+            'rating_counts',
+            'provider_reviews',
             'provider_mobile_number',
             'provider_is_active',
             'price',
@@ -228,50 +235,70 @@ class ProviderServiceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation['provider_rating'] = random.randint(1, 5)  # Random rating between 1 and 5
-        
-        # Modified this part
+
+        # Get all completed orders for this provider
+        completed_orders = Orders.objects.filter(
+            provider=instance.provider,
+            status=OrderStatus.COMPLETED,
+            rating__isnull=False
+        )
+
+        # Calculate average rating
+        avg_rating = completed_orders.aggregate(
+            avg_rating=Coalesce(Avg('rating'), 0.0)
+        )['avg_rating']
+        representation['provider_rating'] = round(float(avg_rating), 2)
+
+        # Calculate rating counts for each star
+        rating_counts = completed_orders.aggregate(
+            one_star=Count(Case(When(rating=1, then=1))),
+            two_star=Count(Case(When(rating=2, then=1))),
+            three_star=Count(Case(When(rating=3, then=1))),
+            four_star=Count(Case(When(rating=4, then=1))),
+            five_star=Count(Case(When(rating=5, then=1)))
+        )
+        representation['rating_counts'] = {
+            '1': rating_counts['one_star'],
+            '2': rating_counts['two_star'],
+            '3': rating_counts['three_star'],
+            '4': rating_counts['four_star'],
+            '5': rating_counts['five_star']
+        }
+
+        # Get reviews
+        completion_date_subquery = OrderStatusHistory.objects.filter(
+        order=OuterRef('pk'),
+        status=OrderStatus.COMPLETED
+        ).values('changed_on')[:1]
+
+        reviews = completed_orders.exclude(review__isnull=True).exclude(review='').annotate(
+            completion_date=Subquery(completion_date_subquery)
+        ).values(
+            'id',
+            'rating',
+            'review',
+            'completion_date',
+            'user__name'
+        ).order_by('-completion_date')[:10]  # Get last 10 reviews
+
+        representation['provider_reviews'] = [{
+            'order_id': str(review['id']),
+            'rating': review['rating'],
+            'review': review['review'],
+            'date': review['completion_date'],
+            'client_name': review['user__name']
+        } for review in reviews]
+
+        # Handle distance
         if hasattr(instance, 'distance'):
             representation['distance'] = float(instance.distance)
         else:
             representation['distance'] = None
-            
+
         return representation
 
             
-# class ProviderServiceSerializer(serializers.ModelSerializer):
-#     provider_id = serializers.UUIDField(source='provider.id', read_only=True)
-#     provider_name = serializers.CharField(source='provider.full_name', read_only=True)
-#     provider_address = serializers.CharField(source='provider.street_address', read_only=True)
-#     provider_photo = Base64ImageField(source='provider.photo', read_only=True)
-#     provider_mobile_number = serializers.CharField(source='provider.mobile_number', read_only=True)
-#     provider_is_active = serializers.BooleanField(source='provider.is_active', read_only=True)
-#     provider_rating = serializers.DecimalField(
-#         source='provider.average_rating',
-#         max_digits=3,
-#         decimal_places=2,
-#         read_only=True,
-#         default=0.0
-#     )
 
-#     class Meta:
-#         model = ProviderService
-#         fields = [
-#             'id',
-#             'provider_id',
-#             'provider_name',
-#             'provider_address',
-#             'provider_photo',
-#             'provider_rating',
-#             'provider_mobile_number',
-#             'provider_is_active',
-#             'price',
-#         ]
-
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-#         representation['provider_rating'] = random.randint(1, 5)  # Random float between 1 and 5, rounded to 2 decimals
-#         return representation
     
 class SimpleProviderServiceSerializer(serializers.ModelSerializer):
     sub_service_name = serializers.CharField(source='sub_service.name', read_only=True)
