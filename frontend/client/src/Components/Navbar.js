@@ -127,7 +127,6 @@ const SearchLoadingIndicator = styled(CircularProgress)(({ theme }) => ({
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [location, setLocation] = useState(null);
   const [locationAnchorEl, setLocationAnchorEl] = useState(null);
   const [userName, setUserName] = useState("");
   const [searchValue, setSearchValue] = useState(null);
@@ -137,6 +136,17 @@ const Navbar = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
   const navigate = useNavigate();
+
+  const {
+    isAuthModalOpen,
+    handleCloseAuthModal,
+    handleOpenAuthModal,
+    isLoggedIn,
+    handleLogout,
+    setSelectedSubService,
+    location,
+    setLocation,
+  } = useWelcomeViewContext();
 
   // Fetch subservices from the backend
   const fetchSubServices = async (searchTerm = "") => {
@@ -228,14 +238,7 @@ const Navbar = () => {
     return parts.slice(0, 2).join(",");
   };
 
-  const {
-    isAuthModalOpen,
-    handleCloseAuthModal,
-    handleOpenAuthModal,
-    isLoggedIn,
-    handleLogout,
-    setSelectedSubService,
-  } = useWelcomeViewContext();
+ 
 
   const handleProfileClick = (event) => {
     setAnchorEl(event.currentTarget);
