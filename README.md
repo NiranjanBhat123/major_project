@@ -5,9 +5,16 @@ FixNGo - A platform for local home service booking
 This is a sample Django application with a React.js frontend.
 
 ## Features
-- Django backend with Django REST Framework
-- React.js frontend
-- User authentication
+- Listing the nearest service providers who provide the necessary services at your doorstep
+- Service provider face verification using deepface models
+- Service provider rating and review system
+- Booking a service with the service provider at desired date and time
+- User profile management
+- Service provider profile management
+- Maps integration to set the client location
+- Chat feature with images
+
+
 
 
 ## Getting Started
