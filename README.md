@@ -1,8 +1,6 @@
 # major_project
 FixNGo - A platform for local home service booking
-# Django React App
 
-This is a sample Django application with a React.js frontend.
 
 ## Features
 - Django backend with Django REST Framework
