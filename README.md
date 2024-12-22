@@ -2,6 +2,10 @@
 FixNGo - A platform for local home service booking
 
 
+https://github.com/user-attachments/assets/08480f4a-0691-4c72-bd86-cc62b252e4c0
+
+
+
 ## Features
 - Django backend with Django REST Framework
 - React.js frontend
