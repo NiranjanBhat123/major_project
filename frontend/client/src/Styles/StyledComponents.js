@@ -247,10 +247,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
         <DialogContent>
           <Box sx={{ mt: 2 }}>
             <Typography variant="h4" gutterBottom>
-              ★ {provider.provider_rating?.toFixed(2)} out of 5
-            </Typography>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {totalReviews} ratings
+               {provider.provider_rating?.toFixed(2)} / 5
             </Typography>
 
             {[5, 4, 3, 2, 1].map((rating) => (
@@ -263,7 +260,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
                   mb: 1,
                 }}
               >
-                <Typography sx={{ minWidth: 30 }}>{rating}★</Typography>
+                <Typography sx={{ minWidth: 30 }}>{rating}</Typography>
                 <LinearProgress
                   variant="determinate"
                   value={getReviewCountPercentage(
