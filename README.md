@@ -1,4 +1,4 @@
-# major_project
+# FixNGo
 FixNGo - A platform for local home service booking
 
 
