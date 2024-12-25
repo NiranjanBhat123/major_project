@@ -28,7 +28,7 @@ import {
   X,
   Star,
 } from "lucide-react";
-import ChatModal from "../Components/ChatModal";
+import ChatModal from "./ChatModal";
 import ReviewModal from "./ReviewModal"; // Import the new ReviewModal
 
 const OrderCard = ({ order, onOrderUpdate }) => {

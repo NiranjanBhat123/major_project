@@ -1,6 +1,6 @@
 import React from 'react';
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
-import WelcomeContent from "./WelcomeContent";
+import { useWelcomeViewContext } from '../../contexts/WelcomeViewContextProvider';
+import WelcomeContent from "../WelcomeContent";
 import SignUp from "./SignUp";
 import Login from "./Login";
 import VerifyOTP from "./VerifyOTP";

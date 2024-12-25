@@ -35,9 +35,9 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CloseIcon from "@mui/icons-material/Close";
-import AuthModal from "./AuthModal";
+import AuthModal from "../authentication/AuthModal.js";
 
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../../contexts/WelcomeViewContextProvider";
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
   backgroundColor: theme.palette.common.white,
