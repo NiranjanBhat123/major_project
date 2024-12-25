@@ -138,6 +138,15 @@ const Navbar = () => {
   const [isLocationPickerOpen, setIsLocationPickerOpen] = useState(false);
   const navigate = useNavigate();
 
+  const {
+    isAuthModalOpen,
+    handleCloseAuthModal,
+    handleOpenAuthModal,
+    isLoggedIn,
+    handleLogout,
+    setSelectedSubService,
+  } = useWelcomeViewContext();
+
   // Fetch subservices from the backend
   const fetchSubServices = async (searchTerm = "") => {
     try {
@@ -208,6 +217,9 @@ const Navbar = () => {
     if (storedUserName) {
       setUserName(storedUserName);
     }
+    else {
+      setUserName("");
+    }
 
     const userLocation = localStorage.getItem("userLocation");
     if (userLocation) {
@@ -218,7 +230,10 @@ const Navbar = () => {
         console.error("Error parsing location:", error);
       }
     }
-  }, []);
+    else {
+      setLocation(null);
+    }
+  }, [isLoggedIn]);
 
   // (scroll handler, user data loading, etc.)
 
@@ -228,14 +243,7 @@ const Navbar = () => {
     return parts.slice(0, 2).join(",");
   };
 
-  const {
-    isAuthModalOpen,
-    handleCloseAuthModal,
-    handleOpenAuthModal,
-    isLoggedIn,
-    handleLogout,
-    setSelectedSubService,
-  } = useWelcomeViewContext();
+ 
 
   const handleProfileClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -496,7 +504,7 @@ const Navbar = () => {
           </LogoContainer>
 
           {/* Location chip remains the same */}
-          {location && 
+          {isLoggedIn && location && 
             <Tooltip
               title="Click to view full address"
               arrow
