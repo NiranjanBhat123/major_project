@@ -131,7 +131,6 @@ const Navbar = () => {
   const [userName, setUserName] = useState("");
   const [searchValue, setSearchValue] = useState(null);
   const [inputValue, setInputValue] = useState("");
-  const [location, setLocation] = useState(null);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [filteredServices, setFilteredServices] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -145,18 +144,11 @@ const Navbar = () => {
     isLoggedIn,
     handleLogout,
     setSelectedSubService,
-  } = useWelcomeViewContext();
-
-  const {
-    isAuthModalOpen,
-    handleCloseAuthModal,
-    handleOpenAuthModal,
-    isLoggedIn,
-    handleLogout,
-    setSelectedSubService,
     location,
     setLocation,
   } = useWelcomeViewContext();
+
+
 
   // Fetch subservices from the backend
   const fetchSubServices = async (searchTerm = "") => {
