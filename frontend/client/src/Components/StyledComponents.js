@@ -19,6 +19,10 @@ import {
   Avatar,
   CardMedia,
   IconButton,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  LinearProgress,
 } from "@mui/material";
 
 import {
@@ -76,6 +80,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
   const [selectedTime, setSelectedTime] = useState(null);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
   const [showSuccessSplash, setShowSuccessSplash] = useState(false);
+  const [reviewsOpen, setReviewsOpen] = useState(false);
   //const [orderCompleted, setOrderCompleted] = useState(false);
 
   const handleBookNowClick = (event) => {
@@ -203,6 +208,180 @@ export const ServiceProviderCard = ({ provider, index }) => {
 
   const open = Boolean(anchorEl);
 
+  const ReviewsDialog = ({ open, onClose, provider }) => {
+    const theme = useTheme();
+    const totalReviews = provider.provider_reviews?.length || 0;
+
+    const getReviewCountPercentage = (count, total) => {
+      if (!total) return 0;
+      return (count / total) * 100;
+    };
+
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            p: 2,
+          },
+        }}
+      >
+        <DialogTitle>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h5" fontWeight={600}>
+              {totalReviews} Reviews
+            </Typography>
+            <IconButton onClick={onClose}>
+              <X size={20} />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h4" gutterBottom>
+               {provider.provider_rating?.toFixed(2)} / 5
+            </Typography>
+
+            {[5, 4, 3, 2, 1].map((rating) => (
+              <Box
+                key={rating}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  mb: 1,
+                }}
+              >
+                <Typography sx={{ minWidth: 30 }}>{rating}</Typography>
+                <LinearProgress
+                  variant="determinate"
+                  value={getReviewCountPercentage(
+                    provider.rating_counts?.[rating] || 0,
+                    totalReviews
+                  )}
+                  sx={{
+                    flex: 1,
+                    height: 8,
+                    borderRadius: 4,
+                    bgcolor: theme.palette.grey[200],
+                    "& .MuiLinearProgress-bar": {
+                      bgcolor: theme.palette.success.main,
+                    },
+                  }}
+                />
+                <Typography sx={{ minWidth: 50 }}>
+                  {provider.rating_counts?.[rating] || 0}
+                </Typography>
+              </Box>
+            ))}
+
+            <Box sx={{ mt: 4 }}>
+              <Typography variant="h6" gutterBottom>
+                Recent Reviews
+              </Typography>
+              {provider.provider_reviews?.map((review) => (
+                <Box
+                  key={review.order_id}
+                  sx={{
+                    py: 2,
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    <Rating value={review.rating} readOnly size="small" />
+                    <Typography variant="body2" color="text.secondary">
+                      by {review.client_name}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2">{review.review}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(review.date).toLocaleDateString()}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  const PartialStar = ({ value, color = "#FF9800" }) => {
+    // Calculate the fill percentage (0-100)
+    const percentage = Math.min(
+      Math.max((value - Math.floor(value)) * 100, 0),
+      100
+    );
+
+    return (
+      <Box
+        sx={{
+          position: "relative",
+          display: "inline-flex",
+          width: 24,
+          height: 24,
+        }}
+      >
+        {/* Empty star outline */}
+        <Star
+          size={24}
+          stroke={color}
+          fill="transparent"
+          style={{ position: "absolute" }}
+        />
+        {/* Partially filled star using SVG clip-path */}
+        <svg width="24" height="24" style={{ position: "absolute" }}>
+          <defs>
+            <clipPath id={`clip-${percentage}`}>
+              <rect x="0" y="0" width={`${percentage}%`} height="100%" />
+            </clipPath>
+          </defs>
+          <g clipPath={`url(#clip-${percentage})`}>
+            <Star
+              size={24}
+              stroke={color}
+              fill={color}
+              style={{ display: "block" }}
+            />
+          </g>
+        </svg>
+      </Box>
+    );
+  };
+
+  // Custom rating component that shows partial fills
+  const PartialRating = ({ value, color = "#FF9800" }) => {
+    return (
+      <Box sx={{ display: "inline-flex", alignItems: "center" }}>
+        {[1, 2, 3, 4, 5].map((star) => {
+          const diff = value - star + 1;
+          return (
+            <Box key={star} sx={{ display: "inline-flex" }}>
+              {diff >= 1 ? (
+                // Full star
+                <Star size={24} stroke={color} fill={color} />
+              ) : diff > 0 ? (
+                // Partial star
+                <PartialStar value={value - Math.floor(value)} color={color} />
+              ) : (
+                // Empty star
+                <Star size={24} stroke={color} fill="transparent" />
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -232,24 +411,41 @@ export const ServiceProviderCard = ({ provider, index }) => {
               <Typography variant="h6" gutterBottom>
                 {provider.provider_name}
               </Typography>
-              <Box display="flex" alignItems="center" gap={2} mb={1}>
-                <Box display="flex" alignItems="center">
-                  <Rating
-                    value={provider.provider_rating}
-                    readOnly
-                    precision={0.5}
-                    icon={
-                      <Star
-                        fill={theme.palette.warning.main}
-                        stroke={theme.palette.warning.main}
-                      />
-                    }
-                    emptyIcon={<Star />}
-                  />
-                  <Typography variant="body2" color="text.secondary" ml={1}>
-                    {provider.total_reviews || 0} reviews
-                  </Typography>
+
+              <Box display="flex" alignItems="center"  gap={2} mb={1}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => setReviewsOpen(true)}
+                >
+                  <PartialRating value={provider.provider_rating || 0} />
+                  <Box display="flex" alignItems="center"  justifyContent="center" gap={1} mt={0.5}   width="100%">
+                    <Typography
+                      variant="body2"
+                      color="text.primary"
+                      sx={{ fontWeight: 700 }}
+                      
+                    >
+                      {provider.provider_rating?.toFixed(1)}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        "&:hover": {
+                          textDecoration: "underline",
+                        },
+                      }}
+                    >
+                      ({provider.provider_reviews?.length || 0} reviews)
+                    </Typography>
+                  </Box>
                 </Box>
+
                 <Box display="flex" alignItems="center" color="text.secondary">
                   <MapPin size={16} />
                   <Typography variant="body2" ml={0.5}>
@@ -257,6 +453,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
                   </Typography>
                 </Box>
               </Box>
+
               <Box display="flex" alignItems="center" gap={3}>
                 <Box display="flex" alignItems="center" color="text.secondary">
                   <Phone size={16} />
@@ -299,6 +496,12 @@ export const ServiceProviderCard = ({ provider, index }) => {
         </CardContent>
       </Card>
 
+      <ReviewsDialog
+        open={reviewsOpen}
+        onClose={() => setReviewsOpen(false)}
+        provider={provider}
+      />
+
       <Backdrop
         sx={{
           backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -308,7 +511,7 @@ export const ServiceProviderCard = ({ provider, index }) => {
         open={open}
         onClick={handleClose}
       />
-      
+
       {/* Popover for ordering services */}
       <Popover
         open={open}

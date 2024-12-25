@@ -370,15 +370,7 @@ class ProviderServicesViewSet(ReadOnlyModelViewSet):
             
         return queryset.none()  # Return empty queryset if no filter provided
 
-# class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
-#     serializer_class = ProviderServiceSerializer
-#     permission_classes = [AllowAny]
-    
-#     def get_queryset(self):
-#         subservice_id = self.kwargs.get('subservice_id')
-#         return ProviderService.objects.filter(
-#             sub_service_id=subservice_id
-#         ).select_related('provider')
+
 
 class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
     serializer_class = ProviderServiceSerializer
@@ -388,7 +380,7 @@ class SubServiceProvidersViewSet(ReadOnlyModelViewSet):
         subservice_id = self.kwargs.get('subservice_id')
         client_lat = float(self.request.query_params.get('latitude'))
         client_lon = float(self.request.query_params.get('longitude'))
-        radius = float(self.request.query_params.get('radius', 10))  # Default 10km radius
+        radius = float(self.request.query_params.get('radius', 25))  # Default 25km radius
        
         # Get base queryset with provider information
         queryset = ProviderService.objects.filter(

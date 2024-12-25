@@ -11,6 +11,7 @@ const WelcomeViewContextProvider = ({ children }) => {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedSubService, setSelectedSubService] = useState(null);
+   const [location, setLocation] = useState(null);
   const navigate = useNavigate();
   // Check authentication status on mount and after any localStorage changes
   useEffect(() => {
@@ -77,6 +78,7 @@ const WelcomeViewContextProvider = ({ children }) => {
     isAuthModalOpen,
     isLoggedIn,
     selectedSubService,
+    location,
     setEmpty, 
     showSignUp, 
     showLogin, 
@@ -88,6 +90,7 @@ const WelcomeViewContextProvider = ({ children }) => {
     handleLogin,
     handleLogout,
     setSelectedSubService,
+    setLocation
   };
 
   return (
