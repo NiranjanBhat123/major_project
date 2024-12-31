@@ -35,9 +35,9 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CloseIcon from "@mui/icons-material/Close";
-import AuthModal from "./AuthModal";
+import AuthModal from "../authentication/AuthModal.js";
 
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../../contexts/WelcomeViewContextProvider";
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
   backgroundColor: theme.palette.common.white,
@@ -148,6 +148,8 @@ const Navbar = () => {
     setLocation,
   } = useWelcomeViewContext();
 
+
+
   // Fetch subservices from the backend
   const fetchSubServices = async (searchTerm = "") => {
     try {
@@ -218,6 +220,9 @@ const Navbar = () => {
     if (storedUserName) {
       setUserName(storedUserName);
     }
+    else {
+      setUserName("");
+    }
 
     const userLocation = localStorage.getItem("userLocation");
     if (userLocation) {
@@ -228,7 +233,10 @@ const Navbar = () => {
         console.error("Error parsing location:", error);
       }
     }
-  }, []);
+    else {
+      setLocation(null);
+    }
+  }, [isLoggedIn]);
 
   // (scroll handler, user data loading, etc.)
 
@@ -499,7 +507,7 @@ const Navbar = () => {
           </LogoContainer>
 
           {/* Location chip remains the same */}
-          {location && 
+          {isLoggedIn && location && 
             <Tooltip
               title="Click to view full address"
               arrow

@@ -15,7 +15,7 @@ import {
 import { Groups as GroupsIcon, Category as CategoryIcon } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../contexts/WelcomeViewContextProvider";
 
 
 

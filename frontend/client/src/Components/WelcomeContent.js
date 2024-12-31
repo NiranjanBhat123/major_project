@@ -1,5 +1,5 @@
 import React from 'react';
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../contexts/WelcomeViewContextProvider";
 import { Typography, Button, Box } from '@mui/material';
 
 const WelcomeContent = () => {

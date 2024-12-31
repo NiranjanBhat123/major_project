@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from '../../contexts/WelcomeViewContextProvider';
 import emailjs from 'emailjs-com';
 import { Typography, Button, Box, TextField, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { requestAndStoreLocation } from '../utils/locationhandler.js';
+import { requestAndStoreLocation } from '../../utils/locationhandler';
 
 
 const VerifyOTP = () => {
@@ -142,7 +142,16 @@ const VerifyOTP = () => {
         console.log(data);
 
         if (!response.ok) {
-          throw new Error(data.message || 'Signup failed');
+
+          let errorMessage = '';
+          if (data.email) {
+            errorMessage += data.email[0] + ' ';
+          }
+          if (data.mobile_number) {
+            errorMessage += data.mobile_number[0];
+          }
+          throw new Error(errorMessage || 'Signup failed');
+        
         }
 
         // Store tokens and user info
@@ -185,6 +194,7 @@ const VerifyOTP = () => {
         }, 1500); // Give user time to see success message
 
       } catch (error) {
+        
         setAlert({
           show: true,
           message: error.message || 'Signup failed. Please try again.',

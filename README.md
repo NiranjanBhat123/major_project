@@ -1,8 +1,18 @@
-# major_project
-FixNGo - A platform for local home service booking
-# Django React App
+# FixNGo
 
-This is a sample Django application with a React.js frontend.
+https://github.com/user-attachments/assets/0fb70ec9-ee4b-4102-9b03-59d49ecd6080
+
+
+
+https://github.com/user-attachments/assets/f870fae0-af3a-4ba3-8b6d-71fc68844cdc
+
+
+FixNGo - A platform for local home service booking
+
+
+https://github.com/user-attachments/assets/08480f4a-0691-4c72-bd86-cc62b252e4c0
+
+
 
 ## Features
 - Listing the nearest service providers who provide the necessary services at your doorstep

@@ -16,7 +16,7 @@ import {
   Button,
 } from "@mui/material";
 
-import OrderCard from "../Styles/OrderCard";
+import OrderCard from "./OrderCard";
 
 const OrdersList = () => {
   const [orders, setOrders] = useState([]);
@@ -96,7 +96,7 @@ const OrdersList = () => {
       <Container maxWidth="lg">
         <Grid container spacing={3}>
           {/* Filters */}
-          <Grid item xs={12} md={3}>
+          <Grid item xs={12} md={3} mt={2} mb={2}>
             <Paper elevation={3} sx={{ p: 2 }}>
               <Typography variant="h6" gutterBottom>
                 Status Filter
@@ -164,7 +164,7 @@ const OrdersList = () => {
           </Grid>
 
           {/* Orders Grid */}
-          <Grid item xs={12} md={9}>
+          <Grid item xs={12} md={9} mt={2} mb={2}>
             <Grid container spacing={2}>
               {filteredOrders.map((order) => (
                 <OrderCard key={order.id} order={order}  onOrderUpdate={handleOrderUpdate}/>

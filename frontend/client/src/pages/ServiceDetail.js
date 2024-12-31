@@ -8,8 +8,8 @@ import {
   Fade,
 } from "@mui/material";
 import { motion, AnimatePresence} from 'framer-motion';
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
-import { ServiceProviderCard, SubServiceCard } from "../Styles/StyledComponents";
+import { useWelcomeViewContext } from "../contexts/WelcomeViewContextProvider";
+import { ServiceProviderCard, SubServiceCard } from "../components/StyledComponents";
 
 
 

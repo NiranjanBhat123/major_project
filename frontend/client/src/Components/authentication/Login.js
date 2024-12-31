@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../../contexts/WelcomeViewContextProvider";
 import { Typography, TextField, Button, Box, Link } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { requestAndStoreLocation } from "../utils/locationhandler.js";
+import { requestAndStoreLocation } from "../../utils/locationhandler.js";
 
 const Login = () => {
 
