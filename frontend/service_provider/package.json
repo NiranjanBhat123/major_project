@@ -16,6 +16,7 @@
     "face-api.js": "^0.22.2",
     "framer-motion": "^11.15.0",
     "lucide-react": "^0.456.0",
+    "moment-timezone": "^0.5.46",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-google-charts": "^5.2.1",

@@ -37,7 +37,7 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 import CloseIcon from "@mui/icons-material/Close";
 import AuthModal from "../authentication/AuthModal.js";
 
-import { useWelcomeViewContext } from "../../contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../../Contexts/WelcomeViewContextProvider";
 
 const StyledAppBar = styled(AppBar)(({ theme, isscrolled }) => ({
   backgroundColor: theme.palette.common.white,

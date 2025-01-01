@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useWelcomeViewContext } from "../../contexts/WelcomeViewContextProvider";
+import { useWelcomeViewContext } from "../../Contexts/WelcomeViewContextProvider.js";
 import { Typography, TextField, Button, Box, Link } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { requestAndStoreLocation } from "../../utils/locationhandler.js";

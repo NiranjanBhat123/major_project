@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useWelcomeViewContext } from '../../contexts/WelcomeViewContextProvider';
+import { useWelcomeViewContext } from '../../Contexts/WelcomeViewContextProvider';
 import { 
   Typography, 
   TextField, 

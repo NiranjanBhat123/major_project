@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { ThemeProvider } from '@mui/material/styles';
-import Theme from './styles/Theme';
+import Theme from './Styles/Theme';
 import App from './App';
 import "./App.css";
 

@@ -8,8 +8,8 @@ import {
   Fade,
 } from "@mui/material";
 import { motion, AnimatePresence} from 'framer-motion';
-import { useWelcomeViewContext } from "../contexts/WelcomeViewContextProvider";
-import { ServiceProviderCard, SubServiceCard } from "../components/StyledComponents";
+import { useWelcomeViewContext } from "../Contexts/WelcomeViewContextProvider";
+import { ServiceProviderCard, SubServiceCard } from "../Components/StyledComponents";
 
 
 
@@ -174,7 +174,7 @@ const ServiceDetail = () => {
             if (locationData.latitude && locationData.longitude) {
               url.searchParams.append('latitude', locationData.latitude.toString());
               url.searchParams.append('longitude', locationData.longitude.toString());
-              url.searchParams.append('radius', '25'); // 25km radius
+              url.searchParams.append('radius', '10000'); // 25km radius
             } else {
               console.log('Location data invalid');
             }

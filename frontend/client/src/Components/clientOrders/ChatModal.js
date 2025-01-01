@@ -11,6 +11,59 @@ import SendIcon from '@mui/icons-material/Send';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 
+
+const adjustTimestamp = (timestamp) => {
+  console.log('Original Timestamp:', timestamp);
+  
+  try {
+    
+    const [time, period] = timestamp.split(' ');
+    const [hours, minutes] = time.split(':');
+    
+    
+    let hour = parseInt(hours);
+    if (period === 'PM' && hour !== 12) {
+      hour += 12;
+    } else if (period === 'AM' && hour === 12) {
+      hour = 0;
+    }
+
+    
+    hour = (hour + 5) % 24;
+    let minute = parseInt(minutes) + 30;
+    
+   
+    if (minute >= 60) {
+      hour = (hour + 1) % 24;
+      minute = minute - 60;
+    }
+
+    
+    let newPeriod = 'AM';
+    if (hour >= 12) {
+      newPeriod = 'PM';
+      if (hour > 12) {
+        hour -= 12;
+      }
+    }
+    if (hour === 0) {
+      hour = 12;
+    }
+
+   
+    const formattedHour = hour.toString().padStart(2, '0');
+    const formattedMinute = minute.toString().padStart(2, '0');
+    
+    const adjustedTime = `${formattedHour}:${formattedMinute} ${newPeriod}`;
+    console.log('Adjusted Timestamp:', adjustedTime);
+    
+    return adjustedTime;
+  } catch (error) {
+    console.error('Error adjusting timestamp:', error);
+    return timestamp;
+  }
+};
+
 const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, clientName }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
@@ -44,10 +97,10 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
             type: msg.message_type,
             content: msg.message_type === 'TEXT' ? 
               msg.message : 
-              `data:image/jpeg;base64,${msg.image_data}`,  // Convert hex to base64
+              `data:image/jpeg;base64,${msg.image_data}`,
             sender: msg.sender,
             sender_type: msg.sender_type,
-            timestamp: msg.timestamp,
+            timestamp: adjustTimestamp(msg.timestamp), 
             isSentByMe: msg.sender_type === 'CLIENT'
           })));
         } else {
@@ -55,10 +108,10 @@ const ChatModal = ({open, onClose, orderId, providerId, providerName, clientId, 
             type: data.message_type,
             content: data.message_type === 'TEXT' ? 
               data.message : 
-              `data:image/jpeg;base64,${data.image_data}`,  // Convert hex to base64
+              `data:image/jpeg;base64,${data.image_data}`,
             sender: data.sender,
             sender_type: data.sender_type,
-            timestamp: data.timestamp,
+            timestamp: adjustTimestamp(data.timestamp), 
             isSentByMe: data.sender_type === 'CLIENT'
           }]);
         }

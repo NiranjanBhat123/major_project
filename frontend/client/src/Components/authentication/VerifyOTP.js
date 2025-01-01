@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useWelcomeViewContext } from '../../contexts/WelcomeViewContextProvider';
+import { useWelcomeViewContext } from '../../Contexts/WelcomeViewContextProvider';
 import emailjs from 'emailjs-com';
 import { Typography, Button, Box, TextField, Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
