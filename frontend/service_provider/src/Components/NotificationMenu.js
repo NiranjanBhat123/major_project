@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Badge,
   IconButton,
@@ -17,44 +17,137 @@ import axios from 'axios';
 const NotificationMenu = () => {
   const [notifications, setNotifications] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [wsConnected, setWsConnected] = useState(false);
+  const websocket = useRef(null);
+  const reconnectTimeout = useRef(null);
   
-  const userId = localStorage.getItem('providerId');
+  const userId = localStorage.getItem('providerId') || localStorage.getItem('userId');
 
-  const fetchNotifications = async () => {
+  const connectWebSocket = () => {
     if (!userId) return;
+
+    const wsUrl = `ws://127.0.0.1:8000/ws/notifications/${userId}/`;
+    console.log('Connecting to WebSocket:', wsUrl);
     
-    try {
-      const response = await axios.get(`http://localhost:8000/notifications?user_id=${userId}`);
-      setNotifications(response.data);
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    }
+    websocket.current = new WebSocket(wsUrl);
+
+    websocket.current.onopen = () => {
+      console.log('WebSocket connected successfully');
+      setWsConnected(true);
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+        reconnectTimeout.current = null;
+      }
+    };
+
+    websocket.current.onmessage = (event) => {
+      console.log('WebSocket message received:', event.data);
+      try {
+        const data = JSON.parse(event.data);
+        console.log('Parsed WebSocket data:', data);
+        
+        // Handle connection message
+        if (data.type === 'connection_established') {
+          console.log('WebSocket connection verified');
+          return;
+        }
+        
+        // Handle notification
+        setNotifications(prev => {
+          const exists = prev.some(n => n.id === data.id);
+          if (exists) {
+            console.log('Duplicate notification ignored:', data.id);
+            return prev;
+          }
+          console.log('Adding new notification to state:', data);
+          return [data, ...prev].slice(0, 5);
+        });
+      } catch (error) {
+        console.error('Error handling WebSocket message:', error);
+        console.error('Raw message:', event.data);
+      }
+    };
+
+    websocket.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setWsConnected(false);
+    };
+
+    websocket.current.onclose = (event) => {
+      console.log('WebSocket disconnected:', event.code, event.reason);
+      setWsConnected(false);
+      
+      reconnectTimeout.current = setTimeout(() => {
+        console.log('Attempting to reconnect...');
+        connectWebSocket();
+      }, 3000);
+    };
   };
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 10000);
-    return () => clearInterval(interval);
+    const fetchInitialNotifications = async () => {
+      if (!userId) return;
+      
+      try {
+        console.log('Fetching initial notifications for user:', userId);
+        const response = await axios.get(`http://localhost:8000/notifications?user_id=${userId}`);
+        console.log('Initial notifications received:', response.data);
+        setNotifications(response.data);
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchInitialNotifications();
+    connectWebSocket();
+
+    return () => {
+      console.log('Cleaning up WebSocket connection');
+      if (websocket.current) {
+        websocket.current.close();
+      }
+      if (reconnectTimeout.current) {
+        clearTimeout(reconnectTimeout.current);
+      }
+    };
   }, [userId]);
 
+
+  const handleDismiss = async (notificationId) => {
+    try {
+      // Try WebSocket first
+      if (wsConnected && websocket.current) {
+        websocket.current.send(JSON.stringify({
+          type: 'mark_read',
+          notification_id: notificationId
+        }));
+        
+        // Update local state immediately for better UX
+        setNotifications(prevNotifications => 
+          prevNotifications.filter(n => n.id !== notificationId)
+        );
+      } else {
+        // Fallback to HTTP if WebSocket isn't connected
+        console.log('WebSocket not connected, using HTTP fallback');
+        await axios.put(`http://localhost:8000/notifications/${notificationId}/`);
+        
+        // Update local state after successful HTTP request
+        setNotifications(prevNotifications => 
+          prevNotifications.filter(n => n.id !== notificationId)
+        );
+      }
+    } catch (error) {
+      console.error('Error dismissing notification:', error);
+    }
+  };
+
+  // Rest of the component remains the same...
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleDismiss = async (notificationId) => {
-    try {
-      await axios.put(`http://localhost:8000/notifications/${notificationId}/`);
-      // Remove the dismissed notification from state
-      setNotifications(prevNotifications => 
-        prevNotifications.filter(n => n.id !== notificationId)
-      );
-    } catch (error) {
-      console.error('Error dismissing notification:', error);
-    }
   };
 
   return (
@@ -64,7 +157,7 @@ const NotificationMenu = () => {
         onClick={handleClick}
         sx={{
           marginRight: 1,
-          color: 'secondary.main'
+          color: wsConnected ? 'secondary.main' : 'error.main'
         }}
       >
         <Badge 
@@ -95,6 +188,11 @@ const NotificationMenu = () => {
           horizontal: 'right',
         }}
       >
+        {!wsConnected && (
+          <MenuItem>
+            <Typography color="error">Connection lost. Reconnecting...</Typography>
+          </MenuItem>
+        )}
         {notifications.length === 0 ? (
           <MenuItem>
             <Typography>No new notifications</Typography>

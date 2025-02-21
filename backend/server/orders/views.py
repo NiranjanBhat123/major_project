@@ -7,6 +7,7 @@ from .models import Orders, OrderStatus
 from .serializers import OrderSerializer
 from notifications.kafka_producer import NotificationProducer
 from notifications.models import NotificationType,Notification
+from notifications.utils import send_notification
 
 class OrderCreateListView(APIView):
     permission_classes = [AllowAny]  
@@ -41,13 +42,14 @@ class OrderCreateListView(APIView):
             # Create notification directly without Kafka for simplicity
             provider_id = order.provider.id
             try:
-                Notification.objects.create(
+                notification = Notification.objects.create(
                     recipient_client_id=order.user.id,
                     recipient_provider_id=provider_id,
                     notification_type=NotificationType.NEW_ORDER,
                     message=f"New order received from {order.user.name} for {order.service.name}",
                     order_id=order.id
                 )
+                send_notification(notification)
             except Exception as e:
                 print(f"Error creating notification: {str(e)}")
             
