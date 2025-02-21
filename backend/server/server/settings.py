@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'orders',
     'chat',
     'channels',
+    'notifications'
 ]
 
 MIDDLEWARE = [

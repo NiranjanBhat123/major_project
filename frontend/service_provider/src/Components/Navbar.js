@@ -1,24 +1,25 @@
-import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Menu, 
-  MenuItem, 
-  Avatar, 
-  Tooltip, 
-  IconButton, 
-  Divider, 
-  ListItemIcon
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  Menu,
+  MenuItem,
+  Avatar,
+  Tooltip,
+  IconButton,
+  Divider,
+  ListItemIcon,
 } from "@mui/material";
-import { 
-  AccountCircle, 
-  EventNote, 
-  Logout, 
-  LocationOn ,
-  Settings as SettingsIcon
+import {
+  AccountCircle,
+  EventNote,
+  Logout,
+  LocationOn,
+  Settings as SettingsIcon,
 } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import ModifyServicesModal from './ModifyServicesModal';
+import ModifyServicesModal from "./ModifyServicesModal";
+import NotificationMenu from "./NotificationMenu";
 
 const Navbar = ({ userName, location }) => {
   const navigate = useNavigate();
@@ -83,11 +84,15 @@ const Navbar = ({ userName, location }) => {
             width: "100%",
           }}
         >
-          <Link 
-            to="/" 
-            style={{ 
-              textDecoration: 'none',
-              color: 'inherit'
+          <NotificationMenu
+            userId={localStorage.getItem("userId")}
+            userType="service_provider"
+          />
+          <Link
+            to="/"
+            style={{
+              textDecoration: "none",
+              color: "inherit",
             }}
           >
             <Typography
@@ -96,7 +101,7 @@ const Navbar = ({ userName, location }) => {
                 color: "secondary.main",
                 fontSize: "2rem",
                 textShadow: "2px 2px 4px rgba(0, 0, 0, 0.1)",
-                cursor: 'pointer',
+                cursor: "pointer",
               }}
             >
               FixNGo
@@ -203,11 +208,11 @@ const Navbar = ({ userName, location }) => {
             </Link>
           </MenuItem>
           <MenuItem onClick={handleModifyServicesClick}>
-              <ListItemIcon>
-                <SettingsIcon fontSize="small" sx={{ color: "text.muted" }} />
-              </ListItemIcon>
-              Modify Services
-            </MenuItem>
+            <ListItemIcon>
+              <SettingsIcon fontSize="small" sx={{ color: "text.muted" }} />
+            </ListItemIcon>
+            Modify Services
+          </MenuItem>
           <Divider />
           <MenuItem onClick={handleLogout}>
             <ListItemIcon>
@@ -217,9 +222,9 @@ const Navbar = ({ userName, location }) => {
           </MenuItem>
         </Menu>
       </Box>
-      <ModifyServicesModal 
-        open={modifyServicesModalOpen} 
-        onClose={() => setModifyServicesModalOpen(false)} 
+      <ModifyServicesModal
+        open={modifyServicesModalOpen}
+        onClose={() => setModifyServicesModalOpen(false)}
       />
     </>
   );

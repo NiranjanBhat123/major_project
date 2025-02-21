@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from .models import Orders, OrderStatus
 from .serializers import OrderSerializer
+from notifications.kafka_producer import NotificationProducer
+from notifications.models import NotificationType,Notification
 
 class OrderCreateListView(APIView):
     permission_classes = [AllowAny]  
@@ -32,10 +34,23 @@ class OrderCreateListView(APIView):
         )
     
     def post(self, request):
-        # User ID is already included in the request.data as 'user'
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            order = serializer.save()
+            
+            # Create notification directly without Kafka for simplicity
+            provider_id = order.provider.id
+            try:
+                Notification.objects.create(
+                    recipient_client_id=order.user.id,
+                    recipient_provider_id=provider_id,
+                    notification_type=NotificationType.NEW_ORDER,
+                    message=f"New order received from {order.user.name} for {order.service.name}",
+                    order_id=order.id
+                )
+            except Exception as e:
+                print(f"Error creating notification: {str(e)}")
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
