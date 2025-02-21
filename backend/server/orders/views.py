@@ -39,7 +39,6 @@ class OrderCreateListView(APIView):
         if serializer.is_valid():
             order = serializer.save()
             
-            # Create notification directly without Kafka for simplicity
             provider_id = order.provider.id
             try:
                 notification = Notification.objects.create(
