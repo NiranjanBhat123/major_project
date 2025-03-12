@@ -36,6 +36,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import CloseIcon from "@mui/icons-material/Close";
 import AuthModal from "../authentication/AuthModal.js";
+import ClientNotificationMenu from "./ClientNotificationMenu";
 
 import { useWelcomeViewContext } from "../../Contexts/WelcomeViewContextProvider";
 
@@ -535,7 +536,7 @@ const Navbar = () => {
                   color="primary"
                   sx={{ backgroundColor: alpha("#000", 0.04) }}
                 >
-                  <ShoppingCartIcon />
+                  <ClientNotificationMenu />
                 </IconButton>
                 <IconButton
                   onClick={handleProfileClick}

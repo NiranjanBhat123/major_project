@@ -8,13 +8,20 @@ import json
 def send_notification(notification):
     try:
         channel_layer = get_channel_layer()
-        
         # Instead of ping, you can check if the connection exists
         if not hasattr(channel_layer, 'connection'):
             print("Redis connection not established")
             return
+        
+        # Determine the group name based on recipient type
+        if notification.recipient_provider_id:
+            group_name = f'notifications_{notification.recipient_provider_id}'
+        elif notification.recipient_client_id:
+            group_name = f'notifications_{notification.recipient_client_id}'
+        else:
+            print("No recipient found for notification")
+            return
             
-        group_name = f'notifications_{notification.recipient_provider_id}'
         print(f"Sending to Redis group: {group_name}")
         
         # Ensure all data is JSON serializable
@@ -28,6 +35,7 @@ def send_notification(notification):
         }
         
         print(f"Sending notification data: {notification_data}")
+        
         async_to_sync(channel_layer.group_send)(
             group_name,
             {

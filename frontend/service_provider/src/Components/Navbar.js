@@ -84,10 +84,6 @@ const Navbar = ({ userName, location }) => {
             width: "100%",
           }}
         >
-          <NotificationMenu
-            userId={localStorage.getItem("userId")}
-            userType="service_provider"
-          />
           <Link
             to="/"
             style={{
@@ -130,6 +126,10 @@ const Navbar = ({ userName, location }) => {
                 {getFormattedLocation()}
               </Typography>
             </Box>
+            
+            {/* Notification Menu - Placed here next to the avatar */}
+            <NotificationMenu />
+            
             <Tooltip title="Account settings">
               <IconButton
                 onClick={handleClick}

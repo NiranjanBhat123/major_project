@@ -23,26 +23,26 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
-const NotificationMenu = () => {
+const ClientNotificationMenu = () => {
   const [notifications, setNotifications] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const websocket = useRef(null);
   const reconnectTimeout = useRef(null);
   
-  // Get the provider's user ID from localStorage
-  const userId = localStorage.getItem('providerId') || localStorage.getItem('userId');
+  // Get the client's user ID from localStorage
+  const userId = localStorage.getItem('userId') || localStorage.getItem('clientId');
 
   const getNotificationIcon = (type) => {
     switch(type) {
-      case 'new_order':
-        return <ShoppingCartIcon sx={{ color: '#fff' }} />;
-      case 'order_cancelled':
+      case 'order_accepted':
+        return <CheckCircleIcon sx={{ color: '#fff' }} />;
+      case 'order_rejected':
         return <CancelIcon sx={{ color: '#fff' }} />;
       case 'order_completed':
-        return <CheckCircleIcon sx={{ color: '#fff' }} />;
-      case 'payment_received':
         return <InfoIcon sx={{ color: '#fff' }} />;
+      case 'new_order':
+        return <ShoppingCartIcon sx={{ color: '#fff' }} />;
       default:
         return <NotificationsIcon sx={{ color: '#fff' }} />;
     }
@@ -50,20 +50,21 @@ const NotificationMenu = () => {
 
   const getNotificationBgColor = (type) => {
     switch(type) {
-      case 'new_order':
-        return '#ff9800'; // Orange
-      case 'order_cancelled':
+      case 'order_accepted':
+        return '#4caf50'; // Green
+      case 'order_rejected':
         return '#f44336'; // Red
       case 'order_completed':
-        return '#4caf50'; // Green
-      case 'payment_received':
         return '#2196f3'; // Blue
+      case 'new_order':
+        return '#ff9800'; // Orange
       default:
         return '#9e9e9e'; // Grey
     }
   };
 
   const connectWebSocket = () => {
+    // WebSocket connection logic remains the same
     if (!userId) return;
 
     const wsUrl = `ws://127.0.0.1:8000/ws/notifications/${userId}/`;
@@ -354,4 +355,4 @@ const NotificationMenu = () => {
   );
 };
 
-export default NotificationMenu;
+export default ClientNotificationMenu;
