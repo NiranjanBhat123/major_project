@@ -293,7 +293,7 @@ export default function EnhancedOrderDashboard() {
   }
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 , my:8 }}>
       <Typography variant="h3" gutterBottom sx={{ mb: 4, fontWeight: 600, color: '#2c3e50', textAlign: "center" }}>
         Order Analysis Dashboard
       </Typography>

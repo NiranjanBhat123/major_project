@@ -5,6 +5,9 @@ from rest_framework.permissions import AllowAny
 from django.shortcuts import get_object_or_404
 from .models import Orders, OrderStatus
 from .serializers import OrderSerializer
+from notifications.kafka_producer import NotificationProducer
+from notifications.models import NotificationType,Notification
+from notifications.utils import send_notification
 
 class OrderCreateListView(APIView):
     permission_classes = [AllowAny]  
@@ -32,10 +35,23 @@ class OrderCreateListView(APIView):
         )
     
     def post(self, request):
-        # User ID is already included in the request.data as 'user'
         serializer = OrderSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            order = serializer.save()
+            
+            provider_id = order.provider.id
+            try:
+                notification = Notification.objects.create(
+                    recipient_client_id=order.user.id,
+                    recipient_provider_id=provider_id,
+                    notification_type=NotificationType.NEW_ORDER,
+                    message=f"New order received from {order.user.name} for {order.service.name}",
+                    order_id=order.id
+                )
+                send_notification(notification)
+            except Exception as e:
+                print(f"Error creating notification: {str(e)}")
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -50,9 +66,9 @@ class OrderStatusUpdateView(APIView):
         valid_transitions = {
             OrderStatus.PENDING: [OrderStatus.ACCEPTED, OrderStatus.REJECTED, OrderStatus.CANCELLED],
             OrderStatus.ACCEPTED: [OrderStatus.COMPLETED, OrderStatus.CANCELLED, OrderStatus.REJECTED],
-            OrderStatus.COMPLETED: [],  # No further transitions allowed
-            OrderStatus.CANCELLED: [],  # No further transitions allowed
-            OrderStatus.REJECTED: []    # No further transitions allowed
+            OrderStatus.COMPLETED: [], # No further transitions allowed
+            OrderStatus.CANCELLED: [], # No further transitions allowed
+            OrderStatus.REJECTED: [] # No further transitions allowed
         }
         
         if new_status not in valid_transitions.get(order.status, []):
@@ -62,11 +78,37 @@ class OrderStatusUpdateView(APIView):
             )
         
         # Update order status and create history entry
+        old_status = order.status
         order.status = new_status
         order.save()
         
         # Create status history entry
         order.status_history.create(status=new_status)
+        
+        # Send notification to client based on the status change
+        notification_type = None
+        message = ""
+        
+        if new_status == OrderStatus.ACCEPTED:
+                notification_type = NotificationType.ORDER_ACCEPTED
+                message = f"Your {order.service.name} order has been accepted by {order.provider.full_name}."
+        elif new_status == OrderStatus.REJECTED:
+            notification_type = NotificationType.ORDER_REJECTED
+            message = f"Your {order.service.name} order has been rejected by {order.provider.full_name}."
+        elif new_status == OrderStatus.COMPLETED:
+            notification_type = NotificationType.ORDER_COMPLETED
+            message = f"Your {order.service.name} order with {order.provider.full_name} has been marked as completed."
+        
+        if notification_type and order.user:
+            # Create notification for the client
+            notification = Notification.objects.create(
+                recipient_client=order.user,
+                notification_type=notification_type,
+                message=message,
+                order_id=order.id
+            )
+            # Send real-time notification via WebSocket
+            send_notification(notification)
         
         serializer = OrderSerializer(order)
         return Response(serializer.data)

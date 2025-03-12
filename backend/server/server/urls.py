@@ -30,6 +30,7 @@ urlpatterns = [
     path('services/', include('service.urls')),
     path('orders/',include('orders.urls')),
     path('service_providers/',include('service_provider.urls')),
+    path('notifications/', include('notifications.urls')),
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('sub_services/', include('sub_service.urls')),
