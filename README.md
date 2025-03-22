@@ -2,17 +2,11 @@
 
 https://github.com/user-attachments/assets/0fb70ec9-ee4b-4102-9b03-59d49ecd6080
 
-
-
 https://github.com/user-attachments/assets/f870fae0-af3a-4ba3-8b6d-71fc68844cdc
-
 
 FixNGo - A platform for local home service booking
 
-
 https://github.com/user-attachments/assets/08480f4a-0691-4c72-bd86-cc62b252e4c0
-
-
 
 ## Features
 - Listing the nearest service providers who provide the necessary services at your doorstep
@@ -22,56 +16,92 @@ https://github.com/user-attachments/assets/08480f4a-0691-4c72-bd86-cc62b252e4c0
 - User profile management
 - Service provider profile management
 - Maps integration to set the client location
-- Chat feature with images
+- Chat feature with images (requires Redis)
 
+## Installation and Setup
 
+### 1. Cloning the Project
 
+First, clone the repository to your local system:
 
-## Getting Started
+```sh
+git clone https://github.com/your-username/FixNGo.git
+cd FixNGo
+```
 
-### Prerequisites
+### 2. Setting up the Backend (Django)
+
+#### Prerequisites
 - Python 3.9+
+- Redis
+
+#### Installation Steps
+
+1. Navigate to the backend directory:
+   ```sh
+   cd backend
+   ```
+
+2. Create and activate a virtual environment:
+   ```sh
+   python3 -m venv venv
+   source venv/bin/activate  # On macOS/Linux
+   venv\Scripts\activate  # On Windows
+   ```
+
+3. Install the required Python packages:
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. Apply database migrations:
+   ```sh
+   python manage.py migrate
+   ```
+
+5. Start the Django development server:
+   ```sh
+   python manage.py runserver
+   ```
+   The backend will be available at `http://localhost:8000`.
+   <br>Also ensure Redis is installed and running before starting the server.
+
+### 3. Setting up the Frontend (Client & Service Provider)
+
+#### Prerequisites
 - Node.js 14+
-- Docker (optional)
 
-### Installation
+#### Client Frontend Setup
 
-1. Create a virtual environment and activate it:
+1. Navigate to the client frontend directory:
+   ```sh
+   cd frontend/client
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Start the client frontend:
+   ```sh
+   npm start
+   ```
+   The client frontend will be available at `http://localhost:3000`.
 
-```
-python3 -m venv venv
-source venv/bin/activate
-```
+#### Service Provider Frontend Setup
 
-2. Install the required Python packages:
-
-```
-pip install -r requirements.txt
-```
-
-3. Install the required Node.js packages:
-
-```
-cd frontend
-npm install
-```
-
-4. Run the Django development server:
-
-```
-python manage.py runserver
-```
-
-5. Start the React.js development server:
-
-```
-cd frontend
-npm start
-```
-
-The Django backend will be available at `http://localhost:8000` and the React.js frontend will be available at `http://localhost:3000`.
-
-
+1. Navigate to the service provider frontend directory:
+   ```sh
+   cd frontend/service-provider
+   ```
+2. Install dependencies:
+   ```sh
+   npm install
+   ```
+3. Start the service provider frontend:
+   ```sh
+   npm start
+   ```
+   The service provider frontend will be available at `http://localhost:3001`.
 
 ## Contributing
 
